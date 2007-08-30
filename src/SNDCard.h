@@ -33,8 +33,8 @@ public:
     void Stop();
     void Start();
 
-    char* Read();
-    void Write( char* pBuffer );
+    char* Read( int& nLength);
+    void Write( char* pBuffer, int nLength );
 
     int GetFDIn();
 
