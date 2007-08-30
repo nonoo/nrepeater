@@ -18,12 +18,12 @@
 #include "Log.h"
 #include "ParPort.h"
 #include "Loop.h"
-#include "Config.h"
+#include "SettingsFile.h"
 #include "SNDCard.h"
 
 CLog g_Log;
 CLoop g_Loop;
-CConfig* g_MainConfig = NULL;
+CSettingsFile g_MainConfig;
 CParPort* g_ParPort = NULL;
 CSNDCard* g_SNDCardIn = NULL;
 CSNDCard* g_SNDCardOut = NULL;
@@ -33,16 +33,30 @@ int main( int argc, char* argv[] )
     g_Log.Msg2( PACKAGE + string( " v" ) + PACKAGE_VERSION + string( " by Nonoo <nonoo@nonoo.hu>\n" ) );
     g_Log.Msg2( "http://www.nonoo.hu/projects/nrepeater/\n\n" );
 
-    g_MainConfig = new CConfig( string( PACKAGE ) + ".conf" );
+    g_MainConfig.SetConfigFile( string( PACKAGE ) + ".conf" );
+    g_MainConfig.LoadConfig();
     g_ParPort = new CParPort( LPT1 );
 
-    g_SNDCardIn = new CSNDCard( "/dev/dsp", SNDCARDMODE_DUPLEX );
-    g_SNDCardOut = g_SNDCardIn;
+    // initializing sound card(s)
+    string sSNDDevIn = g_MainConfig.Get( "sound", "dev_in", "/dev/dsp" );
+    string sSNDDevOut = g_MainConfig.Get( "sound", "dev_out", "/dev/dsp" );
 
+    if( sSNDDevIn == sSNDDevOut )    
+    {
+	g_SNDCardIn = new CSNDCard( sSNDDevIn, SNDCARDMODE_DUPLEX );
+	g_SNDCardOut = g_SNDCardIn;
+    }
+    else
+    {
+	g_SNDCardIn = new CSNDCard( sSNDDevIn, SNDCARDMODE_IN );
+	g_SNDCardOut = new CSNDCard( sSNDDevOut, SNDCARDMODE_OUT );
+    }
+
+    // starting main loop
     g_Loop.Start();
 
+
     SAFE_DELETE( g_ParPort );
-    SAFE_DELETE( g_MainConfig );
     SAFE_DELETE( g_SNDCardIn );
     SAFE_DELETE( g_SNDCardOut );
     return 0;

@@ -63,12 +63,12 @@ CSNDCard::CSNDCard( string sDevName, int nMode )
 	exit( -1 );
     }
 
-    if( ( nMode == SNDCARDMODE_OUT ) && !( devcaps & PCM_CAP_OUTPUT ) )
+/*    if( ( nMode == SNDCARDMODE_OUT ) && !( devcaps & PCM_CAP_OUTPUT ) )
     {
 	g_Log.Error( m_sDevName + " doesn't support output\n" );
 	exit( -1 );
     }
-/*
+
     if( ( nMode == SNDCARDMODE_IN ) && !( devcaps & PCM_CAP_INPUT ) )
     {
 	g_Log.Error( m_sDevName + " doesn't support input\n" );

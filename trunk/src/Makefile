@@ -47,7 +47,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_nrepeater_OBJECTS = Main.$(OBJEXT) Log.$(OBJEXT) ParPort.$(OBJEXT) \
-	Loop.$(OBJEXT) Config.$(OBJEXT) SNDCard.$(OBJEXT)
+	Loop.$(OBJEXT) SettingsFile.$(OBJEXT) SNDCard.$(OBJEXT)
 nrepeater_OBJECTS = $(am_nrepeater_OBJECTS)
 nrepeater_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -98,7 +98,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lparapin  -lrudeconfig
+LIBS = -lparapin 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/nonoo/nrepeater/missing --run makeinfo
 OBJEXT = o
@@ -156,7 +156,7 @@ nrepeater_SOURCES = \
 	Log.cpp Log.h \
 	ParPort.cpp ParPort.h \
 	Loop.cpp Loop.h \
-	Config.cpp Config.h \
+	SettingsFile.cpp SettingsFile.h \
 	SNDCard.cpp SNDCard.h
 
 all: all-am
@@ -225,12 +225,12 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/Config.Po
 include ./$(DEPDIR)/Log.Po
 include ./$(DEPDIR)/Loop.Po
 include ./$(DEPDIR)/Main.Po
 include ./$(DEPDIR)/ParPort.Po
 include ./$(DEPDIR)/SNDCard.Po
+include ./$(DEPDIR)/SettingsFile.Po
 
 .cpp.o:
 	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
