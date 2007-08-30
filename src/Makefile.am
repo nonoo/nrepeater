@@ -5,5 +5,5 @@ nrepeater_SOURCES = \
 	Log.cpp Log.h \
 	ParPort.cpp ParPort.h \
 	Loop.cpp Loop.h \
-	Config.cpp Config.h \
+	SettingsFile.cpp SettingsFile.h \
 	SNDCard.cpp SNDCard.h
