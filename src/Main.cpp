@@ -30,8 +30,8 @@ CSNDCard* g_SNDCardOut = NULL;
 
 int main( int argc, char* argv[] )
 {
-    g_Log.Msg( PACKAGE + string( " v" ) + PACKAGE_VERSION + string( " by Nonoo <nonoo@nonoo.hu>\n" ) );
-    g_Log.Msg( "http://www.nonoo.hu/projects/nrepeater/\n\n" );
+    g_Log.Msg2( PACKAGE + string( " v" ) + PACKAGE_VERSION + string( " by Nonoo <nonoo@nonoo.hu>\n" ) );
+    g_Log.Msg2( "http://www.nonoo.hu/projects/nrepeater/\n\n" );
 
     g_MainConfig = new CConfig( string( PACKAGE ) + ".conf" );
     g_ParPort = new CParPort( LPT1 );

@@ -27,6 +27,7 @@ public:
     void Error( string msg );
     void Warning( string msg );
     void Msg( string msg );
+    void Msg2( string msg );
     void Debug( string msg );
 };
 
