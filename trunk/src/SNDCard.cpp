@@ -149,6 +149,7 @@ CSNDCard::CSNDCard( string sDevName, int nMode )
     }
 
     m_pBuffer = new char[ m_nBufferSize ];
+    memset( m_pBuffer, 0, m_nBufferSize );
 
     if ( (int)m_nFragSize > m_nBufferSize )
     {
@@ -171,7 +172,7 @@ CSNDCard::CSNDCard( string sDevName, int nMode )
 	    break;
     }
 
-    Read(); // starting sound card, if we don't do this, select() will timeout
+    Read( tmp ); // starting sound card, if we don't do this, select() will timeout
     Stop();
 
     char etmp[100];
@@ -250,7 +251,7 @@ void CSNDCard::Stop()
     }
 }
 
-char* CSNDCard::Read()
+char* CSNDCard::Read( int& nLength )
 {
     struct audio_buf_info info;
     if( ioctl( m_nFDIn, SNDCTL_DSP_GETISPACE, &info ) == -1 )
@@ -267,16 +268,18 @@ char* CSNDCard::Read()
 	exit( -1 );
     }
 
+    nLength = n;
+
     return m_pBuffer;
 }
 
-void CSNDCard::Write( char* pBuffer )
+void CSNDCard::Write( char* pBuffer, int nLength )
 {
     if( m_fFirstTime)
     {
-	char* pSilence = new char[ m_nBufferSize ];
-	memset( pSilence, 0, m_nBufferSize );
-	if( write( m_nFDOut, pSilence, m_nBufferSize ) != m_nBufferSize )
+	char* pSilence = new char[ nLength ];
+	memset( pSilence, 0, nLength );
+	if( write( m_nFDOut, pSilence, nLength ) != nLength )
 	{
 	    g_Log.Error( "error writing audio data to " + m_sDevName + "\n" );
 	    exit( -1 );
@@ -285,7 +288,7 @@ void CSNDCard::Write( char* pBuffer )
 	m_fFirstTime = false;
     }
 
-    if( write( m_nFDOut, pBuffer, m_nBufferSize ) != (int)m_nBufferSize )
+    if( write( m_nFDOut, pBuffer, nLength ) != (int)nLength )
     {
 	g_Log.Error( "error writing audio data to " + m_sDevName + "\n" );
 	exit( -1 );

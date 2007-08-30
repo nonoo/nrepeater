@@ -28,47 +28,12 @@ extern CSNDCard* g_SNDCardIn;
 extern CSNDCard* g_SNDCardOut;
 extern CLog g_Log;
 
-void CLoop::ProcessAudio()
-{
-    struct timeval time;
-    int n = 0;
-    int nFDIn = g_SNDCardIn->GetFDIn();
-    fd_set reads;
-
-    FD_ZERO( &reads );
-    FD_SET( 0, &reads ); // stdin
-    FD_SET( nFDIn, &reads );
-
-    time.tv_sec = 1;
-    time.tv_usec = 0;
-    if( ( n = select( nFDIn + 1, &reads, NULL, NULL, &time ) ) == -1 )
-    {
-	g_Log.Error( "select()\n" );
-	exit( -1 );
-    }
-
-    if( n == 0 )
-    {
-        g_Log.Debug( "select() timeout\n");
-        return;
-    }
-
-    if( FD_ISSET(0, &reads) ) // keyboard input
-    {
-	exit( 0 );
-    }
-
-    if( FD_ISSET( nFDIn, &reads) )
-    {
-	char* pBuffer = g_SNDCardIn->Read();
-	g_SNDCardOut->Write( pBuffer );
-    }
-}
-
 // main loop
 void CLoop::Start()
 {
     bool fSquelchOff = false;
+    m_nFDIn = g_SNDCardIn->GetFDIn();
+    m_nSelectRes = -1;
 
     for( ;; )
     {
@@ -78,6 +43,7 @@ void CLoop::Start()
 	    g_SNDCardIn->Start();
 	    fSquelchOff = true;
 	}
+
 	if( pin_is_set( SQOFF ) && fSquelchOff )
 	{
 	    g_Log.Debug( "squelch on\n" );
@@ -85,13 +51,37 @@ void CLoop::Start()
 	    fSquelchOff = false;
 	}
 
-	if( fSquelchOff )
-	{
-	    ProcessAudio();
-	}
-	else
+
+	if( !fSquelchOff )
 	{
 	    usleep( 100 );
+	    continue;
+	}
+
+
+	// select stuff may be removed later
+        FD_ZERO( &m_fsReads );
+	FD_SET( m_nFDIn, &m_fsReads );
+
+	m_tTime.tv_sec = 1;
+	m_tTime.tv_usec = 0;
+
+	if( ( m_nSelectRes = select( m_nFDIn + 1, &m_fsReads, NULL, NULL, &m_tTime ) ) == -1 )
+	{
+	    g_Log.Error( "select()\n" );
+	    exit( -1 );
+	}
+
+	if( m_nSelectRes == 0 )
+	{
+    	    g_Log.Debug( "select() timeout\n");
+	    continue;
+	}
+
+	if( FD_ISSET( m_nFDIn, &m_fsReads) )
+	{
+	    m_pBuffer = g_SNDCardIn->Read( m_nReadBytes );
+	    g_SNDCardOut->Write( m_pBuffer, m_nReadBytes );
 	}
     }
 }

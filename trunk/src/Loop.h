@@ -22,9 +22,15 @@ class CLoop
 public:
     void Start();
 
-    void ProcessAudio();
-
 private:
+    struct timeval	m_tTime;
+    int			m_nFDIn;
+    fd_set		m_fsReads;
+    int			m_nSelectRes;
+
+    // audio data from the sound card
+    char*		m_pBuffer;
+    int			m_nReadBytes;
 };
 
 #endif
