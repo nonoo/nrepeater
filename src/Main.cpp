@@ -39,9 +39,9 @@ int main( int argc, char* argv[] )
 
     // initializing sound card(s)
     string sSNDDevIn = g_MainConfig.Get( "sound", "dev_in", "/dev/dsp" );
-    string sSNDDevOut = g_MainConfig.Get( "sound", "dev_out", "/dev/dsp" );
+    string sSNDDevOut = g_MainConfig.Get( "sound", "dev_out", "/dev/dsp2" );
 
-    if( sSNDDevIn == sSNDDevOut )    
+    if( sSNDDevIn == sSNDDevOut )
     {
 	g_SNDCardIn = new CSNDCard( sSNDDevIn, SNDCARDMODE_DUPLEX );
 	g_SNDCardOut = g_SNDCardIn;

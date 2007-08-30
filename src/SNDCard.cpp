@@ -63,18 +63,6 @@ CSNDCard::CSNDCard( string sDevName, int nMode )
 	exit( -1 );
     }
 
-/*    if( ( nMode == SNDCARDMODE_OUT ) && !( devcaps & PCM_CAP_OUTPUT ) )
-    {
-	g_Log.Error( m_sDevName + " doesn't support output\n" );
-	exit( -1 );
-    }
-
-    if( ( nMode == SNDCARDMODE_IN ) && !( devcaps & PCM_CAP_INPUT ) )
-    {
-	g_Log.Error( m_sDevName + " doesn't support input\n" );
-	exit( -1 );
-    }
-*/
     int frag = 0x7fff000a; // Unlimited number of 1k fragments
     if( ioctl( fd, SNDCTL_DSP_SETFRAGMENT, &frag ) == -1 )
     {
@@ -166,13 +154,14 @@ CSNDCard::CSNDCard( string sDevName, int nMode )
 	    break;
 	case SNDCARDMODE_IN:
 	    m_nFDIn = fd;
+	    Read( tmp ); // initializing sound card, if we don't do this, select() will timeout
 	    break;
 	default:
 	    m_nFDOut = m_nFDIn = fd;
+	    Read( tmp ); // initializing sound card, if we don't do this, select() will timeout
 	    break;
     }
 
-    Read( tmp ); // starting sound card, if we don't do this, select() will timeout
     Stop();
 
     char etmp[100];
@@ -277,9 +266,9 @@ void CSNDCard::Write( char* pBuffer, int nLength )
 {
     if( m_fFirstTime)
     {
-	char* pSilence = new char[ nLength ];
-	memset( pSilence, 0, nLength );
-	if( write( m_nFDOut, pSilence, nLength ) != nLength )
+	char* pSilence = new char[ m_nFragSize ];
+	memset( pSilence, 0, m_nFragSize );
+	if( write( m_nFDOut, pSilence, m_nFragSize ) != (int)m_nFragSize )
 	{
 	    g_Log.Error( "error writing audio data to " + m_sDevName + "\n" );
 	    exit( -1 );
