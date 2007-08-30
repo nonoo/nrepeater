@@ -29,7 +29,7 @@ CConfig::CConfig( string szConfigFile )
     if( SearchForConfigFile() )
     {
 	m_RC.load( string( m_szConfigPath + m_szConfigFile ).c_str() );
-	g_Log.Debug( string( "Loaded config file: " ) + m_szConfigPath + m_szConfigFile );
+	g_Log.Debug( string( "Loaded config file: " ) + m_szConfigPath + "/" + m_szConfigFile + "\n" );
     }
 }
 

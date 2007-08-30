@@ -34,6 +34,12 @@ void CLog::Msg( string msg )
     cout << msg;
 }
 
+// msg without time
+void CLog::Msg2( string msg )
+{
+    cout << msg;
+}
+
 void CLog::Debug( string msg )
 {
     cout << msg;
