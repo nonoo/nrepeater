@@ -16,22 +16,23 @@
 
 #include <iostream>
 #include <string>
+#include <time.h>
 
 #include "Log.h"
 
 void CLog::Error( string msg )
 {
-    cout << "Error: " << msg;
+    cout << CurrTime() << "Error: " << msg;
 }
 
 void CLog::Warning( string msg )
 {
-    cout << "Warning: " << msg;
+    cout << CurrTime() << "Warning: " << msg;
 }
 
 void CLog::Msg( string msg )
 {
-    cout << msg;
+    cout << CurrTime() << msg;
 }
 
 // msg without time
@@ -42,5 +43,15 @@ void CLog::Msg2( string msg )
 
 void CLog::Debug( string msg )
 {
-    cout << msg;
+    cout << CurrTime() << msg;
+}
+
+// returns the time in [H:m:s] format
+string CLog::CurrTime()
+{
+    char tmp[50];
+    time_t t = time( NULL );
+    struct tm *tmpt = localtime( &t );
+    strftime( tmp, 50, "%T", tmpt );
+    return "[" + string( tmp ) + "] ";
 }

@@ -29,6 +29,7 @@ public:
     void Msg( string msg );
     void Msg2( string msg );
     void Debug( string msg );
+    string CurrTime();
 };
 
 #endif
