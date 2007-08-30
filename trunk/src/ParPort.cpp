@@ -34,4 +34,5 @@ CParPort::CParPort( int port )
     clear_pin( SQOFF );
 
     clear_pin( PTT );
+    pin_output_mode( PTT );
 }

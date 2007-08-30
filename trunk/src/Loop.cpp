@@ -39,16 +39,24 @@ void CLoop::Start()
     {
 	if( !pin_is_set( SQOFF ) && !fSquelchOff )
 	{
-	    g_Log.Debug( "squelch off, starting transmission\n" );
+	    g_Log.Debug( "receiver on\n" );
 	    g_SNDCardIn->Start();
 	    fSquelchOff = true;
+
+	    g_Log.Debug( "transmitter on\n" );
+	    g_SNDCardOut->Start();
+	    set_pin( PTT );
 	}
 
 	if( pin_is_set( SQOFF ) && fSquelchOff )
 	{
-	    g_Log.Debug( "squelch on\n" );
+	    g_Log.Debug( "receiver off\n" );
 	    g_SNDCardIn->Stop();
 	    fSquelchOff = false;
+
+	    g_Log.Debug( "transmitter off\n" );
+	    g_SNDCardOut->Stop();
+	    clear_pin( PTT );
 	}
 
 
