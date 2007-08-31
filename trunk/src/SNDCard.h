@@ -36,7 +36,10 @@ public:
     short* Read( int& nLength);
     void Write( short* pBuffer, int nLength );
 
-    int GetFDIn();
+    int getFDIn();
+    int getBufferSize();
+    int getSampleRate();
+    int getChannelNum();
 
 private:
     string m_sDevName;
