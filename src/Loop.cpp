@@ -28,14 +28,16 @@
 #include "SettingsFile.h"
 #include "Main.h"
 
-extern CParPort* g_ParPort;
-extern CSNDCard* g_SNDCardIn;
-extern CSNDCard* g_SNDCardOut;
-extern CLog g_Log;
-extern CWavFile* g_RogerBeep;
-extern CSettingsFile g_MainConfig;
+extern CParPort*	g_ParPort;
+extern CSNDCard*	g_SNDCardIn;
+extern CSNDCard*	g_SNDCardOut;
+extern CLog		g_Log;
+extern CWavFile*	g_RogerBeep;
+extern CSettingsFile	g_MainConfig;
+extern bool		g_fTerminate;
 
-void alarmHandler( int nSig )
+
+void onSIGALRM( int )
 {
     g_Log.Debug( "transmitter off\n" );
     g_ParPort->setPTT( false );
@@ -78,9 +80,9 @@ void CLoop::Start()
 
     g_Log.Debug( "starting main loop\n" );
 
-    signal( SIGALRM, alarmHandler );
+    signal( SIGALRM, onSIGALRM );
 
-    for( ;; )
+    while( !g_fTerminate )
     {
 	// receiver started receiving
 	if( g_ParPort->isSquelchOff() && !fSquelchOff )
