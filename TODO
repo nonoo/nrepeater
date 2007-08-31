@@ -1,0 +1,1 @@
+- reloading config file and reinitializing on SIGHUP

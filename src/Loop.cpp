@@ -130,16 +130,18 @@ void CLoop::Start()
 	    m_nPlayBeepTime = 0;
 	    m_fPlayingBeep = true;
 	}
+
+	// this plays the roger beep wave sequentially
 	if( m_fPlayingBeep )
 	{
 	    m_pBuffer = g_RogerBeep->play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
 	    if( m_pBuffer == NULL )
 	    {
-		// played beep, switching transmitter off
+		// reached the end of the wave
 		g_Log.Debug( "beep end\n" );
 		m_fPlayingBeep = false;
 
-		// turning off transmitter after the given microseconds
+		// turning off transmitter after given microseconds
 		// setting up timer
 		setTransmitTimeout( g_MainConfig.GetInt( "rogerbeep", "delayafter", 250000 ) );
 	    }
