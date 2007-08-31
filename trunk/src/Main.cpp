@@ -101,6 +101,7 @@ int main( int argc, char* argv[] )
 	    sprintf( errstr, "roger beep file has %d channel(s), output has %d\n", g_RogerBeep->getChannelNum(), g_SNDCardOut->getChannelNum() );
 	    g_Log.Warning( errstr );
 	}
+	g_RogerBeep->setVolume( g_MainConfig.GetInt( "rogerbeep", "volume", 50 ) );
 	g_Log.Debug( "roger beep file loaded into memory\n" );
     }
 

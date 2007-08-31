@@ -23,6 +23,9 @@ public:
     void Start();
 
 private:
+    void setTransmitTimeout( int nMicroSecs );
+    void clearTransmitTimeout();
+
     struct timeval	m_tTime;
     int			m_nFDIn;
     fd_set		m_fsReads;
