@@ -43,6 +43,15 @@ int CSettingsFile::GetInt( string Section, string Key, const int& DefaultValue )
     {
 	if( m_Settings[Section].count( Key ) > 0 )
 	{
+	    if( strcasecmp( m_Settings[Section][Key].c_str(), "yes" ) == 0 )
+	    {
+		return 1;
+	    }
+	    if( strcasecmp( m_Settings[Section][Key].c_str(), "no" ) == 0 )
+	    {
+		return 0;
+	    }
+
 	    char* p;
 	    int res = strtol( m_Settings[Section][Key].c_str(), &p, 0 );
 	    if( *p != 0 ) // the whole string was not valid
