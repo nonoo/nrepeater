@@ -14,6 +14,8 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+#include <csignal>
+
 #include "Main.h"
 #include "Log.h"
 #include "ParPort.h"
@@ -22,13 +24,15 @@
 #include "SNDCard.h"
 #include "WavFile.h"
 
-CLog g_Log;
-CLoop g_Loop;
-CSettingsFile g_MainConfig;
-CParPort* g_ParPort = NULL;
-CSNDCard* g_SNDCardIn = NULL;
-CSNDCard* g_SNDCardOut = NULL;
-CWavFile* g_RogerBeep = NULL;
+CLog		g_Log;
+CLoop		g_Loop;
+CSettingsFile	g_MainConfig;
+CParPort*	g_ParPort = NULL;
+CSNDCard*	g_SNDCardIn = NULL;
+CSNDCard*	g_SNDCardOut = NULL;
+CWavFile*	g_RogerBeep = NULL;
+bool		g_fTerminate = false;
+
 
 void initParPort()
 {
@@ -74,10 +78,31 @@ void initSndCards()
     }
 }
 
+void atExit()
+{
+    g_Log.Msg( "exiting.\n\n" );
+}
+
+void onSIGTERM( int )
+{
+    g_fTerminate = true;
+}
+
+void onSIGHUP( int )
+{
+    // reloading config file
+    g_MainConfig.LoadConfig();
+}
+
 int main( int argc, char* argv[] )
 {
     g_Log.Msg2( PACKAGE + string( " v" ) + PACKAGE_VERSION + string( " by Nonoo <nonoo@nonoo.hu>\n" ) );
     g_Log.Msg2( "http://www.nonoo.hu/projects/nrepeater/\n\n" );
+
+    atexit( atExit );
+    signal( SIGTERM, onSIGTERM );
+    signal( SIGINT, onSIGTERM );
+    signal( SIGHUP, onSIGHUP );
 
     g_MainConfig.SetConfigFile( string( PACKAGE ) + ".conf" );
     g_MainConfig.LoadConfig();
