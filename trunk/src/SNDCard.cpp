@@ -24,13 +24,13 @@
 
 extern CLog g_Log;
 
-CSNDCard::CSNDCard( string sDevName, int nMode )
+CSNDCard::CSNDCard( string sDevName, int nMode, int nRate, int nChannels )
 {
     m_sDevName = sDevName;
     m_pBuffer = NULL;
     m_nBufferSize = 32*1024;
-    m_nRate = 44100;
-    m_nChannels = 1;
+    m_nRate = nRate;
+    m_nChannels = nChannels;
     m_nFormat = AFMT_S16_NE;
     m_nMode = nMode;
     m_nFDOut = -1;

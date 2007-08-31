@@ -19,13 +19,23 @@
 
 #include <parapin.h>
 
-#define SQOFF LP_PIN11
-#define PTT LP_PIN02 | LP_PIN03
-
 class CParPort
 {
 public:
     CParPort( int port );
+    void init();
+    void setReceiverPin( int nPin );
+    void setReceiverLow( bool fLow );
+    void setTransmitterPin1( int nPin );
+    void setTransmitterPin2( int nPin );
+    void setPTT( bool fState );
+    bool isSquelchOff();
+
+private:
+    int m_nReceiverPin;
+    bool m_fReceiverLow;
+    int m_nTransmitterPin1;
+    int m_nTransmitterPin2;
 };
 
 #endif
