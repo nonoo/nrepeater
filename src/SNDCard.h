@@ -33,8 +33,8 @@ public:
     void Stop();
     void Start();
 
-    char* Read( int& nLength);
-    void Write( char* pBuffer, int nLength );
+    short* Read( int& nLength);
+    void Write( short* pBuffer, int nLength );
 
     int GetFDIn();
 
@@ -42,7 +42,7 @@ private:
     string m_sDevName;
     int m_nFDOut, m_nFDIn;
     int m_nMode;
-    char* m_pBuffer;
+    short* m_pBuffer;
     int m_nBufferSize;
     int m_nRate;
     int m_nChannels;

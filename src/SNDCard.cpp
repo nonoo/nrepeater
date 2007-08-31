@@ -136,7 +136,7 @@ CSNDCard::CSNDCard( string sDevName, int nMode, int nRate, int nChannels )
 	exit( -1 );
     }
 
-    m_pBuffer = new char[ m_nBufferSize ];
+    m_pBuffer = new short[ m_nBufferSize ];
     memset( m_pBuffer, 0, m_nBufferSize );
 
     if ( (int)m_nFragSize > m_nBufferSize )
@@ -240,7 +240,7 @@ void CSNDCard::Stop()
     }
 }
 
-char* CSNDCard::Read( int& nLength )
+short* CSNDCard::Read( int& nLength )
 {
     struct audio_buf_info info;
     if( ioctl( m_nFDIn, SNDCTL_DSP_GETISPACE, &info ) == -1 )
@@ -262,7 +262,7 @@ char* CSNDCard::Read( int& nLength )
     return m_pBuffer;
 }
 
-void CSNDCard::Write( char* pBuffer, int nLength )
+void CSNDCard::Write( short* pBuffer, int nLength )
 {
     if( m_fFirstTime)
     {

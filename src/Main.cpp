@@ -20,6 +20,7 @@
 #include "Loop.h"
 #include "SettingsFile.h"
 #include "SNDCard.h"
+#include "WavFile.h"
 
 CLog g_Log;
 CLoop g_Loop;
@@ -27,6 +28,7 @@ CSettingsFile g_MainConfig;
 CParPort* g_ParPort = NULL;
 CSNDCard* g_SNDCardIn = NULL;
 CSNDCard* g_SNDCardOut = NULL;
+CWavFile* g_RogerBeep = NULL;
 
 void initParPort()
 {
@@ -84,6 +86,11 @@ int main( int argc, char* argv[] )
 
     initSndCards();
 
+    if( g_MainConfig.GetInt( "rogerbeep", "enabled", 1 ) )
+    {
+	g_RogerBeep = new CWavFile( g_MainConfig.Get( "rogerbeep", "file", "beep.wav" ) );
+    }
+
     // starting main loop
     g_Loop.Start();
 
@@ -91,5 +98,6 @@ int main( int argc, char* argv[] )
     SAFE_DELETE( g_ParPort );
     SAFE_DELETE( g_SNDCardIn );
     SAFE_DELETE( g_SNDCardOut );
+    SAFE_DELETE( g_RogerBeep );
     return 0;
 }

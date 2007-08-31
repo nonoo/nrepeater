@@ -29,7 +29,7 @@ private:
     int			m_nSelectRes;
 
     // audio data from the sound card
-    char*		m_pBuffer;
+    short*		m_pBuffer;
     int			m_nReadBytes;
 };
 
