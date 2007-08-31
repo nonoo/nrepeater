@@ -17,6 +17,7 @@ public:
     short*	getWaveData( int& nLength );
     int		getSampleRate();
     int		getChannelNum();
+    void	setVolume( int nPercent );
 
 private:
     SNDFILE*	m_pSNDFILE;

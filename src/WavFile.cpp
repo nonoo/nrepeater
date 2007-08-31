@@ -78,3 +78,12 @@ int CWavFile::getChannelNum()
 {
     return m_SFINFO.channels;
 }
+
+void CWavFile::setVolume( int nPercent )
+{
+    for( int n=0; n < m_SFINFO.frames; n++ )
+    {
+	short t = m_pWave[n];
+	m_pWave[n] = ( nPercent * t ) / 100;
+    }
+}

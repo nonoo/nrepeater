@@ -17,6 +17,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/select.h>
+#include <signal.h>
+#include <sys/time.h>
 
 #include "Loop.h"
 #include "ParPort.h"
@@ -33,6 +35,37 @@ extern CLog g_Log;
 extern CWavFile* g_RogerBeep;
 extern CSettingsFile g_MainConfig;
 
+void alarmHandler( int nSig )
+{
+    g_Log.Debug( "transmitter off\n" );
+    g_ParPort->setPTT( false );
+    g_SNDCardOut->Stop();
+}
+
+void CLoop::setTransmitTimeout( int nMicroSecs )
+{
+    struct itimerval rttimer;
+    struct itimerval old_rttimer;
+
+    rttimer.it_value.tv_sec = 0;
+    rttimer.it_value.tv_usec = nMicroSecs;
+    rttimer.it_interval.tv_sec = 0;
+    rttimer.it_interval.tv_usec = 0;
+    setitimer( ITIMER_REAL, &rttimer, &old_rttimer );
+}
+
+void CLoop::clearTransmitTimeout()
+{
+    struct itimerval rttimer;
+    struct itimerval old_rttimer;
+
+    rttimer.it_value.tv_sec = 0;
+    rttimer.it_value.tv_usec = 0;
+    rttimer.it_interval.tv_sec = 0;
+    rttimer.it_interval.tv_usec = 0;
+    setitimer( ITIMER_REAL, &rttimer, &old_rttimer );
+}
+
 // main loop
 void CLoop::Start()
 {
@@ -45,11 +78,15 @@ void CLoop::Start()
 
     g_Log.Debug( "starting main loop\n" );
 
+    signal( SIGALRM, alarmHandler );
+
     for( ;; )
     {
 	// receiver started receiving
 	if( g_ParPort->isSquelchOff() && !fSquelchOff )
 	{
+	    clearTransmitTimeout();
+
 	    g_Log.Debug( "receiver on\n" );
 	    g_SNDCardIn->Start();
 	    fSquelchOff = true;
@@ -99,8 +136,10 @@ void CLoop::Start()
 		// played beep, switching transmitter off
 		g_Log.Debug( "beep end\n" );
 		m_fPlayingBeep = false;
-		g_Log.Debug( "transmitter off\n" );
-		g_ParPort->setPTT( false );
+
+		// turning off transmitter after the given microseconds
+		// setting up timer
+		setTransmitTimeout( g_MainConfig.GetInt( "rogerbeep", "delayafter", 250000 ) );
 	    }
 	    else
 	    {
