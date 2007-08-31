@@ -47,7 +47,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_nrepeater_OBJECTS = Main.$(OBJEXT) Log.$(OBJEXT) ParPort.$(OBJEXT) \
-	Loop.$(OBJEXT) SettingsFile.$(OBJEXT) SNDCard.$(OBJEXT)
+	Loop.$(OBJEXT) SettingsFile.$(OBJEXT) SNDCard.$(OBJEXT) \
+	WavFile.$(OBJEXT)
 nrepeater_OBJECTS = $(am_nrepeater_OBJECTS)
 nrepeater_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -84,7 +85,7 @@ CXX = g++
 CXXDEPMODE = depmode=gcc3
 CXXFLAGS = -g -Wall -O0
 CYGPATH_W = echo
-DEFS = -DPACKAGE_NAME=\"nrepeater\" -DPACKAGE_TARNAME=\"nrepeater\" -DPACKAGE_VERSION=\"0.1.1\" -DPACKAGE_STRING=\"nrepeater\ 0.1.1\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"nrepeater\" -DVERSION=\"0.1.1\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBPARAPIN=1
+DEFS = -DPACKAGE_NAME=\"nrepeater\" -DPACKAGE_TARNAME=\"nrepeater\" -DPACKAGE_VERSION=\"0.1.1\" -DPACKAGE_STRING=\"nrepeater\ 0.1.1\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"nrepeater\" -DVERSION=\"0.1.1\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBSNDFILE=1 -DHAVE_LIBPARAPIN=1
 DEPDIR = .deps
 ECHO_C = 
 ECHO_N = -n
@@ -98,7 +99,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lparapin 
+LIBS = -lparapin -lsndfile 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/nonoo/nrepeater/missing --run makeinfo
 OBJEXT = o
@@ -157,7 +158,8 @@ nrepeater_SOURCES = \
 	ParPort.cpp ParPort.h \
 	Loop.cpp Loop.h \
 	SettingsFile.cpp SettingsFile.h \
-	SNDCard.cpp SNDCard.h
+	SNDCard.cpp SNDCard.h \
+	WavFile.cpp WavFile.h
 
 all: all-am
 
@@ -231,6 +233,7 @@ include ./$(DEPDIR)/Main.Po
 include ./$(DEPDIR)/ParPort.Po
 include ./$(DEPDIR)/SNDCard.Po
 include ./$(DEPDIR)/SettingsFile.Po
+include ./$(DEPDIR)/WavFile.Po
 
 .cpp.o:
 	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
