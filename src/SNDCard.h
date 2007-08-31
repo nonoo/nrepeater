@@ -27,7 +27,7 @@ using namespace std;
 
 class CSNDCard {
 public:
-    CSNDCard( string sDevName, int nMode );
+    CSNDCard( string sDevName, int nMode, int nRate, int nChannels );
     ~CSNDCard();
 
     void Stop();

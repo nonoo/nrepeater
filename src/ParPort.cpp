@@ -29,10 +29,69 @@ CParPort::CParPort( int port )
 	exit( -1 );
     }
 
-    clear_pin( SQOFF );
-    pin_input_mode( SQOFF );
-    clear_pin( SQOFF );
+    m_nReceiverPin = 11;
+    m_fReceiverLow = true;
+    m_nTransmitterPin1 = 2;
+    m_nTransmitterPin2 = 3;
+}
 
-    clear_pin( PTT );
-    pin_output_mode( PTT );
+void CParPort::init()
+{
+    clear_pin( LP_PIN[m_nReceiverPin] );
+    pin_input_mode( LP_PIN[m_nReceiverPin] );
+    clear_pin( LP_PIN[m_nReceiverPin] );
+
+    setPTT( false );
+    pin_output_mode( LP_PIN[m_nTransmitterPin1] | LP_PIN[m_nTransmitterPin2] );
+}
+
+void CParPort::setReceiverPin( int nPin )
+{
+    m_nReceiverPin = nPin;
+}
+
+void CParPort::setReceiverLow( bool fLow )
+{
+    m_fReceiverLow = fLow;
+}
+
+void CParPort::setTransmitterPin1( int nPin )
+{
+    m_nTransmitterPin1 = nPin;
+}
+
+void CParPort::setTransmitterPin2( int nPin )
+{
+    m_nTransmitterPin2 = nPin;
+}
+
+void CParPort::setPTT( bool fState )
+{
+    change_pin( LP_PIN[m_nTransmitterPin1] | LP_PIN[m_nTransmitterPin2], fState );
+}
+
+bool CParPort::isSquelchOff()
+{
+    if( m_fReceiverLow )
+    {
+	if( pin_is_set( LP_PIN[m_nReceiverPin] ) )
+	{
+	    return false;
+	}
+	else
+	{
+	    return true;
+	}
+    }
+    else
+    {
+	if( pin_is_set( LP_PIN[m_nReceiverPin] ) )
+	{
+	    return true;
+	}
+	else
+	{
+	    return false;
+	}
+    }
 }

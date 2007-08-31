@@ -28,6 +28,50 @@ CParPort* g_ParPort = NULL;
 CSNDCard* g_SNDCardIn = NULL;
 CSNDCard* g_SNDCardOut = NULL;
 
+void initParPort()
+{
+    string sParPort = g_MainConfig.Get( "lpt", "port", "LPT1" );
+    if( sParPort == "LPT1" )
+    {
+	g_ParPort = new CParPort( LPT1 );
+    }
+    else
+    {
+	if( sParPort == "LPT2" )
+	{
+	    g_ParPort = new CParPort( LPT2 );
+	}
+	else
+	{
+	    g_ParPort = new CParPort( atoi( sParPort.c_str() ) );
+	}
+    }
+
+    g_ParPort->setReceiverPin( g_MainConfig.GetInt( "lpt", "receiver_pin", 11 ) );
+    g_ParPort->setReceiverLow( g_MainConfig.GetInt( "lpt", "receiver_low", 1 ) );
+    g_ParPort->setTransmitterPin1( g_MainConfig.GetInt( "lpt", "transmitter_pin1", 2 ) );
+    g_ParPort->setTransmitterPin2( g_MainConfig.GetInt( "lpt", "transmitter_pin2", 3 ) );
+
+    g_ParPort->init();
+}
+
+void initSndCards()
+{
+    string sSNDDevIn = g_MainConfig.Get( "sound", "dev_in", "/dev/dsp" );
+    string sSNDDevOut = g_MainConfig.Get( "sound", "dev_out", "/dev/dsp2" );
+
+    if( sSNDDevIn == sSNDDevOut )
+    {
+	g_SNDCardIn = new CSNDCard( sSNDDevIn, SNDCARDMODE_DUPLEX, g_MainConfig.GetInt( "sound", "rate", 44100 ), g_MainConfig.GetInt( "sound", "channels", 1 ) );
+	g_SNDCardOut = g_SNDCardIn;
+    }
+    else
+    {
+	g_SNDCardIn = new CSNDCard( sSNDDevIn, SNDCARDMODE_IN, g_MainConfig.GetInt( "sound", "rate", 44100 ), g_MainConfig.GetInt( "sound", "channels", 1 ) );
+	g_SNDCardOut = new CSNDCard( sSNDDevOut, SNDCARDMODE_OUT, g_MainConfig.GetInt( "sound", "rate", 44100 ), g_MainConfig.GetInt( "sound", "channels", 1 ) );
+    }
+}
+
 int main( int argc, char* argv[] )
 {
     g_Log.Msg2( PACKAGE + string( " v" ) + PACKAGE_VERSION + string( " by Nonoo <nonoo@nonoo.hu>\n" ) );
@@ -35,22 +79,10 @@ int main( int argc, char* argv[] )
 
     g_MainConfig.SetConfigFile( string( PACKAGE ) + ".conf" );
     g_MainConfig.LoadConfig();
-    g_ParPort = new CParPort( LPT1 );
 
-    // initializing sound card(s)
-    string sSNDDevIn = g_MainConfig.Get( "sound", "dev_in", "/dev/dsp" );
-    string sSNDDevOut = g_MainConfig.Get( "sound", "dev_out", "/dev/dsp2" );
+    initParPort();
 
-    if( sSNDDevIn == sSNDDevOut )
-    {
-	g_SNDCardIn = new CSNDCard( sSNDDevIn, SNDCARDMODE_DUPLEX );
-	g_SNDCardOut = g_SNDCardIn;
-    }
-    else
-    {
-	g_SNDCardIn = new CSNDCard( sSNDDevIn, SNDCARDMODE_IN );
-	g_SNDCardOut = new CSNDCard( sSNDDevOut, SNDCARDMODE_OUT );
-    }
+    initSndCards();
 
     // starting main loop
     g_Loop.Start();

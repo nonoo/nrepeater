@@ -23,7 +23,7 @@
 #include "SNDCard.h"
 #include "Log.h"
 
-extern CParPort g_ParPort;
+extern CParPort* g_ParPort;
 extern CSNDCard* g_SNDCardIn;
 extern CSNDCard* g_SNDCardOut;
 extern CLog g_Log;
@@ -37,7 +37,7 @@ void CLoop::Start()
 
     for( ;; )
     {
-	if( !pin_is_set( SQOFF ) && !fSquelchOff )
+	if( g_ParPort->isSquelchOff() && !fSquelchOff )
 	{
 	    g_Log.Debug( "receiver on\n" );
 	    g_SNDCardIn->Start();
@@ -45,10 +45,10 @@ void CLoop::Start()
 
 	    g_Log.Debug( "transmitter on\n" );
 	    g_SNDCardOut->Start();
-	    set_pin( PTT );
+	    g_ParPort->setPTT( true );
 	}
 
-	if( pin_is_set( SQOFF ) && fSquelchOff )
+	if( !g_ParPort->isSquelchOff() && fSquelchOff )
 	{
 	    g_Log.Debug( "receiver off\n" );
 	    g_SNDCardIn->Stop();
@@ -56,7 +56,7 @@ void CLoop::Start()
 
 	    g_Log.Debug( "transmitter off\n" );
 	    g_SNDCardOut->Stop();
-	    clear_pin( PTT );
+	    g_ParPort->setPTT( false );
 	}
 
 
