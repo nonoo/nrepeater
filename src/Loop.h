@@ -30,7 +30,10 @@ private:
 
     // audio data from the sound card
     short*		m_pBuffer;
-    int			m_nReadBytes;
+    int			m_nFramesRead;
+    int			m_nBeepDelay;
+    int			m_nPlayBeepTime;
+    bool		m_fPlayingBeep;
 };
 
 #endif

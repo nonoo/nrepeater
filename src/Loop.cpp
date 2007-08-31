@@ -22,21 +22,32 @@
 #include "ParPort.h"
 #include "SNDCard.h"
 #include "Log.h"
+#include "WavFile.h"
+#include "SettingsFile.h"
+#include "Main.h"
 
 extern CParPort* g_ParPort;
 extern CSNDCard* g_SNDCardIn;
 extern CSNDCard* g_SNDCardOut;
 extern CLog g_Log;
+extern CWavFile* g_RogerBeep;
+extern CSettingsFile g_MainConfig;
 
 // main loop
 void CLoop::Start()
 {
     bool fSquelchOff = false;
-    m_nFDIn = g_SNDCardIn->GetFDIn();
+    m_nFDIn = g_SNDCardIn->getFDIn();
     m_nSelectRes = -1;
+
+    m_nBeepDelay = g_MainConfig.GetInt( "rogerbeep", "delay", 2 );
+    m_nPlayBeepTime = 0;
+
+    g_Log.Debug( "starting main loop\n" );
 
     for( ;; )
     {
+	// receiver started receiving
 	if( g_ParPort->isSquelchOff() && !fSquelchOff )
 	{
 	    g_Log.Debug( "receiver on\n" );
@@ -44,24 +55,62 @@ void CLoop::Start()
 	    fSquelchOff = true;
 
 	    g_Log.Debug( "transmitter on\n" );
+	    g_SNDCardOut->Stop();
 	    g_SNDCardOut->Start();
 	    g_ParPort->setPTT( true );
+
+	    m_nPlayBeepTime = 0;
+	    m_fPlayingBeep = false;
 	}
 
+	// receiver stopped receiving
 	if( !g_ParPort->isSquelchOff() && fSquelchOff )
 	{
 	    g_Log.Debug( "receiver off\n" );
 	    g_SNDCardIn->Stop();
 	    fSquelchOff = false;
 
-	    g_Log.Debug( "transmitter off\n" );
-	    g_SNDCardOut->Stop();
-	    g_ParPort->setPTT( false );
+	    // do we have to play a roger beep?
+	    if( g_RogerBeep == NULL )
+	    {
+		g_Log.Debug( "transmitter off\n" );
+		g_SNDCardOut->Stop();
+		g_ParPort->setPTT( false );
+	    }
+	    else
+	    {
+		m_nPlayBeepTime = time( NULL ) + m_nBeepDelay;
+		g_RogerBeep->init();
+	    }
 	}
 
+	// playing roger beep if needed
+	if( ( m_nPlayBeepTime ) && ( time( NULL ) > m_nPlayBeepTime ) )
+	{
+	    g_Log.Debug( "playing beep\n" );
+	    m_nPlayBeepTime = 0;
+	    m_fPlayingBeep = true;
+	}
+	if( m_fPlayingBeep )
+	{
+	    m_pBuffer = g_RogerBeep->play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
+	    if( m_pBuffer == NULL )
+	    {
+		// played beep, switching transmitter off
+		g_Log.Debug( "beep end\n" );
+		m_fPlayingBeep = false;
+		g_Log.Debug( "transmitter off\n" );
+		g_ParPort->setPTT( false );
+	    }
+	    else
+	    {
+		g_SNDCardOut->Write( m_pBuffer, m_nFramesRead );
+	    }
+	}
 
 	if( !fSquelchOff )
 	{
+	    // we're not transmitting so we don't need to capture audio
 	    usleep( 100 );
 	    continue;
 	}
@@ -88,8 +137,8 @@ void CLoop::Start()
 
 	if( FD_ISSET( m_nFDIn, &m_fsReads) )
 	{
-	    m_pBuffer = g_SNDCardIn->Read( m_nReadBytes );
-	    g_SNDCardOut->Write( m_pBuffer, m_nReadBytes );
+	    m_pBuffer = g_SNDCardIn->Read( m_nFramesRead );
+	    g_SNDCardOut->Write( m_pBuffer, m_nFramesRead );
 	}
     }
 }

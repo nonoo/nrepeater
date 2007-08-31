@@ -28,7 +28,7 @@ CSNDCard::CSNDCard( string sDevName, int nMode, int nRate, int nChannels )
 {
     m_sDevName = sDevName;
     m_pBuffer = NULL;
-    m_nBufferSize = 32*1024;
+    m_nBufferSize = 0;
     m_nRate = nRate;
     m_nChannels = nChannels;
     m_nFormat = AFMT_S16_NE;
@@ -117,17 +117,18 @@ CSNDCard::CSNDCard( string sDevName, int nMode, int nRate, int nChannels )
     if ( ioctl( fd, SNDCTL_DSP_SPEED, &tmp ) == -1 )
     {
 	char etmp[100];
-	sprintf( etmp, "can't set requested (%d) sample rate on %s\n", m_nRate, sDevName.c_str() );
+	sprintf( etmp, "can't set requested (%dhz) sample rate on %s\n", m_nRate, sDevName.c_str() );
         g_Log.Error( etmp );
 	exit( -1 );
     }
 
     if ( tmp != m_nRate )
     {
-	char etmp[100];
-	sprintf( etmp, "%s does not support requested sample rate (%d)\n", sDevName.c_str(), m_nRate );
-        g_Log.Error( etmp );
-	exit( -1 );
+	char tmpstr[100];
+	sprintf( tmpstr, "%s does not support requested sample rate (%dhz), switching to: %dhz\n", sDevName.c_str(), m_nRate, tmp );
+        g_Log.Warning( tmpstr );
+
+	m_nRate = tmp;
     }
 
     if ( ioctl( fd, SNDCTL_DSP_GETBLKSIZE, &m_nFragSize ) == -1 )
@@ -136,6 +137,7 @@ CSNDCard::CSNDCard( string sDevName, int nMode, int nRate, int nChannels )
 	exit( -1 );
     }
 
+    m_nBufferSize = m_nFragSize * 2;
     m_pBuffer = new short[ m_nBufferSize ];
     memset( m_pBuffer, 0, m_nBufferSize );
 
@@ -238,6 +240,10 @@ void CSNDCard::Stop()
 		g_Log.Debug( "SNDCTL_DSP_SETTRIGGER INOUT 0" + m_sDevName + "\n" );
 	    }
     }
+
+    ioctl( m_nFDOut, SNDCTL_DSP_SILENCE, NULL);
+    ioctl( m_nFDOut, SNDCTL_DSP_SKIP, NULL);
+    ioctl( m_nFDOut, SNDCTL_DSP_HALT, NULL);
 }
 
 short* CSNDCard::Read( int& nLength )
@@ -251,7 +257,7 @@ short* CSNDCard::Read( int& nLength )
 
     int n = info.bytes; // how much to read
 
-    if( read( m_nFDIn, m_pBuffer, n ) != n )
+    if( read( m_nFDIn, m_pBuffer, n * 2 ) != n * 2 ) // n * 2 because we read shorts
     {
 	g_Log.Error( "error reading audio data from " + m_sDevName + "\n" );
 	exit( -1 );
@@ -266,9 +272,9 @@ void CSNDCard::Write( short* pBuffer, int nLength )
 {
     if( m_fFirstTime)
     {
-	char* pSilence = new char[ m_nFragSize ];
-	memset( pSilence, 0, m_nFragSize );
-	if( write( m_nFDOut, pSilence, m_nFragSize ) != (int)m_nFragSize )
+	short* pSilence = new short[ m_nFragSize ];
+	memset( pSilence, 0, m_nFragSize * 2 );
+	if( write( m_nFDOut, pSilence, m_nFragSize * 2 ) != (int)m_nFragSize * 2 )
 	{
 	    g_Log.Error( "error writing audio data to " + m_sDevName + "\n" );
 	    exit( -1 );
@@ -277,14 +283,30 @@ void CSNDCard::Write( short* pBuffer, int nLength )
 	m_fFirstTime = false;
     }
 
-    if( write( m_nFDOut, pBuffer, nLength ) != (int)nLength )
+    // n * 2 because we read shorts
+    if( write( m_nFDOut, pBuffer, nLength * 2 ) != (int)nLength * 2 )
     {
 	g_Log.Error( "error writing audio data to " + m_sDevName + "\n" );
 	exit( -1 );
     }
 }
 
-int CSNDCard::GetFDIn()
+int CSNDCard::getFDIn()
 {
     return m_nFDIn;
+}
+
+int CSNDCard::getBufferSize()
+{
+    return m_nBufferSize;
+}
+
+int CSNDCard::getSampleRate()
+{
+    return m_nRate;
+}
+
+int CSNDCard::getChannelNum()
+{
+    return m_nChannels;
 }

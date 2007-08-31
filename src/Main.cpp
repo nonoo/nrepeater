@@ -89,6 +89,19 @@ int main( int argc, char* argv[] )
     if( g_MainConfig.GetInt( "rogerbeep", "enabled", 1 ) )
     {
 	g_RogerBeep = new CWavFile( g_MainConfig.Get( "rogerbeep", "file", "beep.wav" ) );
+	if( g_RogerBeep->getSampleRate() != g_SNDCardOut->getSampleRate() )
+	{
+	    char errstr[100];
+	    sprintf( errstr, "roger beep sample rate (%dhz) doesn't match output sample rate (%dhz)\n", g_RogerBeep->getSampleRate(), g_SNDCardOut->getSampleRate() );
+	    g_Log.Warning( errstr );
+	}
+	if( g_RogerBeep->getChannelNum() != g_SNDCardOut->getChannelNum() )
+	{
+	    char errstr[100];
+	    sprintf( errstr, "roger beep file has %d channel(s), output has %d\n", g_RogerBeep->getChannelNum(), g_SNDCardOut->getChannelNum() );
+	    g_Log.Warning( errstr );
+	}
+	g_Log.Debug( "roger beep file loaded into memory\n" );
     }
 
     // starting main loop
