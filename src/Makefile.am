@@ -6,4 +6,5 @@ nrepeater_SOURCES = \
 	ParPort.cpp ParPort.h \
 	Loop.cpp Loop.h \
 	SettingsFile.cpp SettingsFile.h \
-	SNDCard.cpp SNDCard.h
+	SNDCard.cpp SNDCard.h \
+	WavFile.cpp WavFile.h
