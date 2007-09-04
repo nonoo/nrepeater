@@ -14,32 +14,42 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __LOOP_H
-#define __LOOP_H
+#ifndef __COMPRESSOR_H
+#define __COMPRESSOR_H
 
-#include "Compressor.h"
+#include <vector>
 
-class CLoop
+class CCompressor
 {
 public:
-    void Start();
+    short* Process( short* pBuffer, int nFramesIn, int& nFramesOut );
+    void doCalcRMSVolume();
+
+    CCompressor( int nSNDCardRate, int nSNDCardBufferSize );
+    ~CCompressor();
 
 private:
-    void setTransmitTimeout( int nMicroSecs );
-    void clearTransmitTimeout();
+    void DoCompress();
 
-    struct timeval	m_tTime;
-    int			m_nFDIn;
-    fd_set		m_fsReads;
-    int			m_nSelectRes;
-    CCompressor*	m_pCompressor;
+    typedef struct
+    {
+	short*	pData;
+	int	nSize;
+    } tBufferChunk;
 
-    // audio data from the sound card
-    short*		m_pBuffer;
-    int			m_nFramesRead;
-    int			m_nBeepDelay;
-    int			m_nPlayBeepTime;
-    bool		m_fPlayingBeep;
+    std::vector< tBufferChunk >			m_vBuffer;
+
+    int		m_nCurrChunk;
+    int		m_nBufferSize;
+    int		m_nDelayFramesCount;
+    short*	m_pOut;
+    int		m_nSampleRate;
+
+/*    int		m_nBufferPos;
+    double	m_dRMSVol;
+    float	m_fThreshold;
+    float	m_fOrigRatio, m_fRatio;
+    int		m_nMakeUpGain;*/
 };
 
 #endif

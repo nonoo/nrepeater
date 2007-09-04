@@ -7,4 +7,5 @@ nrepeater_SOURCES = \
 	Loop.cpp Loop.h \
 	SettingsFile.cpp SettingsFile.h \
 	SNDCard.cpp SNDCard.h \
-	WavFile.cpp WavFile.h
+	WavFile.cpp WavFile.h \
+	Compressor.cpp Compressor.h
