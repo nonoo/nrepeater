@@ -18,6 +18,8 @@
 #include "SettingsFile.h"
 #include "Log.h"
 
+using namespace std;
+
 extern CLog g_Log;
 
 void CSettingsFile::Set( string Section, string Key, string Value )
