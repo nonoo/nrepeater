@@ -22,30 +22,63 @@
 
 using namespace std;
 
+CLog::CLog()
+{
+    m_nLogLevel = LOGLEVEL_NORMAL;
+}
+
 void CLog::Error( string msg )
 {
-    cout << CurrTime() << "Error: " << msg;
+    if( m_nLogLevel > LOGLEVEL_NONE )
+    {
+	cout << CurrTime() << "Error: " << msg;
+    }
 }
 
 void CLog::Warning( string msg )
 {
-    cout << CurrTime() << "Warning: " << msg;
+    if( m_nLogLevel > LOGLEVEL_NONE )
+    {
+	cout << CurrTime() << "Warning: " << msg;
+    }
 }
 
 void CLog::Msg( string msg )
 {
-    cout << CurrTime() << msg;
+    if( m_nLogLevel > LOGLEVEL_NONE )
+    {
+	cout << CurrTime() << msg;
+    }
 }
 
 // msg without time
 void CLog::Msg2( string msg )
 {
-    cout << msg;
+    if( m_nLogLevel > LOGLEVEL_NONE )
+    {
+        cout << msg;
+    }
 }
 
 void CLog::Debug( string msg )
 {
-    cout << CurrTime() << msg;
+    if( m_nLogLevel > LOGLEVEL_NORMAL )
+    {
+        cout << CurrTime() << msg;
+    }
+}
+
+void CLog::Debug2( string msg )
+{
+    if( m_nLogLevel > LOGLEVEL_DEBUG )
+    {
+        cout << CurrTime() << msg;
+    }
+}
+
+void CLog::setLogLevel( int nLogLevel )
+{
+    m_nLogLevel = nLogLevel;
 }
 
 // returns the time in [H:m:s] format

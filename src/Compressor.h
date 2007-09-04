@@ -19,6 +19,11 @@
 
 #include <vector>
 
+#define COMPSTATE_OFF		0
+#define COMPSTATE_COMPRESSING	1
+#define COMPSTATE_ATTACK	2
+#define COMPSTATE_RELEASE	4
+
 class CCompressor
 {
 public:
@@ -29,27 +34,35 @@ public:
     ~CCompressor();
 
 private:
-    void DoCompress();
+    int		doCompress();
+    void	calcRatio();
 
     typedef struct
     {
 	short*	pData;
 	int	nSize;
     } tBufferChunk;
-
-    std::vector< tBufferChunk >			m_vBuffer;
+    std::vector< tBufferChunk > m_vBuffer;
 
     int		m_nCurrChunk;
     int		m_nBufferSize;
     int		m_nDelayFramesCount;
     short*	m_pOut;
     int		m_nSampleRate;
+    int		m_nOrigRatio;
+    float	m_fRatio;
+    int		m_nMakeUpGain;
+    int		m_nThreshold;
+    int		m_sState;
 
-/*    int		m_nBufferPos;
-    double	m_dRMSVol;
-    float	m_fThreshold;
-    float	m_fOrigRatio, m_fRatio;
-    int		m_nMakeUpGain;*/
+    int		m_nAttackFramesCount;
+    int		m_nCurrAttackFrameCount;
+    int		m_nReleaseFramesCount;
+    int		m_nCurrReleaseFrameCount;
+    int		m_nHoldFramesCount;
+    int		m_nCurrHoldFrameCount;
+
+    int		m_nPeak;
 };
 
 #endif
