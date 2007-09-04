@@ -20,8 +20,6 @@
 #include <string>
 #include <map>
 
-using namespace std;
-
 // config file settings manager class
 //
 class CSettingsFile
@@ -32,36 +30,36 @@ public:
     // if config path is not set, loadconfig tries to
     // figure out where the config file is
     //
-    void	SetConfigPath( string szConfigPath );
-    void	SetConfigFile( string szConfigFile );
+    void	SetConfigPath( std::string szConfigPath );
+    void	SetConfigFile( std::string szConfigFile );
 
     void	LoadConfig();
     void	SaveConfig();
 
-    string	Get( string Section, string Key, string DefaultValue );
-    int		GetInt( string Section, string Key, const int& DefaultValue );
-    void	Set( string Section, string Key, string Value );
+    std::string	Get( std::string Section, std::string Key, std::string DefaultValue );
+    int		GetInt( std::string Section, std::string Key, const int& DefaultValue );
+    void	Set( std::string Section, std::string Key, std::string Value );
 
 private:
     // removes whitespaces
     //
-    string	TrimLeft( string szString );
-    string	TrimRight( string szString );
+    std::string	TrimLeft( std::string szString );
+    std::string	TrimRight( std::string szString );
 
     void	SearchForConfigFile();
 
 
 
 
-    string	m_szInitialHomeDir;
-    string	m_szConfigFile;
-    string	m_szConfigPath;
+    std::string	m_szInitialHomeDir;
+    std::string	m_szConfigFile;
+    std::string	m_szConfigPath;
 
     // ini structure in memory
     // m_Settings[section][key] == value
     //
-    typedef map< string, string >	t_mKeys;
-    map< string, t_mKeys >		m_Settings;
+    typedef std::map< std::string, std::string >	t_mKeys;
+    std::map< std::string, t_mKeys >			m_Settings;
 };
 
 #endif

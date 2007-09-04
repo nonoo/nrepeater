@@ -21,13 +21,11 @@
 #define SNDCARDMODE_OUT 1
 #define SNDCARDMODE_DUPLEX 2
 
-using namespace std;
-
 #include <string>
 
 class CSNDCard {
 public:
-    CSNDCard( string sDevName, int nMode, int nRate, int nChannels );
+    CSNDCard( std::string sDevName, int nMode, int nRate, int nChannels );
     ~CSNDCard();
 
     void Stop();
@@ -42,7 +40,7 @@ public:
     int getChannelNum();
 
 private:
-    string m_sDevName;
+    std::string m_sDevName;
     int m_nFDOut, m_nFDIn;
     int m_nMode;
     short* m_pBuffer;

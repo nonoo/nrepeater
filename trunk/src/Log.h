@@ -17,19 +17,19 @@
 #ifndef __CLOG_H
 #define __CLOG_H
 
-using namespace std;
-
 #include <string>
 
 class CLog
 {
 public:
-    void Error( string msg );
-    void Warning( string msg );
-    void Msg( string msg );
-    void Msg2( string msg );
-    void Debug( string msg );
-    string CurrTime();
+    void Error( std::string msg );
+    void Warning( std::string msg );
+    void Msg( std::string msg );
+    void Msg2( std::string msg );
+    void Debug( std::string msg );
+
+private:
+    std::string CurrTime();
 };
 
 #endif

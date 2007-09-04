@@ -20,12 +20,10 @@
 #include <string>
 #include <sndfile.h>
 
-using namespace std;
-
 class CWavFile
 {
 public:
-    CWavFile( string sFile );
+    CWavFile( std::string sFile );
     ~CWavFile();
 
     void	init();

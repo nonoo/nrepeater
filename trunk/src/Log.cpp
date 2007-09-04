@@ -20,6 +20,8 @@
 
 #include "Log.h"
 
+using namespace std;
+
 void CLog::Error( string msg )
 {
     cout << CurrTime() << "Error: " << msg;
