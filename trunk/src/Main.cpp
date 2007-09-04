@@ -33,7 +33,6 @@ CSNDCard*	g_SNDCardOut = NULL;
 CWavFile*	g_RogerBeep = NULL;
 bool		g_fTerminate = false;
 
-
 void initParPort()
 {
     string sParPort = g_MainConfig.Get( "lpt", "port", "LPT1" );
@@ -96,6 +95,11 @@ void onSIGHUP( int )
 
 int main( int argc, char* argv[] )
 {
+    g_MainConfig.SetConfigFile( string( PACKAGE ) + ".conf" );
+    g_MainConfig.LoadConfig();
+
+    g_Log.setLogLevel( g_MainConfig.GetInt( "logging", "loglevel_screen", 1 ) );
+
     g_Log.Msg2( PACKAGE + string( " v" ) + PACKAGE_VERSION + string( " by Nonoo <nonoo@nonoo.hu>\n" ) );
     g_Log.Msg2( "http://www.nonoo.hu/projects/nrepeater/\n\n" );
 
@@ -103,9 +107,6 @@ int main( int argc, char* argv[] )
     signal( SIGTERM, onSIGTERM );
     signal( SIGINT, onSIGTERM );
     signal( SIGHUP, onSIGHUP );
-
-    g_MainConfig.SetConfigFile( string( PACKAGE ) + ".conf" );
-    g_MainConfig.LoadConfig();
 
     initParPort();
 

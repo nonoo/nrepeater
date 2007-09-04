@@ -19,17 +19,28 @@
 
 #include <string>
 
+#define LOGLEVEL_NONE		0
+#define LOGLEVEL_NORMAL		1
+#define LOGLEVEL_DEBUG		2
+#define LOGLEVEL_EXTREME	3
+
 class CLog
 {
 public:
+    CLog();
+
     void Error( std::string msg );
     void Warning( std::string msg );
     void Msg( std::string msg );
     void Msg2( std::string msg );
     void Debug( std::string msg );
+    void Debug2( std::string msg );
+    void setLogLevel( int nLogLevel );
 
 private:
     std::string CurrTime();
+
+    int	m_nLogLevel;
 };
 
 #endif
