@@ -48,7 +48,7 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_nrepeater_OBJECTS = Main.$(OBJEXT) Log.$(OBJEXT) ParPort.$(OBJEXT) \
 	Loop.$(OBJEXT) SettingsFile.$(OBJEXT) SNDCard.$(OBJEXT) \
-	WavFile.$(OBJEXT)
+	WavFile.$(OBJEXT) Compressor.$(OBJEXT)
 nrepeater_OBJECTS = $(am_nrepeater_OBJECTS)
 nrepeater_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -159,7 +159,8 @@ nrepeater_SOURCES = \
 	Loop.cpp Loop.h \
 	SettingsFile.cpp SettingsFile.h \
 	SNDCard.cpp SNDCard.h \
-	WavFile.cpp WavFile.h
+	WavFile.cpp WavFile.h \
+	Compressor.cpp Compressor.h
 
 all: all-am
 
@@ -227,6 +228,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Compressor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Log.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Loop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Main.Po@am__quote@

@@ -82,6 +82,8 @@ void CLoop::Start()
 
     signal( SIGALRM, onSIGALRM );
 
+    m_pCompressor = new CCompressor( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getBufferSize() );
+
     while( !g_fTerminate )
     {
 	// receiver started receiving
@@ -181,7 +183,16 @@ void CLoop::Start()
 	if( FD_ISSET( m_nFDIn, &m_fsReads) )
 	{
 	    m_pBuffer = g_SNDCardIn->Read( m_nFramesRead );
-	    g_SNDCardOut->Write( m_pBuffer, m_nFramesRead );
+	    if( g_MainConfig.GetInt( "compressor", "enabled", 0 ) )
+	    {
+		int nCompFramesOut;
+		short* pCompOut = m_pCompressor->Process( m_pBuffer, m_nFramesRead, nCompFramesOut );
+		if( pCompOut != NULL ) { g_SNDCardOut->Write( pCompOut, nCompFramesOut ); }
+	    }
+	    else
+	    {
+		g_SNDCardOut->Write( m_pBuffer, m_nFramesRead );
+	    }
 	}
     }
 }

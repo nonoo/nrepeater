@@ -167,7 +167,7 @@ CSNDCard::CSNDCard( string sDevName, int nMode, int nRate, int nChannels )
     Stop();
 
     char etmp[100];
-    sprintf( etmp, "Initialized %s using fragment size %d.\n", m_sDevName.c_str(), m_nFragSize );
+    sprintf( etmp, "Initialized %s using fragment size %d, buffer size %d.\n", m_sDevName.c_str(), m_nFragSize, m_nBufferSize );
     g_Log.Debug( etmp );
 }
 
