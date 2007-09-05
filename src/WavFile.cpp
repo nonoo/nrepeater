@@ -20,17 +20,56 @@
 #include "Log.h"
 #include "Main.h"
 
+using namespace std;
+
 extern CLog g_Log;
 
-void CWavFile::load( string sFile )
+CWavFile::CWavFile()
 {
+    m_pWave = NULL;
+    m_pSNDFILE = NULL;
+    m_nSeek = 0;
+}
+
+void CWavFile::openForWrite( string sFile, int nSampleRate, int nChannels, int nFormat )
+{
+    close();
+
+    memset( &m_SFINFO, 0, sizeof( m_SFINFO ) );
+    m_SFINFO.samplerate = nSampleRate;
+    m_SFINFO.channels = nChannels;
+    m_SFINFO.format = nFormat;
+    if( ( m_pSNDFILE = sf_open( sFile.c_str(), SFM_WRITE, &m_SFINFO ) ) == NULL )
+    {
+	char errstr[100];
+	sf_error_str( m_pSNDFILE, errstr, 100 );
+	g_Log.Warning( "can't open wav file for writing" + sFile + ": " + errstr + "\n" );
+    }
+
+    sf_set_string( m_pSNDFILE, SF_STR_SOFTWARE, PACKAGE );
+}
+
+int CWavFile::write( short* pData, int nFramesNum )
+{
+    if( m_pSNDFILE == NULL )
+    {
+	return -1;
+    }
+
+    return sf_write_short( m_pSNDFILE, pData, nFramesNum );
+}
+
+void CWavFile::loadToMemory( string sFile )
+{
+    close();
+
     memset( &m_SFINFO, 0, sizeof( m_SFINFO ) );
     if( ( m_pSNDFILE = sf_open( sFile.c_str(), SFM_READ, &m_SFINFO ) ) == NULL )
     {
 	char errstr[100];
 	sf_error_str( m_pSNDFILE, errstr, 100 );
-	g_Log.Error( "can't open wav file " + sFile + ": " + errstr + "\n" );
-	exit( -1 );
+	g_Log.Warning( "can't open wav file " + sFile + ": " + errstr + "\n" );
+	return;
     }
 
     // loading wave data to memory
@@ -39,11 +78,12 @@ void CWavFile::load( string sFile )
     {
 	char errstr[100];
 	sf_error_str( m_pSNDFILE, errstr, 100 );
-	g_Log.Error( "can't load wav file " + sFile + ": " + errstr + "\n" );
-	exit( -1 );
+	g_Log.Warning( "can't load wav file " + sFile + ": " + errstr + "\n" );
+	SAFE_DELETE_ARRAY( m_pWave );
+	return;
     }
 
-    init();
+    rewind();
 }
 
 bool CWavFile::isLoaded()
@@ -63,17 +103,25 @@ CWavFile::~CWavFile()
 }
 
 // seeks to the beginning of the wave pointer
-void CWavFile::init()
+void CWavFile::rewind()
 {
     m_nSeek = 0;
 }
 
 // nBufferSize: available sound buffer
 // nFramesRead: count of frames read to the buffer
+// this is called sequentially
 short* CWavFile::play( int nBufferSize, int& nFramesRead )
 {
+    if( m_pWave == NULL )
+    {
+	return NULL;
+    }
+
     if( m_nSeek >= m_SFINFO.frames )
     {
+	// play ended, rewinding
+	m_nSeek = 0;
 	return NULL;
     }
 
@@ -109,6 +157,11 @@ int CWavFile::getChannelNum()
 
 void CWavFile::setVolume( int nPercent )
 {
+    if( m_pWave == NULL )
+    {
+	return;
+    }
+
     for( int n=0; n < m_SFINFO.frames; n++ )
     {
 	short t = m_pWave[n];

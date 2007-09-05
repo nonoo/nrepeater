@@ -111,8 +111,14 @@ void CLoop::Start()
 	    g_SNDCardIn->Stop();
 	    fSquelchOff = false;
 
+	    if( g_MainConfig.GetInt( "compressor", "enabled", 0 ) )
+	    {
+		// resetting compressor
+		m_pCompressor->flush();
+	    }
+
 	    // do we have to play a roger beep?
-	    if( g_RogerBeep.isLoaded() )
+	    if( !g_RogerBeep.isLoaded() )
 	    {
 		g_Log.Debug( "transmitter off\n" );
 		g_SNDCardOut->Stop();
@@ -121,7 +127,7 @@ void CLoop::Start()
 	    else
 	    {
 		m_nPlayBeepTime = time( NULL ) + m_nBeepDelay;
-		g_RogerBeep.init();
+		g_RogerBeep.rewind();
 	    }
 	}
 
@@ -186,7 +192,7 @@ void CLoop::Start()
 	    if( g_MainConfig.GetInt( "compressor", "enabled", 0 ) )
 	    {
 		int nCompFramesOut;
-		short* pCompOut = m_pCompressor->Process( m_pBuffer, m_nFramesRead, nCompFramesOut );
+		short* pCompOut = m_pCompressor->process( m_pBuffer, m_nFramesRead, nCompFramesOut );
 		if( pCompOut != NULL ) { g_SNDCardOut->Write( pCompOut, nCompFramesOut ); }
 	    }
 	    else

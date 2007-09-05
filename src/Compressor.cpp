@@ -46,7 +46,23 @@ CCompressor::CCompressor( int nSNDCardRate, int nSNDCardBufferSize )
     // calculating release time from ms to frames
     m_nReleaseFramesCount = (int)( ( (float)g_MainConfig.GetInt( "compressor", "releasetime", 100 ) / 1000 ) * m_nSampleRate );
     m_nCurrReleaseFrameCount = m_nReleaseFramesCount;
-    m_sState = COMPSTATE_OFF;
+
+    // when the receiver starts receiving, start the compressor?
+    if( g_MainConfig.GetInt( "compressor", "fadein", 1 ) )
+    {
+	if( g_MainConfig.GetInt( "compressor", "fadein_hold", 1 ) )
+	{
+	    m_sState = COMPSTATE_COMPRESSING;
+	}
+	else
+	{
+	    m_sState = COMPSTATE_RELEASE;
+	}
+    }
+    else
+    {
+	m_sState = COMPSTATE_OFF;
+    }
 
     // peak sound value
     m_nPeak = 0;
@@ -59,6 +75,31 @@ CCompressor::~CCompressor()
     for( vector< tBufferChunk >::iterator it = m_vBuffer.begin(); it != m_vBuffer.end(); it++ )
     {
 	SAFE_DELETE_ARRAY( (*it).pData );
+    }
+}
+
+void CCompressor::flush()
+{
+    for( vector< tBufferChunk >::iterator it = m_vBuffer.begin(); it != m_vBuffer.end(); it++ )
+    {
+	memset( (*it).pData, 0, (*it).nSize * 2 );
+    }
+
+    // when the receiver starts receiving, start the compressor?
+    if( g_MainConfig.GetInt( "compressor", "fadein", 1 ) )
+    {
+	if( g_MainConfig.GetInt( "compressor", "fadein_hold", 1 ) )
+	{
+	    m_sState = COMPSTATE_COMPRESSING;
+	}
+	else
+	{
+	    m_sState = COMPSTATE_RELEASE;
+	}
+    }
+    else
+    {
+	m_sState = COMPSTATE_OFF;
     }
 }
 
@@ -156,7 +197,7 @@ int CCompressor::doCompress()
 }
 
 // this is called sequentially from the main loop
-short* CCompressor::Process( short* pBuffer, int nFramesIn, int& nFramesOut )
+short* CCompressor::process( short* pBuffer, int nFramesIn, int& nFramesOut )
 {
     // data comes in variable-sized chunks from the sound card.
     // we put each incoming chunk into the m_vBuffer vector and
@@ -218,10 +259,10 @@ short* CCompressor::Process( short* pBuffer, int nFramesIn, int& nFramesOut )
 
     return m_pOut;
 }
-
+/*
 void CCompressor::doCalcRMSVolume()
 {
-/*    m_dRMSVol = 0;
+    m_dRMSVol = 0;
 
     for( int n = 0; n < m_nBufferSize; n++ )
     {
@@ -233,5 +274,5 @@ void CCompressor::doCalcRMSVolume()
     pow( m_dRMSVol, 0.5f );
     m_dRMSVol = 20*log10( m_dRMSVol );
 
-    m_nBufferPos = 0;*/
-}
+    m_nBufferPos = 0;
+}*/
