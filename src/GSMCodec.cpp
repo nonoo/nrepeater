@@ -14,32 +14,5 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __WAVFILE_H
-#define __WAVFILE_H
-
-#include <string>
-#include <sndfile.h>
-
-class CWavFile
-{
-public:
-    ~CWavFile();
-
-    void	init();
-    void	close();
-    void	load( std::string sFile );
-    bool	isLoaded();
-    short*	play( int nBufferSize, int& nFramesRead );
-    short*	getWaveData( int& nLength );
-    int		getSampleRate();
-    int		getChannelNum();
-    void	setVolume( int nPercent );
-
-private:
-    SNDFILE*	m_pSNDFILE;
-    SF_INFO	m_SFINFO;
-    int		m_nSeek;
-    short*	m_pWave;
-};
-
-#endif
+#include "GSMCodec.h"
+#include "Main.h"

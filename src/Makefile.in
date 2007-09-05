@@ -48,7 +48,8 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_nrepeater_OBJECTS = Main.$(OBJEXT) Log.$(OBJEXT) ParPort.$(OBJEXT) \
 	Loop.$(OBJEXT) SettingsFile.$(OBJEXT) SNDCard.$(OBJEXT) \
-	WavFile.$(OBJEXT) Compressor.$(OBJEXT)
+	WavFile.$(OBJEXT) Compressor.$(OBJEXT) ArchiveFile.$(OBJEXT) \
+	GSMCodec.$(OBJEXT)
 nrepeater_OBJECTS = $(am_nrepeater_OBJECTS)
 nrepeater_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -160,7 +161,9 @@ nrepeater_SOURCES = \
 	SettingsFile.cpp SettingsFile.h \
 	SNDCard.cpp SNDCard.h \
 	WavFile.cpp WavFile.h \
-	Compressor.cpp Compressor.h
+	Compressor.cpp Compressor.h \
+	ArchiveFile.cpp ArchiveFile.h \
+	GSMCodec.cpp GSMCodec.h
 
 all: all-am
 
@@ -228,7 +231,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ArchiveFile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Compressor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GSMCodec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Log.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Loop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Main.Po@am__quote@
