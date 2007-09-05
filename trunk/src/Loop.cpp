@@ -32,7 +32,7 @@ extern CParPort*	g_ParPort;
 extern CSNDCard*	g_SNDCardIn;
 extern CSNDCard*	g_SNDCardOut;
 extern CLog		g_Log;
-extern CWavFile*	g_RogerBeep;
+extern CWavFile		g_RogerBeep;
 extern CSettingsFile	g_MainConfig;
 extern bool		g_fTerminate;
 
@@ -112,7 +112,7 @@ void CLoop::Start()
 	    fSquelchOff = false;
 
 	    // do we have to play a roger beep?
-	    if( g_RogerBeep == NULL )
+	    if( g_RogerBeep.isLoaded() )
 	    {
 		g_Log.Debug( "transmitter off\n" );
 		g_SNDCardOut->Stop();
@@ -121,7 +121,7 @@ void CLoop::Start()
 	    else
 	    {
 		m_nPlayBeepTime = time( NULL ) + m_nBeepDelay;
-		g_RogerBeep->init();
+		g_RogerBeep.init();
 	    }
 	}
 
@@ -136,7 +136,7 @@ void CLoop::Start()
 	// this plays the roger beep wave sequentially
 	if( m_fPlayingBeep )
 	{
-	    m_pBuffer = g_RogerBeep->play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
+	    m_pBuffer = g_RogerBeep.play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
 	    if( m_pBuffer == NULL )
 	    {
 		// reached the end of the wave

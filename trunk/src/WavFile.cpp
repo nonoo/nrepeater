@@ -22,7 +22,7 @@
 
 extern CLog g_Log;
 
-CWavFile::CWavFile( string sFile )
+void CWavFile::load( string sFile )
 {
     memset( &m_SFINFO, 0, sizeof( m_SFINFO ) );
     if( ( m_pSNDFILE = sf_open( sFile.c_str(), SFM_READ, &m_SFINFO ) ) == NULL )
@@ -46,10 +46,20 @@ CWavFile::CWavFile( string sFile )
     init();
 }
 
-CWavFile::~CWavFile()
+bool CWavFile::isLoaded()
+{
+    return ( m_pWave != NULL ? true : false );
+}
+
+void CWavFile::close()
 {
     sf_close( m_pSNDFILE );
     SAFE_DELETE_ARRAY( m_pWave );
+}
+
+CWavFile::~CWavFile()
+{
+    close();
 }
 
 // seeks to the beginning of the wave pointer

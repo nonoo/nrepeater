@@ -8,4 +8,6 @@ nrepeater_SOURCES = \
 	SettingsFile.cpp SettingsFile.h \
 	SNDCard.cpp SNDCard.h \
 	WavFile.cpp WavFile.h \
-	Compressor.cpp Compressor.h
+	Compressor.cpp Compressor.h \
+	ArchiveFile.cpp ArchiveFile.h \
+	GSMCodec.cpp GSMCodec.h

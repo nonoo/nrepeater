@@ -30,7 +30,7 @@ CSettingsFile	g_MainConfig;
 CParPort*	g_ParPort = NULL;
 CSNDCard*	g_SNDCardIn = NULL;
 CSNDCard*	g_SNDCardOut = NULL;
-CWavFile*	g_RogerBeep = NULL;
+CWavFile	g_RogerBeep;
 bool		g_fTerminate = false;
 
 void initParPort()
@@ -112,22 +112,23 @@ int main( int argc, char* argv[] )
 
     initSndCards();
 
+    // loading roger beep wave file
     if( g_MainConfig.GetInt( "rogerbeep", "enabled", 1 ) )
     {
-	g_RogerBeep = new CWavFile( g_MainConfig.Get( "rogerbeep", "file", "beep.wav" ) );
-	if( g_RogerBeep->getSampleRate() != g_SNDCardOut->getSampleRate() )
+	g_RogerBeep.load( g_MainConfig.Get( "rogerbeep", "file", "beep.wav" ) );
+	if( g_RogerBeep.getSampleRate() != g_SNDCardOut->getSampleRate() )
 	{
 	    char errstr[100];
-	    sprintf( errstr, "roger beep sample rate (%dhz) doesn't match output sample rate (%dhz)\n", g_RogerBeep->getSampleRate(), g_SNDCardOut->getSampleRate() );
+	    sprintf( errstr, "roger beep sample rate (%dhz) doesn't match output sample rate (%dhz)\n", g_RogerBeep.getSampleRate(), g_SNDCardOut->getSampleRate() );
 	    g_Log.Warning( errstr );
 	}
-	if( g_RogerBeep->getChannelNum() != g_SNDCardOut->getChannelNum() )
+	if( g_RogerBeep.getChannelNum() != g_SNDCardOut->getChannelNum() )
 	{
 	    char errstr[100];
-	    sprintf( errstr, "roger beep file has %d channel(s), output has %d\n", g_RogerBeep->getChannelNum(), g_SNDCardOut->getChannelNum() );
+	    sprintf( errstr, "roger beep file has %d channel(s), output has %d\n", g_RogerBeep.getChannelNum(), g_SNDCardOut->getChannelNum() );
 	    g_Log.Warning( errstr );
 	}
-	g_RogerBeep->setVolume( g_MainConfig.GetInt( "rogerbeep", "volume", 80 ) );
+	g_RogerBeep.setVolume( g_MainConfig.GetInt( "rogerbeep", "volume", 80 ) );
 	g_Log.Debug( "roger beep file loaded into memory\n" );
     }
 
@@ -138,6 +139,5 @@ int main( int argc, char* argv[] )
     SAFE_DELETE( g_ParPort );
     SAFE_DELETE( g_SNDCardIn );
     SAFE_DELETE( g_SNDCardOut );
-    SAFE_DELETE( g_RogerBeep );
     return 0;
 }
