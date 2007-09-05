@@ -1,5 +1,5 @@
 //  This file is part of nrepeater.
-//
+//    
 //  nrepeater is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation; either version 2 of the License, or
@@ -14,34 +14,17 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __LOOP_H
-#define __LOOP_H
+#ifndef __ARCHIVER_H
+#define __ARCHIVER_H
 
-#include "Compressor.h"
-#include "Archiver.h"
+#include "ArchiveFile.h"
 
-class CLoop
+class CArchiver
 {
 public:
-    void Start();
+    void write( short* pData, int nFramesNum );
 
 private:
-    void setTransmitTimeout( int nMicroSecs );
-    void clearTransmitTimeout();
-
-    struct timeval	m_tTime;
-    int			m_nFDIn;
-    fd_set		m_fsReads;
-    int			m_nSelectRes;
-    CCompressor*	m_pCompressor;
-
-    // audio data from the sound card
-    short*		m_pBuffer;
-    int			m_nFramesRead;
-    int			m_nBeepDelay;
-    int			m_nPlayBeepTime;
-    bool		m_fPlayingBeep;
-    CArchiver		m_Archiver;
 };
 
 #endif

@@ -10,4 +10,5 @@ nrepeater_SOURCES = \
 	WavFile.cpp WavFile.h \
 	Compressor.cpp Compressor.h \
 	ArchiveFile.cpp ArchiveFile.h \
+	Archiver.cpp Archiver.h \
 	GSMCodec.cpp GSMCodec.h

@@ -42,76 +42,76 @@ PATH: /home/nonoo/bin
 ## Core tests. ##
 ## ----------- ##
 
-configure:1749: checking for a BSD-compatible install
-configure:1805: result: /usr/bin/install -c
-configure:1816: checking whether build environment is sane
-configure:1859: result: yes
-configure:1924: checking for gawk
-configure:1940: found /usr/bin/gawk
-configure:1951: result: gawk
-configure:1962: checking whether make sets $(MAKE)
-configure:1983: result: yes
-configure:2179: checking for style of include used by make
-configure:2207: result: GNU
-configure:2280: checking for gcc
-configure:2296: found /usr/local/bin/gcc
-configure:2307: result: gcc
-configure:2545: checking for C compiler version
-configure:2552: gcc --version >&5
+configure:1750: checking for a BSD-compatible install
+configure:1806: result: /usr/bin/install -c
+configure:1817: checking whether build environment is sane
+configure:1860: result: yes
+configure:1925: checking for gawk
+configure:1941: found /usr/bin/gawk
+configure:1952: result: gawk
+configure:1963: checking whether make sets $(MAKE)
+configure:1984: result: yes
+configure:2180: checking for style of include used by make
+configure:2208: result: GNU
+configure:2281: checking for gcc
+configure:2297: found /usr/local/bin/gcc
+configure:2308: result: gcc
+configure:2546: checking for C compiler version
+configure:2553: gcc --version >&5
 gcc (GCC) 4.1.1
 Copyright (C) 2006 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-configure:2555: $? = 0
-configure:2562: gcc -v >&5
+configure:2556: $? = 0
+configure:2563: gcc -v >&5
 Using built-in specs.
 Target: i686-pc-linux-gnu
 Configured with: ./configure 
 Thread model: posix
 gcc version 4.1.1
-configure:2565: $? = 0
-configure:2572: gcc -V >&5
+configure:2566: $? = 0
+configure:2573: gcc -V >&5
 gcc: '-V' option must have argument
-configure:2575: $? = 1
-configure:2598: checking for C compiler default output file name
-configure:2625: gcc    conftest.c  >&5
-configure:2628: $? = 0
-configure:2666: result: a.out
-configure:2683: checking whether the C compiler works
-configure:2693: ./a.out
-configure:2696: $? = 0
-configure:2713: result: yes
-configure:2720: checking whether we are cross compiling
-configure:2722: result: no
-configure:2725: checking for suffix of executables
-configure:2732: gcc -o conftest    conftest.c  >&5
-configure:2735: $? = 0
-configure:2759: result: 
-configure:2765: checking for suffix of object files
-configure:2791: gcc -c   conftest.c >&5
-configure:2794: $? = 0
-configure:2817: result: o
-configure:2821: checking whether we are using the GNU C compiler
-configure:2850: gcc -c   conftest.c >&5
-configure:2856: $? = 0
-configure:2873: result: yes
-configure:2878: checking whether gcc accepts -g
-configure:2908: gcc -c -g  conftest.c >&5
-configure:2914: $? = 0
-configure:3013: result: yes
-configure:3030: checking for gcc option to accept ISO C89
-configure:3104: gcc  -c -g -O2  conftest.c >&5
-configure:3110: $? = 0
-configure:3133: result: none needed
-configure:3153: checking dependency style of gcc
-configure:3243: result: gcc3
-configure:3266: checking how to run the C preprocessor
-configure:3306: gcc -E  conftest.c
-configure:3312: $? = 0
-configure:3343: gcc -E  conftest.c
+configure:2576: $? = 1
+configure:2599: checking for C compiler default output file name
+configure:2626: gcc    conftest.c  >&5
+configure:2629: $? = 0
+configure:2667: result: a.out
+configure:2684: checking whether the C compiler works
+configure:2694: ./a.out
+configure:2697: $? = 0
+configure:2714: result: yes
+configure:2721: checking whether we are cross compiling
+configure:2723: result: no
+configure:2726: checking for suffix of executables
+configure:2733: gcc -o conftest    conftest.c  >&5
+configure:2736: $? = 0
+configure:2760: result: 
+configure:2766: checking for suffix of object files
+configure:2792: gcc -c   conftest.c >&5
+configure:2795: $? = 0
+configure:2818: result: o
+configure:2822: checking whether we are using the GNU C compiler
+configure:2851: gcc -c   conftest.c >&5
+configure:2857: $? = 0
+configure:2874: result: yes
+configure:2879: checking whether gcc accepts -g
+configure:2909: gcc -c -g  conftest.c >&5
+configure:2915: $? = 0
+configure:3014: result: yes
+configure:3031: checking for gcc option to accept ISO C89
+configure:3105: gcc  -c -g -O2  conftest.c >&5
+configure:3111: $? = 0
+configure:3134: result: none needed
+configure:3154: checking dependency style of gcc
+configure:3244: result: gcc3
+configure:3267: checking how to run the C preprocessor
+configure:3307: gcc -E  conftest.c
+configure:3313: $? = 0
+configure:3344: gcc -E  conftest.c
 conftest.c:10:28: error: ac_nonexistent.h: No such file or directory
-configure:3349: $? = 1
+configure:3350: $? = 1
 configure: failed program was:
 | /* confdefs.h.  */
 | #define PACKAGE_NAME "nrepeater"
@@ -123,12 +123,12 @@ configure: failed program was:
 | #define VERSION "0.1.1"
 | /* end confdefs.h.  */
 | #include <ac_nonexistent.h>
-configure:3382: result: gcc -E
-configure:3411: gcc -E  conftest.c
-configure:3417: $? = 0
-configure:3448: gcc -E  conftest.c
+configure:3383: result: gcc -E
+configure:3412: gcc -E  conftest.c
+configure:3418: $? = 0
+configure:3449: gcc -E  conftest.c
 conftest.c:10:28: error: ac_nonexistent.h: No such file or directory
-configure:3454: $? = 1
+configure:3455: $? = 1
 configure: failed program was:
 | /* confdefs.h.  */
 | #define PACKAGE_NAME "nrepeater"
@@ -140,62 +140,66 @@ configure: failed program was:
 | #define VERSION "0.1.1"
 | /* end confdefs.h.  */
 | #include <ac_nonexistent.h>
-configure:3492: checking for grep that handles long lines and -e
-configure:3566: result: /bin/grep
-configure:3571: checking for egrep
-configure:3649: result: /bin/grep -E
-configure:3654: checking for ANSI C header files
-configure:3684: gcc -c -g -O2  conftest.c >&5
-configure:3690: $? = 0
-configure:3789: gcc -o conftest -g -O2   conftest.c  >&5
-configure:3792: $? = 0
-configure:3798: ./conftest
-configure:3801: $? = 0
-configure:3818: result: yes
-configure:3886: checking for g++
-configure:3902: found /usr/local/bin/g++
-configure:3913: result: g++
-configure:3944: checking for C++ compiler version
-configure:3951: g++ --version >&5
+configure:3493: checking for grep that handles long lines and -e
+configure:3567: result: /bin/grep
+configure:3572: checking for egrep
+configure:3650: result: /bin/grep -E
+configure:3655: checking for ANSI C header files
+configure:3685: gcc -c -g -O2  conftest.c >&5
+configure:3691: $? = 0
+configure:3790: gcc -o conftest -g -O2   conftest.c  >&5
+configure:3793: $? = 0
+configure:3799: ./conftest
+configure:3802: $? = 0
+configure:3819: result: yes
+configure:3887: checking for g++
+configure:3903: found /usr/local/bin/g++
+configure:3914: result: g++
+configure:3945: checking for C++ compiler version
+configure:3952: g++ --version >&5
 g++ (GCC) 4.1.1
 Copyright (C) 2006 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-configure:3954: $? = 0
-configure:3961: g++ -v >&5
+configure:3955: $? = 0
+configure:3962: g++ -v >&5
 Using built-in specs.
 Target: i686-pc-linux-gnu
 Configured with: ./configure 
 Thread model: posix
 gcc version 4.1.1
-configure:3964: $? = 0
-configure:3971: g++ -V >&5
+configure:3965: $? = 0
+configure:3972: g++ -V >&5
 g++: '-V' option must have argument
-configure:3974: $? = 1
-configure:3977: checking whether we are using the GNU C++ compiler
-configure:4006: g++ -c   conftest.cpp >&5
-configure:4012: $? = 0
-configure:4029: result: yes
-configure:4034: checking whether g++ accepts -g
-configure:4064: g++ -c -g  conftest.cpp >&5
-configure:4070: $? = 0
-configure:4169: result: yes
-configure:4194: checking dependency style of g++
-configure:4284: result: gcc3
-configure:4356: checking for sf_open in -lsndfile
-configure:4391: g++ -o conftest -g -Wall -O0   conftest.cpp -lsndfile   >&5
-configure:4397: $? = 0
-configure:4415: result: yes
-configure:4438: checking for pin_init_user in -lparapin
-configure:4473: g++ -o conftest -g -Wall -O0   conftest.cpp -lparapin  -lsndfile  >&5
-configure:4479: $? = 0
-configure:4497: result: yes
-configure:4675: creating ./config.status
-configure:5736: result: 
-configure:5738: result: WOOOOOOOO success! ;)
-configure:5740: result: Now you can type make to compile nrepeater.
-configure:5742: result: 
+configure:3975: $? = 1
+configure:3978: checking whether we are using the GNU C++ compiler
+configure:4007: g++ -c   conftest.cpp >&5
+configure:4013: $? = 0
+configure:4030: result: yes
+configure:4035: checking whether g++ accepts -g
+configure:4065: g++ -c -g  conftest.cpp >&5
+configure:4071: $? = 0
+configure:4170: result: yes
+configure:4195: checking dependency style of g++
+configure:4285: result: gcc3
+configure:4369: checking for sf_open in -lsndfile
+configure:4404: g++ -o conftest -g -Wall -O0   conftest.cpp -lsndfile   >&5
+configure:4410: $? = 0
+configure:4428: result: yes
+configure:4451: checking for pin_init_user in -lparapin
+configure:4486: g++ -o conftest -g -Wall -O0   conftest.cpp -lparapin  -lsndfile  >&5
+configure:4492: $? = 0
+configure:4510: result: yes
+configure:4533: checking for gsm_create in -lgsm
+configure:4568: g++ -o conftest -g -Wall -O0   conftest.cpp -lgsm  -lparapin -lsndfile  >&5
+configure:4574: $? = 0
+configure:4592: result: yes
+configure:4770: creating ./config.status
+configure:5831: result: 
+configure:5833: result: WOOOOOOOO success! ;)
+configure:5835: result: Now you can type make to compile nrepeater.
+configure:5837: result: 
 
 ## ---------------- ##
 ## Cache variables. ##
@@ -228,6 +232,7 @@ ac_cv_env_host_alias_value=
 ac_cv_env_target_alias_set=
 ac_cv_env_target_alias_value=
 ac_cv_header_stdc=yes
+ac_cv_lib_gsm_gsm_create=yes
 ac_cv_lib_parapin_pin_init_user=yes
 ac_cv_lib_sndfile_sf_open=yes
 ac_cv_objext=o
@@ -267,7 +272,7 @@ CXX='g++'
 CXXDEPMODE='depmode=gcc3'
 CXXFLAGS='-g -Wall -O0'
 CYGPATH_W='echo'
-DEFS='-DPACKAGE_NAME=\"nrepeater\" -DPACKAGE_TARNAME=\"nrepeater\" -DPACKAGE_VERSION=\"0.1.1\" -DPACKAGE_STRING=\"nrepeater\ 0.1.1\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"nrepeater\" -DVERSION=\"0.1.1\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBSNDFILE=1 -DHAVE_LIBPARAPIN=1'
+DEFS='-DPACKAGE_NAME=\"nrepeater\" -DPACKAGE_TARNAME=\"nrepeater\" -DPACKAGE_VERSION=\"0.1.1\" -DPACKAGE_STRING=\"nrepeater\ 0.1.1\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"nrepeater\" -DVERSION=\"0.1.1\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBSNDFILE=1 -DHAVE_LIBPARAPIN=1 -DHAVE_LIBGSM=1'
 DEPDIR='.deps'
 ECHO_C=''
 ECHO_N='-n'
@@ -281,7 +286,7 @@ INSTALL_SCRIPT='${INSTALL}'
 INSTALL_STRIP_PROGRAM='${SHELL} $(install_sh) -c -s'
 LDFLAGS=''
 LIBOBJS=''
-LIBS='-lparapin -lsndfile '
+LIBS='-lgsm -lparapin -lsndfile '
 LTLIBOBJS=''
 MAKEINFO='${SHELL} /home/nonoo/nrepeater/missing --run makeinfo'
 OBJEXT='o'
@@ -350,6 +355,7 @@ target_alias=''
 #define DEBUG 1
 #define HAVE_LIBSNDFILE 1
 #define HAVE_LIBPARAPIN 1
+#define HAVE_LIBGSM 1
 
 configure: exit 0
 
@@ -371,76 +377,4 @@ on puttony-ng
 config.status:624: creating Makefile
 config.status:624: creating src/Makefile
 config.status:624: creating conf/Makefile
-config.status:809: executing depfiles commands
-
-## ---------------------- ##
-## Running config.status. ##
-## ---------------------- ##
-
-This file was extended by nrepeater config.status 0.1.1, which was
-generated by GNU Autoconf 2.61.  Invocation command line was
-
-  CONFIG_FILES    = 
-  CONFIG_HEADERS  = 
-  CONFIG_LINKS    = 
-  CONFIG_COMMANDS = 
-  $ ./config.status src/Makefile depfiles
-
-on puttony-ng
-
-config.status:624: creating src/Makefile
-config.status:809: executing depfiles commands
-
-## ---------------------- ##
-## Running config.status. ##
-## ---------------------- ##
-
-This file was extended by nrepeater config.status 0.1.1, which was
-generated by GNU Autoconf 2.61.  Invocation command line was
-
-  CONFIG_FILES    = 
-  CONFIG_HEADERS  = 
-  CONFIG_LINKS    = 
-  CONFIG_COMMANDS = 
-  $ ./config.status src/Makefile depfiles
-
-on puttony-ng
-
-config.status:624: creating src/Makefile
-config.status:809: executing depfiles commands
-
-## ---------------------- ##
-## Running config.status. ##
-## ---------------------- ##
-
-This file was extended by nrepeater config.status 0.1.1, which was
-generated by GNU Autoconf 2.61.  Invocation command line was
-
-  CONFIG_FILES    = 
-  CONFIG_HEADERS  = 
-  CONFIG_LINKS    = 
-  CONFIG_COMMANDS = 
-  $ ./config.status src/Makefile depfiles
-
-on puttony-ng
-
-config.status:624: creating src/Makefile
-config.status:809: executing depfiles commands
-
-## ---------------------- ##
-## Running config.status. ##
-## ---------------------- ##
-
-This file was extended by nrepeater config.status 0.1.1, which was
-generated by GNU Autoconf 2.61.  Invocation command line was
-
-  CONFIG_FILES    = 
-  CONFIG_HEADERS  = 
-  CONFIG_LINKS    = 
-  CONFIG_COMMANDS = 
-  $ ./config.status src/Makefile depfiles
-
-on puttony-ng
-
-config.status:624: creating src/Makefile
 config.status:809: executing depfiles commands

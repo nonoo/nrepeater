@@ -49,6 +49,15 @@ AC_ARG_WITH(parapin-dir,
 	LDFLAGS="$LDFLAGS -R${withval}/lib"
     fi
 ])
+AC_ARG_WITH(gsm-dir,
+    AC_HELP_STRING([--with-gsm-dir=PATH],[path to libgsm installation]),
+[
+    CXXFLAGS="$CXXFLAGS -I${withval}/include"
+    LDFLAGS="$LDFLAGS -L${withval}/lib"
+    if test -n "${need_dash_r}"; then
+	LDFLAGS="$LDFLAGS -R${withval}/lib"
+    fi
+])
 
 dnl AC_MSG_CHECKING([for librudeconfig])
 dnl LIBS="$LIBS -lrudeconfig"
@@ -86,6 +95,16 @@ AC_CHECK_LIB([parapin], [pin_init_user], [], [
     echo
     echo "Or you can specify libparapin installation directory this way:"
     echo "./configure --with-parapin-dir=PATH"
+    echo
+    exit
+])
+AC_CHECK_LIB([gsm], [gsm_create], [], [
+    echo
+    echo "You need to have libgsm installed on your system!"
+    echo "You can download it from http://kbs.cs.tu-berlin.de/~jutta/toast.html"
+    echo
+    echo "Or you can specify libgsm installation directory this way:"
+    echo "./configure --with-gsm-dir=PATH"
     echo
     exit
 ])

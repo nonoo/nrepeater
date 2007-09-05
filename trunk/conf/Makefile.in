@@ -138,7 +138,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-pkgdata_DATA = nrepeater.conf
+pkgdata_DATA = nrepeater.conf beep.wav
 EXTRA_DIST = $(pkgdata_DATA)
 all: all-am
 

@@ -193,10 +193,26 @@ void CLoop::Start()
 	    {
 		int nCompFramesOut;
 		short* pCompOut = m_pCompressor->process( m_pBuffer, m_nFramesRead, nCompFramesOut );
-		if( pCompOut != NULL ) { g_SNDCardOut->Write( pCompOut, nCompFramesOut ); }
+
+		// if there's an error, we play the original sample
+		if( pCompOut == NULL )
+		{
+		    pCompOut = m_pBuffer;
+		    nCompFramesOut = m_nFramesRead;
+		}
+
+		if( g_MainConfig.GetInt( "archiver", "enabled", 1 ) )
+		{
+		    m_Archiver.write( pCompOut, nCompFramesOut );
+		}
+		g_SNDCardOut->Write( pCompOut, nCompFramesOut );
 	    }
 	    else
 	    {
+		if( g_MainConfig.GetInt( "archiver", "enabled", 1 ) )
+		{
+		    m_Archiver.write( m_pBuffer, m_nFramesRead );
+		}
 		g_SNDCardOut->Write( m_pBuffer, m_nFramesRead );
 	    }
 	}

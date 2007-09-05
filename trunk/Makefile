@@ -36,7 +36,7 @@ POST_UNINSTALL = :
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/configure AUTHORS COPYING \
-	ChangeLog INSTALL NEWS depcomp install-sh missing
+	ChangeLog INSTALL NEWS TODO depcomp install-sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -84,7 +84,7 @@ CXX = g++
 CXXDEPMODE = depmode=gcc3
 CXXFLAGS = -g -Wall -O0
 CYGPATH_W = echo
-DEFS = -DPACKAGE_NAME=\"nrepeater\" -DPACKAGE_TARNAME=\"nrepeater\" -DPACKAGE_VERSION=\"0.1.1\" -DPACKAGE_STRING=\"nrepeater\ 0.1.1\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"nrepeater\" -DVERSION=\"0.1.1\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBSNDFILE=1 -DHAVE_LIBPARAPIN=1
+DEFS = -DPACKAGE_NAME=\"nrepeater\" -DPACKAGE_TARNAME=\"nrepeater\" -DPACKAGE_VERSION=\"0.1.1\" -DPACKAGE_STRING=\"nrepeater\ 0.1.1\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"nrepeater\" -DVERSION=\"0.1.1\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBSNDFILE=1 -DHAVE_LIBPARAPIN=1 -DHAVE_LIBGSM=1
 DEPDIR = .deps
 ECHO_C = 
 ECHO_N = -n
@@ -98,7 +98,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lparapin -lsndfile 
+LIBS = -lgsm -lparapin -lsndfile 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/nonoo/nrepeater/missing --run makeinfo
 OBJEXT = o
