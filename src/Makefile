@@ -49,7 +49,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_nrepeater_OBJECTS = Main.$(OBJEXT) Log.$(OBJEXT) ParPort.$(OBJEXT) \
 	Loop.$(OBJEXT) SettingsFile.$(OBJEXT) SNDCard.$(OBJEXT) \
 	WavFile.$(OBJEXT) Compressor.$(OBJEXT) ArchiveFile.$(OBJEXT) \
-	GSMCodec.$(OBJEXT)
+	Archiver.$(OBJEXT) GSMCodec.$(OBJEXT)
 nrepeater_OBJECTS = $(am_nrepeater_OBJECTS)
 nrepeater_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -86,7 +86,7 @@ CXX = g++
 CXXDEPMODE = depmode=gcc3
 CXXFLAGS = -g -Wall -O0
 CYGPATH_W = echo
-DEFS = -DPACKAGE_NAME=\"nrepeater\" -DPACKAGE_TARNAME=\"nrepeater\" -DPACKAGE_VERSION=\"0.1.1\" -DPACKAGE_STRING=\"nrepeater\ 0.1.1\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"nrepeater\" -DVERSION=\"0.1.1\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBSNDFILE=1 -DHAVE_LIBPARAPIN=1
+DEFS = -DPACKAGE_NAME=\"nrepeater\" -DPACKAGE_TARNAME=\"nrepeater\" -DPACKAGE_VERSION=\"0.1.1\" -DPACKAGE_STRING=\"nrepeater\ 0.1.1\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"nrepeater\" -DVERSION=\"0.1.1\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBSNDFILE=1 -DHAVE_LIBPARAPIN=1 -DHAVE_LIBGSM=1
 DEPDIR = .deps
 ECHO_C = 
 ECHO_N = -n
@@ -100,7 +100,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lparapin -lsndfile 
+LIBS = -lgsm -lparapin -lsndfile 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/nonoo/nrepeater/missing --run makeinfo
 OBJEXT = o
@@ -163,6 +163,7 @@ nrepeater_SOURCES = \
 	WavFile.cpp WavFile.h \
 	Compressor.cpp Compressor.h \
 	ArchiveFile.cpp ArchiveFile.h \
+	Archiver.cpp Archiver.h \
 	GSMCodec.cpp GSMCodec.h
 
 all: all-am
@@ -232,6 +233,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/ArchiveFile.Po
+include ./$(DEPDIR)/Archiver.Po
 include ./$(DEPDIR)/Compressor.Po
 include ./$(DEPDIR)/GSMCodec.Po
 include ./$(DEPDIR)/Log.Po
