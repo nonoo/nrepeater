@@ -23,12 +23,15 @@
 class CWavFile
 {
 public:
+    CWavFile();
     ~CWavFile();
 
-    void	init();
-    void	close();
-    void	load( std::string sFile );
+    void	openForWrite( std::string sFile, int nSampleRate, int nChannels, int nFormat );
+    int		write( short* pData, int nFramesNum );
+    void	loadToMemory( std::string sFile );
     bool	isLoaded();
+    void	close();
+    void	rewind();
     short*	play( int nBufferSize, int& nFramesRead );
     short*	getWaveData( int& nLength );
     int		getSampleRate();

@@ -27,11 +27,11 @@
 class CCompressor
 {
 public:
-    short* Process( short* pBuffer, int nFramesIn, int& nFramesOut );
-    void doCalcRMSVolume();
-
     CCompressor( int nSNDCardRate, int nSNDCardBufferSize );
     ~CCompressor();
+
+    short*	process( short* pBuffer, int nFramesIn, int& nFramesOut );
+    void	flush();
 
 private:
     int		doCompress();

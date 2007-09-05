@@ -115,7 +115,7 @@ int main( int argc, char* argv[] )
     // loading roger beep wave file
     if( g_MainConfig.GetInt( "rogerbeep", "enabled", 1 ) )
     {
-	g_RogerBeep.load( g_MainConfig.Get( "rogerbeep", "file", "beep.wav" ) );
+	g_RogerBeep.loadToMemory( g_MainConfig.Get( "rogerbeep", "file", "beep.wav" ) );
 	if( g_RogerBeep.getSampleRate() != g_SNDCardOut->getSampleRate() )
 	{
 	    char errstr[100];
