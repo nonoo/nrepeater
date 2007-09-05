@@ -43,10 +43,15 @@ void CWavFile::openForWrite( string sFile, int nSampleRate, int nChannels, int n
     {
 	char errstr[100];
 	sf_error_str( m_pSNDFILE, errstr, 100 );
-	g_Log.Warning( "can't open wav file for writing" + sFile + ": " + errstr + "\n" );
+	g_Log.Warning( "can't open wav file for writing " + sFile + ": " + errstr + "\n" );
     }
 
     sf_set_string( m_pSNDFILE, SF_STR_SOFTWARE, PACKAGE );
+}
+
+bool CWavFile::isOpened()
+{
+    return ( m_pSNDFILE != NULL ? true : false );
 }
 
 int CWavFile::write( short* pData, int nFramesNum )

@@ -83,6 +83,7 @@ void CLoop::Start()
     signal( SIGALRM, onSIGALRM );
 
     m_pCompressor = new CCompressor( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getBufferSize() );
+    m_Archiver.init( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getChannelNum() );
 
     while( !g_fTerminate )
     {

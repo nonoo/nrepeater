@@ -16,7 +16,42 @@
 
 #include "Archiver.h"
 #include "Main.h"
+#include "SettingsFile.h"
+#include <sndfile.h>
+
+#include <time.h>
+
+using namespace std;
+
+extern CSettingsFile g_MainConfig;
+
+CArchiver::~CArchiver()
+{
+    m_WavFile.close();
+}
+
+void CArchiver::init( int nSampleRate, int nChannels )
+{
+    m_nSampleRate = nSampleRate;
+    m_nChannels = nChannels;
+}
 
 void CArchiver::write( short* pData, int nFramesNum )
 {
+    if( !m_WavFile.isOpened() )
+    {
+	//m_WavFile.openForWrite( g_MainConfig.Get( "archiver", "dir", "./" ) + g_MainConfig.Get( "archiver", "prefix", "log-" ) + currDate() + ".wav", m_nSampleRate, m_nChannels, SF_FORMAT_GSM610 );
+	m_WavFile.openForWrite( g_MainConfig.Get( "archiver", "dir", "./" ) + g_MainConfig.Get( "archiver", "prefix", "log-" ) + currDate() + ".wav", m_nSampleRate, m_nChannels, SF_FORMAT_WAV );
+    }
+    m_WavFile.write( pData, nFramesNum );
+}
+
+// returns current time in ymd format
+string CArchiver::currDate()
+{
+    char tmp[50];
+    time_t t = time( NULL );
+    struct tm *tmpt = localtime( &t );
+    strftime( tmp, 50, "%y%m%d", tmpt );
+    return tmp;
 }
