@@ -28,6 +28,7 @@ public:
 
     void	openForWrite( std::string sFile, int nSampleRate, int nChannels, int nFormat );
     int		write( short* pData, int nFramesNum );
+    bool	isOpened();
     void	loadToMemory( std::string sFile );
     bool	isLoaded();
     void	close();

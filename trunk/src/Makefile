@@ -48,8 +48,8 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_nrepeater_OBJECTS = Main.$(OBJEXT) Log.$(OBJEXT) ParPort.$(OBJEXT) \
 	Loop.$(OBJEXT) SettingsFile.$(OBJEXT) SNDCard.$(OBJEXT) \
-	WavFile.$(OBJEXT) Compressor.$(OBJEXT) ArchiveFile.$(OBJEXT) \
-	Archiver.$(OBJEXT) GSMCodec.$(OBJEXT)
+	WavFile.$(OBJEXT) Compressor.$(OBJEXT) Archiver.$(OBJEXT) \
+	GSMCodec.$(OBJEXT)
 nrepeater_OBJECTS = $(am_nrepeater_OBJECTS)
 nrepeater_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -162,7 +162,6 @@ nrepeater_SOURCES = \
 	SNDCard.cpp SNDCard.h \
 	WavFile.cpp WavFile.h \
 	Compressor.cpp Compressor.h \
-	ArchiveFile.cpp ArchiveFile.h \
 	Archiver.cpp Archiver.h \
 	GSMCodec.cpp GSMCodec.h
 
@@ -232,7 +231,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/ArchiveFile.Po
 include ./$(DEPDIR)/Archiver.Po
 include ./$(DEPDIR)/Compressor.Po
 include ./$(DEPDIR)/GSMCodec.Po

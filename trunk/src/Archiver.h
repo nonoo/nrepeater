@@ -17,14 +17,24 @@
 #ifndef __ARCHIVER_H
 #define __ARCHIVER_H
 
-#include "ArchiveFile.h"
+#include "WavFile.h"
+#include "GSMCodec.h"
 
 class CArchiver
 {
 public:
-    void write( short* pData, int nFramesNum );
+    ~CArchiver();
+
+    void	init( int nSampleRate, int nChannels );
+    void	write( short* pData, int nFramesNum );
 
 private:
+    std::string	currDate();
+
+    CWavFile	m_WavFile;
+    CGSMCodec	m_GSM;
+    int		m_nSampleRate;
+    int		m_nChannels;
 };
 
 #endif
