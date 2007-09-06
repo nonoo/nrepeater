@@ -14,5 +14,28 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "GSMCodec.h"
-#include "Main.h"
+#ifndef __OGGFILEOUTSTREAM_H
+#define __OGGFILEOUTSTREAM_H
+
+#include "OggOutStream.h"
+
+#include <ogg/ogg.h>
+#include <string>
+
+class COggFileOutStream : public COggOutStream
+{
+public:
+    COggFileOutStream( unsigned int nSerial );
+    ~COggFileOutStream();
+
+    void feedPacket( ogg_packet* m_Op, bool bFlush );
+    void open( std::string sFileName );
+    void close();
+
+private:
+    void writePage();
+
+    FILE*	m_pFile;
+};
+
+#endif

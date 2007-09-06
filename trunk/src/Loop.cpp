@@ -156,6 +156,10 @@ void CLoop::Start()
 	    }
 	    else
 	    {
+		if( g_MainConfig.GetInt( "archiver", "enabled", 1 ) )
+		{
+		    m_Archiver.write( m_pBuffer, m_nFramesRead );
+		}
 		g_SNDCardOut->Write( m_pBuffer, m_nFramesRead );
 	    }
 	}

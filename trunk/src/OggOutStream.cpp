@@ -14,37 +14,42 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __WAVFILE_H
-#define __WAVFILE_H
+#include "OggOutStream.h"
+#include "Main.h"
 
-#include <string>
-#include <sndfile.h>
-
-class CWavFile
+COggOutStream::COggOutStream( unsigned int nSerial )
 {
-public:
-    CWavFile();
-    ~CWavFile();
+    m_nSerial = nSerial;
 
-    void	openForWrite( std::string sFile, int nSampleRate, int nChannels, int nFormat );
-    int		write( short* pData, int nFramesNum );
-    int		write( char* pData, int nBytesNum );
-    bool	isOpened();
-    void	loadToMemory( std::string sFile );
-    bool	isLoaded();
-    void	close();
-    void	rewind();
-    short*	play( int nBufferSize, int& nFramesRead );
-    short*	getWaveData( int& nLength );
-    int		getSampleRate();
-    int		getChannelNum();
-    void	setVolume( int nPercent );
+    m_pStreamState = (ogg_stream_state *) malloc( sizeof( ogg_stream_state ) );
+    ogg_stream_init( m_pStreamState, nSerial );
 
-private:
-    SNDFILE*	m_pSNDFILE;
-    SF_INFO	m_SFINFO;
-    int		m_nSeek;
-    short*	m_pWave;
-};
+    m_lPacketNo = 0;
 
-#endif
+/*    m_OggPage.header = NULL;
+    m_OggPage.header_len = 0;
+    m_OggPage.body = NULL;
+    m_OggPage.body_len = 0;*/
+}
+
+COggOutStream::~COggOutStream()
+{
+    ogg_stream_destroy( m_pStreamState );
+}
+
+unsigned int COggOutStream::getSerial()
+{
+    return m_nSerial;
+}
+
+void COggOutStream::feedPacket( ogg_packet* m_Op, bool bFlush )
+{
+}
+
+void COggOutStream::open( std::string sFileName )
+{
+}
+
+void COggOutStream::close()
+{
+}

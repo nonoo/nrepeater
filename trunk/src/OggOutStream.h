@@ -14,13 +14,30 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __GSMCODEC_H
-#define __GSMCODEC_H
+#ifndef __OGGOUTSTREAM_H
+#define __OGGOUTSTREAM_H
 
-#include <gsm.h>
+#include <ogg/ogg.h>
+#include <string>
 
-class CGSMCodec
+class COggOutStream
 {
+public:
+    COggOutStream( unsigned int nSerial );
+    virtual ~COggOutStream();
+
+    virtual void feedPacket( ogg_packet* m_Op, bool bFlush );
+    virtual void open( std::string sFileName );
+    virtual void close();
+    unsigned int getSerial();
+
+protected:
+    unsigned int	m_nSerial;
+	
+    ogg_stream_state*	m_pStreamState;
+    ogg_page		m_OggPage;
+
+    long		m_lPacketNo;
 };
 
 #endif

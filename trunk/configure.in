@@ -49,8 +49,17 @@ AC_ARG_WITH(parapin-dir,
 	LDFLAGS="$LDFLAGS -R${withval}/lib"
     fi
 ])
-AC_ARG_WITH(gsm-dir,
-    AC_HELP_STRING([--with-gsm-dir=PATH],[path to libgsm installation]),
+AC_ARG_WITH(speex-dir,
+    AC_HELP_STRING([--with-speex-dir=PATH],[path to libspeex installation]),
+[
+    CXXFLAGS="$CXXFLAGS -I${withval}/include"
+    LDFLAGS="$LDFLAGS -L${withval}/lib"
+    if test -n "${need_dash_r}"; then
+	LDFLAGS="$LDFLAGS -R${withval}/lib"
+    fi
+])
+AC_ARG_WITH(ogg-dir,
+    AC_HELP_STRING([--with-ogg-dir=PATH],[path to libogg installation]),
 [
     CXXFLAGS="$CXXFLAGS -I${withval}/include"
     LDFLAGS="$LDFLAGS -L${withval}/lib"
@@ -98,13 +107,23 @@ AC_CHECK_LIB([parapin], [pin_init_user], [], [
     echo
     exit
 ])
-AC_CHECK_LIB([gsm], [gsm_create], [], [
+AC_CHECK_LIB([speex], [speex_encoder_init], [], [
     echo
-    echo "You need to have libgsm installed on your system!"
-    echo "You can download it from http://kbs.cs.tu-berlin.de/~jutta/toast.html"
+    echo "You need to have libspeex installed on your system!"
+    echo "You can download it from http://www.speex.org/"
     echo
-    echo "Or you can specify libgsm installation directory this way:"
-    echo "./configure --with-gsm-dir=PATH"
+    echo "Or you can specify libspeex installation directory this way:"
+    echo "./configure --with-speex-dir=PATH"
+    echo
+    exit
+])
+AC_CHECK_LIB([ogg], [ogg_stream_packetin], [], [
+    echo
+    echo "You need to have libogg installed on your system!"
+    echo "You can download it from http://www.xiph.org/"
+    echo
+    echo "Or you can specify libogg installation directory this way:"
+    echo "./configure --with-ogg-dir=PATH"
     echo
     exit
 ])
