@@ -1260,6 +1260,8 @@ Optional Packages:
   --with-parapin-dir=PATH path to libparapin installation
   --with-speex-dir=PATH   path to libspeex installation
   --with-ogg-dir=PATH     path to libogg installation
+  --with-samplerate-dir=PATH
+                          path to libsamplerate installation
 
 Some influential environment variables:
   CC          C compiler command
@@ -4377,6 +4379,18 @@ if test "${with_ogg_dir+set}" = set; then
 fi
 
 
+# Check whether --with-samplerate-dir was given.
+if test "${with_samplerate_dir+set}" = set; then
+  withval=$with_samplerate_dir;
+    CXXFLAGS="$CXXFLAGS -I${withval}/include"
+    LDFLAGS="$LDFLAGS -L${withval}/lib"
+    if test -n "${need_dash_r}"; then
+	LDFLAGS="$LDFLAGS -R${withval}/lib"
+    fi
+
+fi
+
+
 
 
 { echo "$as_me:$LINENO: checking for sf_open in -lsndfile" >&5
@@ -4701,6 +4715,88 @@ else
     echo
     echo "Or you can specify libogg installation directory this way:"
     echo "./configure --with-ogg-dir=PATH"
+    echo
+    exit
+
+fi
+
+
+{ echo "$as_me:$LINENO: checking for src_simple in -lsamplerate" >&5
+echo $ECHO_N "checking for src_simple in -lsamplerate... $ECHO_C" >&6; }
+if test "${ac_cv_lib_samplerate_src_simple+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsamplerate  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char src_simple ();
+int
+main ()
+{
+return src_simple ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_samplerate_src_simple=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_samplerate_src_simple=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_samplerate_src_simple" >&5
+echo "${ECHO_T}$ac_cv_lib_samplerate_src_simple" >&6; }
+if test $ac_cv_lib_samplerate_src_simple = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBSAMPLERATE 1
+_ACEOF
+
+  LIBS="-lsamplerate $LIBS"
+
+else
+
+    echo
+    echo "You need to have libsamplerate installed on your system!"
+    echo "You can download it from http://www.mega-nerd.com/SRC/"
+    echo
+    echo "Or you can specify libogg installation directory this way:"
+    echo "./configure --with-samplerate-dir=PATH"
     echo
     exit
 

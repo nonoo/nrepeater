@@ -67,6 +67,15 @@ AC_ARG_WITH(ogg-dir,
 	LDFLAGS="$LDFLAGS -R${withval}/lib"
     fi
 ])
+AC_ARG_WITH(samplerate-dir,
+    AC_HELP_STRING([--with-samplerate-dir=PATH],[path to libsamplerate installation]),
+[
+    CXXFLAGS="$CXXFLAGS -I${withval}/include"
+    LDFLAGS="$LDFLAGS -L${withval}/lib"
+    if test -n "${need_dash_r}"; then
+	LDFLAGS="$LDFLAGS -R${withval}/lib"
+    fi
+])
 
 dnl AC_MSG_CHECKING([for librudeconfig])
 dnl LIBS="$LIBS -lrudeconfig"
@@ -124,6 +133,16 @@ AC_CHECK_LIB([ogg], [ogg_stream_packetin], [], [
     echo
     echo "Or you can specify libogg installation directory this way:"
     echo "./configure --with-ogg-dir=PATH"
+    echo
+    exit
+])
+AC_CHECK_LIB([samplerate], [src_simple], [], [
+    echo
+    echo "You need to have libsamplerate installed on your system!"
+    echo "You can download it from http://www.mega-nerd.com/SRC/"
+    echo
+    echo "Or you can specify libogg installation directory this way:"
+    echo "./configure --with-samplerate-dir=PATH"
     echo
     exit
 ])

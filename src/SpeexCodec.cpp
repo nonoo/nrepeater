@@ -81,7 +81,7 @@ void CSpeexCodec::initEncode( COggOutStream* pOgg, int nSampleRate, int nChannel
 
     // setting encoder options
     int tmp = nBitRate;
-    //speex_encoder_ctl( m_pState, SPEEX_SET_ABR, &tmp);
+    speex_encoder_ctl( m_pState, SPEEX_SET_ABR, &tmp);
     speex_encoder_ctl( m_pState, SPEEX_SET_BITRATE, &tmp);
     tmp = 1;
     speex_encoder_ctl( m_pState, SPEEX_SET_VBR, &tmp);
@@ -169,7 +169,7 @@ void CSpeexCodec::encode( short* pData, int nFramesNum )
 	speex_bits_reset( &m_spxBits );
 	speex_encode_int( m_pState, pData + nDataPos, &m_spxBits );
 	nDataPos += m_nFrameSize;
-	unsigned int nBytesOut = speex_bits_write( &m_spxBits, m_pOut, m_nFrameSize * 2 );
+	/*unsigned int nBytesOut = speex_bits_write( &m_spxBits, m_pOut, m_nFrameSize * 2 );
 
 	m_Op.packet = (unsigned char*)m_pOut;
 	m_Op.bytes = nBytesOut;
@@ -178,7 +178,11 @@ void CSpeexCodec::encode( short* pData, int nFramesNum )
 	m_Op.granulepos = ++m_lGranulePos;
 	m_Op.granulepos = -1;
 
-	m_pOgg->feedPacket( &m_Op, false );
+	int tmp;
+	speex_encoder_ctl( m_pState, SPEEX_GET_BITRATE, &tmp );
+	cout << tmp << endl;
+
+	m_pOgg->feedPacket( &m_Op, false );*/
 
     } while( nDataPos < nFramesNum );
 }
