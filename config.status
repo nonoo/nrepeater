@@ -508,11 +508,11 @@ s,@psdir@,|#_!!_#|${docdir},g
 s,@libdir@,|#_!!_#|${exec_prefix}/lib,g
 s,@localedir@,|#_!!_#|${datarootdir}/locale,g
 s,@mandir@,|#_!!_#|${datarootdir}/man,g
-s,@DEFS@,|#_!!_#|-DPACKAGE_NAME=\\"nrepeater\\" -DPACKAGE_TARNAME=\\"nrepeater\\" -DPACKAGE_VERSION=\\"0.1.1\\" -DPACKAGE_STRING=\\"nrepeater\\ 0.1.1\\" -DPACKAGE_BUGREPORT=\\"\\" -DPACKAGE=\\"nrepeater\\" -DVERSION=\\"0.1.1\\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBSNDFILE=1 -DHAVE_LIBPARAPIN=1 -DHAVE_LIBGSM=1,g
+s,@DEFS@,|#_!!_#|-DPACKAGE_NAME=\\"nrepeater\\" -DPACKAGE_TARNAME=\\"nrepeater\\" -DPACKAGE_VERSION=\\"0.1.1\\" -DPACKAGE_STRING=\\"nrepeater\\ 0.1.1\\" -DPACKAGE_BUGREPORT=\\"\\" -DPACKAGE=\\"nrepeater\\" -DVERSION=\\"0.1.1\\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBSNDFILE=1 -DHAVE_LIBPARAPIN=1 -DHAVE_LIBSPEEX=1 -DHAVE_LIBOGG=1,g
 s,@ECHO_C@,|#_!!_#|,g
 s,@ECHO_N@,|#_!!_#|-n,g
 s,@ECHO_T@,|#_!!_#|,g
-s,@LIBS@,|#_!!_#|-lgsm -lparapin -lsndfile ,g
+s,@LIBS@,|#_!!_#|-logg -lspeex -lparapin -lsndfile ,g
 s,@build_alias@,|#_!!_#|,g
 s,@host_alias@,|#_!!_#|,g
 s,@target_alias@,|#_!!_#|,g

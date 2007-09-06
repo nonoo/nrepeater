@@ -49,7 +49,8 @@ PROGRAMS = $(bin_PROGRAMS)
 am_nrepeater_OBJECTS = Main.$(OBJEXT) Log.$(OBJEXT) ParPort.$(OBJEXT) \
 	Loop.$(OBJEXT) SettingsFile.$(OBJEXT) SNDCard.$(OBJEXT) \
 	WavFile.$(OBJEXT) Compressor.$(OBJEXT) Archiver.$(OBJEXT) \
-	GSMCodec.$(OBJEXT)
+	SpeexCodec.$(OBJEXT) OggOutStream.$(OBJEXT) \
+	OggFileOutStream.$(OBJEXT)
 nrepeater_OBJECTS = $(am_nrepeater_OBJECTS)
 nrepeater_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -163,7 +164,9 @@ nrepeater_SOURCES = \
 	WavFile.cpp WavFile.h \
 	Compressor.cpp Compressor.h \
 	Archiver.cpp Archiver.h \
-	GSMCodec.cpp GSMCodec.h
+	SpeexCodec.cpp SpeexCodec.h \
+	OggOutStream.cpp OggOutStream.h \
+	OggFileOutStream.cpp OggFileOutStream.h
 
 all: all-am
 
@@ -233,13 +236,15 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Archiver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Compressor.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GSMCodec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Log.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Loop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OggFileOutStream.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OggOutStream.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ParPort.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SNDCard.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SettingsFile.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SpeexCodec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WavFile.Po@am__quote@
 
 .cpp.o:

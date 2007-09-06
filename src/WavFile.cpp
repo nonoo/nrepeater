@@ -46,7 +46,7 @@ void CWavFile::openForWrite( string sFile, int nSampleRate, int nChannels, int n
 	g_Log.Warning( "can't open wav file for writing " + sFile + ": " + errstr + "\n" );
     }
 
-    sf_set_string( m_pSNDFILE, SF_STR_SOFTWARE, PACKAGE );
+    sf_set_string( m_pSNDFILE, SF_STR_SOFTWARE, PACKAGE_STRING );
 }
 
 bool CWavFile::isOpened()
@@ -64,6 +64,16 @@ int CWavFile::write( short* pData, int nFramesNum )
     return sf_write_short( m_pSNDFILE, pData, nFramesNum );
 }
 
+int CWavFile::write( char* pData, int nBytesNum )
+{
+    if( m_pSNDFILE == NULL )
+    {
+	return -1;
+    }
+
+    return sf_write_raw( m_pSNDFILE, pData, nBytesNum );
+}
+
 void CWavFile::loadToMemory( string sFile )
 {
     close();
@@ -78,7 +88,7 @@ void CWavFile::loadToMemory( string sFile )
     }
 
     // loading wave data to memory
-    m_pWave = new short[ m_SFINFO.frames ];
+    m_pWave = new short[ m_SFINFO.frames + 200 ]; // without + 200 there's a SIGSEGV when freeing
     if( sf_read_short( m_pSNDFILE, m_pWave, m_SFINFO.frames ) < m_SFINFO.frames )
     {
 	char errstr[100];

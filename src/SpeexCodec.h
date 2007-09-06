@@ -14,37 +14,41 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __WAVFILE_H
-#define __WAVFILE_H
+#ifndef __SPEEXCODEC_H
+#define __SPEEXCODEC_H
 
-#include <string>
-#include <sndfile.h>
+#include <speex/speex.h>
+#include <speex/speex_preprocess.h>
+#include <ogg/ogg.h>
 
-class CWavFile
+#include "OggOutStream.h"
+
+class CSpeexCodec
 {
 public:
-    CWavFile();
-    ~CWavFile();
+    CSpeexCodec();
+    ~CSpeexCodec();
 
-    void	openForWrite( std::string sFile, int nSampleRate, int nChannels, int nFormat );
-    int		write( short* pData, int nFramesNum );
-    int		write( char* pData, int nBytesNum );
-    bool	isOpened();
-    void	loadToMemory( std::string sFile );
-    bool	isLoaded();
-    void	close();
-    void	rewind();
-    short*	play( int nBufferSize, int& nFramesRead );
-    short*	getWaveData( int& nLength );
-    int		getSampleRate();
-    int		getChannelNum();
-    void	setVolume( int nPercent );
+    void	initEncode( COggOutStream* pOGG, int nSampleRate, int nChannels, int nBitrate );
+    void	destroy();
+    void	encode( short* pData, int nFramesNum  );
 
 private:
-    SNDFILE*	m_pSNDFILE;
-    SF_INFO	m_SFINFO;
-    int		m_nSeek;
-    short*	m_pWave;
+    void	generateHeader();
+    void	generateComment();
+
+    int				m_nSampleRate;
+    int				m_nChannels;
+    SpeexBits			m_spxBits;
+    void*			m_pState;
+    int				m_nFrameSize;
+    char*			m_pOut;
+    SpeexPreprocessState*	m_pPreProcState;
+    long			m_lSerialNo;
+    ogg_packet			m_Op;
+    long			m_lGranulePos;
+    COggOutStream*		m_pOgg;
+    bool			m_bDecoder;
 };
 
 #endif

@@ -18,7 +18,8 @@
 #define __ARCHIVER_H
 
 #include "WavFile.h"
-#include "GSMCodec.h"
+#include "SpeexCodec.h"
+#include "OggFileOutStream.h"
 
 class CArchiver
 {
@@ -31,10 +32,11 @@ public:
 private:
     std::string	currDate();
 
-    CWavFile	m_WavFile;
-    CGSMCodec	m_GSM;
-    int		m_nSampleRate;
-    int		m_nChannels;
+    COggFileOutStream*	m_pOgg;
+    long		m_lSerialNo;
+    CSpeexCodec		m_SpeexCodec;
+    int			m_nSampleRate;
+    int			m_nChannels;
 };
 
 #endif

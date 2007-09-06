@@ -27,7 +27,7 @@ extern CSettingsFile g_MainConfig;
 
 CArchiver::~CArchiver()
 {
-    m_WavFile.close();
+    SAFE_DELETE( m_pOgg );
 }
 
 void CArchiver::init( int nSampleRate, int nChannels )
@@ -38,12 +38,15 @@ void CArchiver::init( int nSampleRate, int nChannels )
 
 void CArchiver::write( short* pData, int nFramesNum )
 {
-    if( !m_WavFile.isOpened() )
+    if( m_pOgg == NULL )
     {
-	//m_WavFile.openForWrite( g_MainConfig.Get( "archiver", "dir", "./" ) + g_MainConfig.Get( "archiver", "prefix", "log-" ) + currDate() + ".wav", m_nSampleRate, m_nChannels, SF_FORMAT_GSM610 );
-	m_WavFile.openForWrite( g_MainConfig.Get( "archiver", "dir", "./" ) + g_MainConfig.Get( "archiver", "prefix", "log-" ) + currDate() + ".wav", m_nSampleRate, m_nChannels, SF_FORMAT_WAV );
+	m_SpeexCodec.destroy();
+	m_pOgg = new COggFileOutStream( 0 );
+	m_pOgg->open( string( g_MainConfig.Get( "archiver", "dir", "./" ) + g_MainConfig.Get( "archiver", "prefix", "log-" ) + currDate() + ".spx" ).c_str() );
+	m_SpeexCodec.initEncode( m_pOgg, m_nSampleRate, m_nChannels, g_MainConfig.GetInt( "archiver", "bitrate", 10000 ) );
     }
-    m_WavFile.write( pData, nFramesNum );
+
+    m_SpeexCodec.encode( pData, nFramesNum );
 }
 
 // returns current time in ymd format
