@@ -49,6 +49,10 @@ private:
     long			m_lGranulePos;
     COggOutStream*		m_pOgg;
     bool			m_bDecoder;
+
+    short*			m_pBuf;
+    int				m_nBufSize;
+    int				m_nBufStoredFramesNum;
 };
 
 #endif

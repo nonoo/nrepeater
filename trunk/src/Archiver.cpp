@@ -24,11 +24,9 @@ using namespace std;
 
 extern CSettingsFile	g_MainConfig;
 
-FILE*f=fopen("a.raw","w");
 CArchiver::~CArchiver()
 {
     SAFE_DELETE( m_pOgg );
-    fclose(f);
 }
 
 void CArchiver::init( int nSampleRate, int nChannels )
@@ -50,7 +48,6 @@ void CArchiver::write( short* pData, int nFramesNum )
     }
 
     m_SpeexCodec.encode( pData, nFramesNum );
-    fwrite( pData, 1, nFramesNum * sizeof( short ), f );
 }
 
 // returns current time in ymd format

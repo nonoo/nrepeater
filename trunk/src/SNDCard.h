@@ -49,7 +49,7 @@ private:
     int m_nChannels;
     int m_nFormat;
     unsigned int m_nFragSize;
-    bool m_fFirstTime;
+    bool m_bFirstTime;
 };
 
 #endif
