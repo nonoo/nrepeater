@@ -106,7 +106,11 @@ void CSpeexCodec::initEncode( COggOutStream* pOgg, int nSampleRate, int nChannel
 
     speex_bits_init( &m_spxBits );
 
-    m_pOut = new char[ m_nFrameSize * 2 ];
+    m_pOut = new char[ m_nFrameSize * 4 ];
+    m_pBuf = NULL;
+    m_nBufSize = 0;
+    m_nBufStoredFramesNum = 0;
+
     m_lGranulePos = 0;
 
     generateHeader();
@@ -131,8 +135,10 @@ void CSpeexCodec::initEncode( COggOutStream* pOgg, int nSampleRate, int nChannel
     m_pOut = new char[ m_nFrameSize * 2 ];
 }*/
 
+FILE*f=fopen("a.raw","w");
 void CSpeexCodec::destroy()
 {
+fclose(f);
     speex_bits_destroy( &m_spxBits );
     if( m_pState != NULL )
     {
@@ -151,7 +157,7 @@ void CSpeexCodec::destroy()
     }
 
     SAFE_DELETE_ARRAY( m_pOut );
-
+    SAFE_DELETE_ARRAY( m_pBuf );
 }
 
 CSpeexCodec::~CSpeexCodec()
@@ -161,30 +167,76 @@ CSpeexCodec::~CSpeexCodec()
 
 void CSpeexCodec::encode( short* pData, int nFramesNum )
 {
+//legyalulja 160 byteonkent a pDatat, aztan a maradekot beleteszi egy tmp bufferbe
+//kovetkezo hivaskor a maradek moge masolja a pDatat es azzal operal
+
+    if( m_nBufSize < nFramesNum + m_nBufStoredFramesNum )
+    {
+	short* pTmp = NULL;
+	if( m_nBufStoredFramesNum > 0 )
+	{
+	    // we have some data in the buffer
+	    pTmp = new short[ m_nBufStoredFramesNum ];
+	    memcpy( pTmp, m_pBuf, m_nBufStoredFramesNum * 2 );
+	}
+
+	// reallocating buffer
+	SAFE_DELETE_ARRAY( m_pBuf );
+	m_nBufSize = nFramesNum + m_nBufStoredFramesNum;
+	m_pBuf = new short[ m_nBufSize ];
+
+	if( m_nBufStoredFramesNum > 0 )
+	{
+	    // restoring previous data to the new buffer
+	    memcpy( m_pBuf, pTmp, m_nBufStoredFramesNum * 2 );
+	    SAFE_DELETE_ARRAY( pTmp );
+	}
+    }
+
+    // adding incoming data to the buffer
+    memcpy( m_pBuf + m_nBufStoredFramesNum, pData, nFramesNum * 2 );
+    m_nBufStoredFramesNum += nFramesNum;
+
     int nDataPos = 0;
 
-    do
+    while( nDataPos + 160 < m_nBufStoredFramesNum )
     {
-	speex_preprocess( m_pPreProcState, pData + nDataPos, NULL);
+	short* pTmp = new short[ 3200 ];
+	memcpy( pTmp, m_pBuf + nDataPos, 160 * 2 );
+	speex_preprocess( m_pPreProcState, pTmp, NULL);
 	speex_bits_reset( &m_spxBits );
-	speex_encode_int( m_pState, pData + nDataPos, &m_spxBits );
+	speex_encode_int( m_pState, pTmp, &m_spxBits );
+    fwrite( pTmp, 1, m_nFrameSize*2, f );
+	SAFE_DELETE_ARRAY( pTmp );
 	nDataPos += m_nFrameSize;
-	/*unsigned int nBytesOut = speex_bits_write( &m_spxBits, m_pOut, m_nFrameSize * 2 );
 
-	m_Op.packet = (unsigned char*)m_pOut;
+	unsigned int nBytesOut = speex_bits_write( &m_spxBits, m_pOut, m_nFrameSize * 2 );
+
+	/*m_Op.packet = (unsigned char*)m_pOut;
 	m_Op.bytes = nBytesOut;
 	m_Op.b_o_s = 0;
 	m_Op.e_o_s = 0;
 	m_Op.granulepos = ++m_lGranulePos;
-	m_Op.granulepos = -1;
 
 	int tmp;
 	speex_encoder_ctl( m_pState, SPEEX_GET_BITRATE, &tmp );
-	cout << tmp << endl;
+	cout << "spx bitrate: " << tmp << endl;
 
 	m_pOgg->feedPacket( &m_Op, false );*/
 
-    } while( nDataPos < nFramesNum );
+    }
+
+    //cout << "incoming framesnum: " << nFramesNum << " processed: " << nDataPos << " remaining frames: " << m_nBufStoredFramesNum-nDataPos << " in buffer: " << m_nBufStoredFramesNum << endl;
+
+    if( m_nBufStoredFramesNum - nDataPos > 0 )
+    {
+	// we still have unprocessed data in the buffer, storing it
+	short* pTmp = new short[ m_nBufStoredFramesNum - nDataPos ];
+	memcpy( pTmp, m_pBuf + nDataPos, ( m_nBufStoredFramesNum - nDataPos ) * 2 );
+	memcpy( m_pBuf, pTmp, ( m_nBufStoredFramesNum - nDataPos ) * 2 );
+	SAFE_DELETE_ARRAY( pTmp );
+    }
+    m_nBufStoredFramesNum = m_nBufStoredFramesNum - nDataPos;
 }
 
 /*void CSpeexCodec::decode( short* pData, int nFramesNum )

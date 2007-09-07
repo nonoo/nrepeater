@@ -35,7 +35,7 @@ CSNDCard::CSNDCard( string sDevName, int nMode, int nRate, int nChannels )
     m_nMode = nMode;
     m_nFDOut = -1;
     m_nFDIn = -1;
-    m_fFirstTime = true; // for writing silence to the output for the first time
+    m_bFirstTime = true; // for writing silence to the output for the first time
 
     int fd = -1;
     switch( m_nMode )
@@ -270,7 +270,7 @@ short* CSNDCard::Read( int& nLength )
 
 void CSNDCard::Write( short* pBuffer, int nLength )
 {
-    if( m_fFirstTime)
+    if( m_bFirstTime)
     {
 	short* pSilence = new short[ m_nFragSize ];
 	memset( pSilence, 0, m_nFragSize * 2 );
@@ -280,7 +280,7 @@ void CSNDCard::Write( short* pBuffer, int nLength )
 	    exit( -1 );
         }
 	SAFE_DELETE_ARRAY( pSilence );
-	m_fFirstTime = false;
+	m_bFirstTime = false;
     }
 
     // n * 2 because we read shorts
