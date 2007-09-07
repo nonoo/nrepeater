@@ -36,6 +36,7 @@ extern CWavFile		g_RogerBeep;
 extern CSettingsFile	g_MainConfig;
 extern bool		g_fTerminate;
 
+#define SPEEX_SAMPLERATE 8000
 
 void onSIGALRM( int )
 {
@@ -83,7 +84,8 @@ void CLoop::Start()
     signal( SIGALRM, onSIGALRM );
 
     m_pCompressor = new CCompressor( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getBufferSize() );
-    m_Archiver.init( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getChannelNum() );
+    m_Resampler.init( ( 1.0 * SPEEX_SAMPLERATE ) / g_SNDCardIn->getSampleRate(), g_SNDCardOut->getChannelNum() );
+    m_Archiver.init( SPEEX_SAMPLERATE, g_SNDCardOut->getChannelNum() );
 
     while( !g_fTerminate )
     {
@@ -194,32 +196,20 @@ void CLoop::Start()
 	if( FD_ISSET( m_nFDIn, &m_fsReads) )
 	{
 	    m_pBuffer = g_SNDCardIn->Read( m_nFramesRead );
-	    if( g_MainConfig.GetInt( "compressor", "enabled", 0 ) )
-	    {
-		int nCompFramesOut;
-		short* pCompOut = m_pCompressor->process( m_pBuffer, m_nFramesRead, nCompFramesOut );
 
-		// if there's an error, we play the original sample
-		if( pCompOut == NULL )
-		{
-		    pCompOut = m_pBuffer;
-		    nCompFramesOut = m_nFramesRead;
-		}
+	    // compressing
+	    int nCompressedFramesNum = 0;
+	    short* pCompOut = m_pCompressor->process( m_pBuffer, m_nFramesRead, nCompressedFramesNum );
 
-		if( g_MainConfig.GetInt( "archiver", "enabled", 1 ) )
-		{
-		    m_Archiver.write( pCompOut, nCompFramesOut );
-		}
-		g_SNDCardOut->Write( pCompOut, nCompFramesOut );
-	    }
-	    else
-	    {
-		if( g_MainConfig.GetInt( "archiver", "enabled", 1 ) )
-		{
-		    m_Archiver.write( m_pBuffer, m_nFramesRead );
-		}
-		g_SNDCardOut->Write( m_pBuffer, m_nFramesRead );
-	    }
+	    // playing processed samples
+	    g_SNDCardOut->Write( pCompOut, nCompressedFramesNum );
+
+	    // resampling
+	    int nResampledFramesNum = 0;
+	    short* pResampledData = m_Resampler.resample( pCompOut, nCompressedFramesNum, nResampledFramesNum );
+
+	    // archiving
+	    m_Archiver.write( pResampledData, nResampledFramesNum );
 	}
     }
 }

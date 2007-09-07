@@ -44,6 +44,8 @@ private:
     } tBufferChunk;
     std::vector< tBufferChunk > m_vBuffer;
 
+    bool	m_bCompressorEnabled;
+
     int		m_nCurrChunk;
     int		m_nBufferSize;
     int		m_nDelayFramesCount;

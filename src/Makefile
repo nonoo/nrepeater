@@ -50,7 +50,7 @@ am_nrepeater_OBJECTS = Main.$(OBJEXT) Log.$(OBJEXT) ParPort.$(OBJEXT) \
 	Loop.$(OBJEXT) SettingsFile.$(OBJEXT) SNDCard.$(OBJEXT) \
 	WavFile.$(OBJEXT) Compressor.$(OBJEXT) Archiver.$(OBJEXT) \
 	SpeexCodec.$(OBJEXT) OggOutStream.$(OBJEXT) \
-	OggFileOutStream.$(OBJEXT)
+	OggFileOutStream.$(OBJEXT) Resampler.$(OBJEXT)
 nrepeater_OBJECTS = $(am_nrepeater_OBJECTS)
 nrepeater_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -166,7 +166,8 @@ nrepeater_SOURCES = \
 	Archiver.cpp Archiver.h \
 	SpeexCodec.cpp SpeexCodec.h \
 	OggOutStream.cpp OggOutStream.h \
-	OggFileOutStream.cpp OggFileOutStream.h
+	OggFileOutStream.cpp OggFileOutStream.h \
+	Resampler.cpp Resampler.h
 
 all: all-am
 
@@ -242,6 +243,7 @@ include ./$(DEPDIR)/Main.Po
 include ./$(DEPDIR)/OggFileOutStream.Po
 include ./$(DEPDIR)/OggOutStream.Po
 include ./$(DEPDIR)/ParPort.Po
+include ./$(DEPDIR)/Resampler.Po
 include ./$(DEPDIR)/SNDCard.Po
 include ./$(DEPDIR)/SettingsFile.Po
 include ./$(DEPDIR)/SpeexCodec.Po

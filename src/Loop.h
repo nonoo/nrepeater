@@ -19,6 +19,7 @@
 
 #include "Compressor.h"
 #include "Archiver.h"
+#include "Resampler.h"
 
 class CLoop
 {
@@ -41,6 +42,7 @@ private:
     int			m_nBeepDelay;
     int			m_nPlayBeepTime;
     bool		m_fPlayingBeep;
+    CResampler		m_Resampler;
     CArchiver		m_Archiver;
 };
 

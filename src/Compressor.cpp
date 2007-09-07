@@ -28,6 +28,8 @@ CCompressor::CCompressor( int nSNDCardRate, int nSNDCardBufferSize )
 {
     m_nSampleRate = nSNDCardRate;
 
+    m_bCompressorEnabled = g_MainConfig.GetInt( "compressor", "enabled", 0 );
+
     // how many frames we need to buffer to delay the audio for the given time
     m_nDelayFramesCount = (int)( ( (float)g_MainConfig.GetInt( "compressor", "lookahead", 0 ) / 1000 ) * m_nSampleRate );
     m_nCurrChunk = 0;
@@ -205,6 +207,12 @@ short* CCompressor::process( short* pBuffer, int nFramesIn, int& nFramesOut )
     // if we got the number of samples needed to delay (m_vBuffer
     // is full == m_nBufferSize is at least the number of samples
     // we need to delay), we jump to the beginning of the vector.
+
+    if( !m_bCompressorEnabled )
+    {
+	nFramesOut = nFramesIn;
+	return pBuffer;
+    }
 
     // do we have a chunk already allocated at the given slot?
     if( (int)m_vBuffer.size() - 1 < m_nCurrChunk )
