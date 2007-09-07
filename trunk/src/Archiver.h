@@ -20,7 +20,6 @@
 #include "WavFile.h"
 #include "SpeexCodec.h"
 #include "OggFileOutStream.h"
-#include "samplerate.h"
 
 class CArchiver
 {
@@ -34,19 +33,10 @@ private:
     std::string	currDate();
 
     COggFileOutStream*	m_pOgg;
-    long		m_lSerialNo;
     CSpeexCodec		m_SpeexCodec;
     int			m_nSampleRate;
     int			m_nChannels;
     bool		m_bArchiverEnabled;
-
-    float*		m_pSRCIn;
-    float*		m_pSRCOut;
-    short*		m_pDataOut;
-    int			m_nResampleBufSize;
-
-    SRC_STATE*		m_pSRCState;
-    SRC_DATA		m_SRCData;
 };
 
 #endif

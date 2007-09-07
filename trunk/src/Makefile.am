@@ -12,4 +12,5 @@ nrepeater_SOURCES = \
 	Archiver.cpp Archiver.h \
 	SpeexCodec.cpp SpeexCodec.h \
 	OggOutStream.cpp OggOutStream.h \
-	OggFileOutStream.cpp OggFileOutStream.h
+	OggFileOutStream.cpp OggFileOutStream.h \
+	Resampler.cpp Resampler.h
