@@ -30,7 +30,7 @@ CParPort::CParPort( int port )
     }
 
     m_nReceiverPin = 11;
-    m_fReceiverLow = true;
+    m_bReceiverLow = true;
     m_nTransmitterPin1 = 2;
     m_nTransmitterPin2 = 3;
 }
@@ -52,7 +52,7 @@ void CParPort::setReceiverPin( int nPin )
 
 void CParPort::setReceiverLow( bool fLow )
 {
-    m_fReceiverLow = fLow;
+    m_bReceiverLow = fLow;
 }
 
 void CParPort::setTransmitterPin1( int nPin )
@@ -72,7 +72,7 @@ void CParPort::setPTT( bool fState )
 
 bool CParPort::isSquelchOff()
 {
-    if( m_fReceiverLow )
+    if( m_bReceiverLow )
     {
 	if( pin_is_set( LP_PIN[m_nReceiverPin] ) )
 	{
