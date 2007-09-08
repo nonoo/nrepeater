@@ -26,6 +26,7 @@ extern CLog g_Log;
 
 COggFileOutStream::COggFileOutStream( unsigned int nSerial ) : COggOutStream( nSerial )
 {
+    m_pFile = NULL;
 }
 
 COggFileOutStream::~COggFileOutStream()
@@ -47,9 +48,7 @@ void COggFileOutStream::feedPacket( ogg_packet* m_Op, bool bFlush )
     {
 	if( bFlush )
 	{
-	    ogg_stream_flush( m_pStreamState, &m_OggPage );
-
-	    writePage();
+	    flush();
 	}
     }
 }
@@ -75,13 +74,24 @@ void COggFileOutStream::destroy()
 {
     if( m_pStreamState )
     {
-	ogg_stream_flush( m_pStreamState, &m_OggPage );
-	writePage();
+	flush();
+
 	ogg_stream_destroy( m_pStreamState );
 	m_pStreamState = NULL;
     }
 
-    fclose( m_pFile );
+    if( m_pFile != NULL )
+    {
+	fclose( m_pFile );
+    }
+}
+
+void COggFileOutStream::flush()
+{
+    while( ogg_stream_flush( m_pStreamState, &m_OggPage ) )
+    {
+        writePage();
+    }
 }
 
 void COggFileOutStream::writePage()

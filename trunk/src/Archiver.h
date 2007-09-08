@@ -21,6 +21,8 @@
 #include "SpeexCodec.h"
 #include "OggFileOutStream.h"
 
+#include <string>
+
 class CArchiver
 {
 public:
@@ -28,9 +30,13 @@ public:
 
     void	init( int nSampleRate, int nChannels );
     void	write( short* pData, int nFramesNum );
+    void	event( std::string sEvent );
+    void	event2( std::string sEvent );
+    void	maintain();
 
 private:
     std::string	currDate();
+    std::string getLogFileName();
 
     COggFileOutStream*	m_pOgg;
     CSpeexCodec		m_SpeexCodec;
@@ -41,6 +47,10 @@ private:
     struct tm*		m_stLocalTime;
     time_t		m_stTime;
     int			m_nDay;
+
+    FILE*		m_pEventFile;
+
+    long		m_lArchivedSamples;
 };
 
 #endif

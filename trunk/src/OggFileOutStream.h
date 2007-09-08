@@ -31,6 +31,7 @@ public:
     void feedPacket( ogg_packet* m_Op, bool bFlush );
     void init( std::string sFileName );
     void destroy();
+    void flush();
 
 private:
     void writePage();
