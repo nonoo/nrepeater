@@ -83,7 +83,7 @@ void CLoop::Start()
 
     signal( SIGALRM, onSIGALRM );
 
-    m_pCompressor = new CCompressor( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getBufferSize() );
+    m_Compressor.init( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getBufferSize() );
     m_Resampler.init( ( 1.0 * SPEEX_SAMPLERATE ) / g_SNDCardIn->getSampleRate(), g_SNDCardOut->getChannelNum() );
     m_Archiver.init( SPEEX_SAMPLERATE, g_SNDCardOut->getChannelNum() );
 
@@ -117,7 +117,7 @@ void CLoop::Start()
 	    if( g_MainConfig.GetInt( "compressor", "enabled", 0 ) )
 	    {
 		// resetting compressor
-		m_pCompressor->flush();
+		m_Compressor.flush();
 	    }
 
 	    // do we have to play a roger beep?
@@ -199,7 +199,7 @@ void CLoop::Start()
 
 	    // compressing
 	    int nCompressedFramesNum = 0;
-	    short* pCompOut = m_pCompressor->process( m_pBuffer, m_nFramesRead, nCompressedFramesNum );
+	    short* pCompOut = m_Compressor.process( m_pBuffer, m_nFramesRead, nCompressedFramesNum );
 
 	    // playing processed samples
 	    g_SNDCardOut->Write( pCompOut, nCompressedFramesNum );

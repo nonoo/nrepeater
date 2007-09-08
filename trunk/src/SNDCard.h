@@ -49,6 +49,7 @@ private:
     int m_nChannels;
     int m_nFormat;
     unsigned int m_nFragSize;
+public:
     bool m_bFirstTime;
 };
 

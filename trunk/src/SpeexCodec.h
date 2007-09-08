@@ -53,6 +53,8 @@ private:
     short*			m_pBuf;
     int				m_nBufSize;
     int				m_nBufStoredFramesNum;
+
+    short*			m_pTmp;
 };
 
 #endif

@@ -27,8 +27,10 @@
 class CCompressor
 {
 public:
-    CCompressor( int nSNDCardRate, int nSNDCardBufferSize );
     ~CCompressor();
+
+    void	init( int nSNDCardRate, int nSNDCardBufferSize );
+    void	destroy();
 
     short*	process( short* pBuffer, int nFramesIn, int& nFramesOut );
     void	flush();
@@ -50,6 +52,7 @@ private:
     int		m_nBufferSize;
     int		m_nDelayFramesCount;
     short*	m_pOut;
+    int		m_nOutSize;
     int		m_nSampleRate;
     int		m_nOrigRatio;
     float	m_fRatio;
@@ -65,6 +68,7 @@ private:
     int		m_nCurrHoldFrameCount;
 
     int		m_nPeak;
+    char	m_sDebugString[500];
 };
 
 #endif

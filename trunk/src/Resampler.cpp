@@ -64,11 +64,11 @@ short* CResampler::resample( short* pData, int nFramesNum, int& nOutFramesNum )
     if( m_nResampleBufSize < nFramesNum )
     {
 	m_nResampleBufSize = nFramesNum;
-	SAFE_DELETE( m_pSRCIn );
+	SAFE_DELETE_ARRAY( m_pSRCIn );
 	m_pSRCIn = new float[ m_nResampleBufSize ];
-	SAFE_DELETE( m_pSRCOut );
+	SAFE_DELETE_ARRAY( m_pSRCOut );
 	m_pSRCOut = new float[ m_nResampleBufSize ];
-	SAFE_DELETE( m_pDataOut );
+	SAFE_DELETE_ARRAY( m_pDataOut );
 	m_pDataOut = new short[ m_nResampleBufSize ];
 
 	m_SRCData.data_in = m_pSRCIn;
