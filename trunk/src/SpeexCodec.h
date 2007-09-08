@@ -44,7 +44,6 @@ private:
     int				m_nFrameSize;
     char*			m_pOut;
     SpeexPreprocessState*	m_pPreProcState;
-    long			m_lSerialNo;
     ogg_packet			m_Op;
     long			m_lGranulePos;
     COggOutStream*		m_pOgg;
