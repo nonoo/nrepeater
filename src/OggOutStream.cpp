@@ -20,11 +20,7 @@
 COggOutStream::COggOutStream( unsigned int nSerial )
 {
     m_nSerial = nSerial;
-
-    m_pStreamState = (ogg_stream_state *) malloc( sizeof( ogg_stream_state ) );
-    ogg_stream_init( m_pStreamState, nSerial );
-
-    m_lPacketNo = 0;
+    m_pStreamState = NULL;
 
 /*    m_OggPage.header = NULL;
     m_OggPage.header_len = 0;

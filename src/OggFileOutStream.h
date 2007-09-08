@@ -29,13 +29,14 @@ public:
     ~COggFileOutStream();
 
     void feedPacket( ogg_packet* m_Op, bool bFlush );
-    void open( std::string sFileName );
-    void close();
+    void init( std::string sFileName );
+    void destroy();
 
 private:
     void writePage();
 
     FILE*	m_pFile;
+    std::string	m_sFileName;
 };
 
 #endif
