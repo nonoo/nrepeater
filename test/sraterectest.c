@@ -3,10 +3,16 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/soundcard.h>
+#include <samplerate.h>
 
 int fd_in;
 FILE* fd_out;
-int sample_rate;
+int sample_rate = 44100;
+SRC_STATE* sstate = NULL;
+SRC_DATA sdata;
+float srcin[1024];
+float srcout[1024];
+short dataout[1024];
 
 static int open_audio_device (char *name, int mode)
 {
@@ -64,10 +70,16 @@ void process_input (void)
 	perror ("Audio read");
 	exit (-1);		/* Or return an error code */
     }
-    l = l / 2;
-    level = 0;
 
-    fwrite( &buffer, 2048, 1, fd_out );
+    l = l / 2;
+
+    sdata.input_frames = l;
+    src_short_to_float_array( buffer, srcin, l );
+    src_process( sstate, &sdata );
+    src_float_to_short_array( srcout, dataout, sdata.output_frames_gen );
+    fwrite( dataout, 1, sdata.output_frames_gen*sizeof(short), fd_out );
+
+    level = 0;
 
     for (i = 0; i < l; i++)
     {
@@ -88,7 +100,7 @@ void process_input (void)
     printf ("\r");
     fflush (stdout);
 }
-		  
+
 int main (int argc, char *argv[])
 {
     char *name_in = "/dev/dsp";
@@ -99,9 +111,18 @@ int main (int argc, char *argv[])
 
     fd_out = fopen( "out.raw", "w" );
 
+    int tmp=0;
+    sstate = src_new( SRC_SINC_BEST_QUALITY, 1, &tmp );
+    sdata.output_frames = 1024;
+    sdata.data_in = srcin;
+    sdata.data_out = srcout;
+    sdata.end_of_input = 0;
+    sdata.src_ratio = (1.0*8000) / sample_rate;
+
     while (1)
 	process_input ();
 
+    sstate = src_delete( sstate );
     fclose( fd_out );
 
     exit (0);

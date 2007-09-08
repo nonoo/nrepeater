@@ -1,0 +1,7 @@
+
+TROUBLESHOOTING:
+----------------
+
+ - libspeex-dev 1.1.12-3 in Debian makes a SEGFAULT. Compile libspeex
+   yourself, if your Debian has this libspeex version. Maybe other distros
+   are affected, I don't know.

@@ -33,7 +33,7 @@ public:
 
 private:
     int m_nReceiverPin;
-    bool m_fReceiverLow;
+    bool m_bReceiverLow;
     int m_nTransmitterPin1;
     int m_nTransmitterPin2;
 };
