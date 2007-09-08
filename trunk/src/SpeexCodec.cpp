@@ -81,10 +81,10 @@ void CSpeexCodec::initEncode( COggOutStream* pOgg, int nSampleRate, int nChannel
 
     // setting encoder options
     int tmp = nBitRate;
-    speex_encoder_ctl( m_pState, SPEEX_SET_ABR, &tmp);
+    //speex_encoder_ctl( m_pState, SPEEX_SET_ABR, &tmp); // sigsegv if enabled
     speex_encoder_ctl( m_pState, SPEEX_SET_BITRATE, &tmp);
     tmp = 1;
-    speex_encoder_ctl( m_pState, SPEEX_SET_VBR, &tmp);
+    //speex_encoder_ctl( m_pState, SPEEX_SET_VBR, &tmp); // sigsegv if enabled
     speex_encoder_ctl( m_pState, SPEEX_SET_DTX, &tmp);
     //tmp = 10;
     //speex_encoder_ctl( m_pState, SPEEX_SET_VBR_QUALITY, &tmp);

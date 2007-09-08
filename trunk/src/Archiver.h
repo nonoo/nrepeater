@@ -37,6 +37,10 @@ private:
     int			m_nSampleRate;
     int			m_nChannels;
     bool		m_bArchiverEnabled;
+
+    struct tm*		m_stLocalTime;
+    time_t		m_stTime;
+    int			m_nDay;
 };
 
 #endif

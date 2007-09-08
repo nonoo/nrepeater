@@ -17,12 +17,14 @@
 #include "Archiver.h"
 #include "Main.h"
 #include "SettingsFile.h"
+#include "Log.h"
 
 #include <time.h>
 
 using namespace std;
 
 extern CSettingsFile	g_MainConfig;
+extern CLog		g_Log;
 
 CArchiver::~CArchiver()
 {
@@ -35,9 +37,13 @@ void CArchiver::init( int nSampleRate, int nChannels )
     m_nChannels = nChannels;
     m_bArchiverEnabled = g_MainConfig.GetInt( "archiver", "enabled", 1 );
 
+    m_stTime = time( NULL );
+    m_stLocalTime = localtime( &m_stTime );
+    m_nDay = m_stLocalTime->tm_min;
+
     m_pOgg = new COggFileOutStream( 0 );
-    m_pOgg->open( string( g_MainConfig.Get( "archiver", "dir", "./" ) + g_MainConfig.Get( "archiver", "prefix", "log-" ) + currDate() + ".spx" ).c_str() );
-    m_SpeexCodec.initEncode( m_pOgg, nSampleRate, m_nChannels, g_MainConfig.GetInt( "archiver", "bitrate", 10000 ) );
+    m_pOgg->init( string( g_MainConfig.Get( "archiver", "dir", "./" ) + g_MainConfig.Get( "archiver", "prefix", "log-" ) + currDate() + ".spx" ).c_str() );
+    m_SpeexCodec.initEncode( m_pOgg, m_nSampleRate, m_nChannels, g_MainConfig.GetInt( "archiver", "bitrate", 10000 ) );
 }
 
 void CArchiver::write( short* pData, int nFramesNum )
@@ -47,6 +53,24 @@ void CArchiver::write( short* pData, int nFramesNum )
 	return;
     }
 
+    m_stTime = time( NULL );
+    m_stLocalTime = localtime( &m_stTime );
+//    if( m_stLocalTime.tm_mday != m_nDay )
+cout << m_stLocalTime->tm_min << ":" << m_stLocalTime->tm_sec << endl;
+    if( m_stLocalTime->tm_min != m_nDay )
+    {
+	g_Log.Debug( "starting new log files\n" );
+
+	// day changed, starting new log files
+	m_SpeexCodec.destroy();
+	m_pOgg->destroy();
+
+	m_pOgg->init( string( g_MainConfig.Get( "archiver", "dir", "./" ) + g_MainConfig.Get( "archiver", "prefix", "log-" ) + currDate() + ".spx" ).c_str() );
+	m_SpeexCodec.initEncode( m_pOgg, m_nSampleRate, m_nChannels, g_MainConfig.GetInt( "archiver", "bitrate", 10000 ) );
+    }
+//    m_nDay = m_stLocalTime.tm_mday;
+    m_nDay = m_stLocalTime->tm_min;
+
     m_SpeexCodec.encode( pData, nFramesNum );
 }
 
@@ -54,8 +78,6 @@ void CArchiver::write( short* pData, int nFramesNum )
 string CArchiver::currDate()
 {
     char tmp[50];
-    time_t t = time( NULL );
-    struct tm *tmpt = localtime( &t );
-    strftime( tmp, 50, "%y%m%d", tmpt );
+    strftime( tmp, 50, "%y%m%d%S", m_stLocalTime );
     return tmp;
 }

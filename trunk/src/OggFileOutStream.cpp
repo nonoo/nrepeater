@@ -16,10 +16,13 @@
 
 #include "OggFileOutStream.h"
 #include "Main.h"
+#include "Log.h"
 
 #include <stdio.h>
 
 using namespace std;
+
+extern CLog g_Log;
 
 COggFileOutStream::COggFileOutStream( unsigned int nSerial ) : COggOutStream( nSerial )
 {
@@ -27,7 +30,7 @@ COggFileOutStream::COggFileOutStream( unsigned int nSerial ) : COggOutStream( nS
 
 COggFileOutStream::~COggFileOutStream()
 {
-    close();
+    destroy();
 }
 
 void COggFileOutStream::feedPacket( ogg_packet* m_Op, bool bFlush )
@@ -51,22 +54,41 @@ void COggFileOutStream::feedPacket( ogg_packet* m_Op, bool bFlush )
     }
 }
 
-void COggFileOutStream::open( string sFileName )
+void COggFileOutStream::init( string sFileName )
 {
-    m_pFile = fopen( sFileName.c_str(), "w" );
+    m_sFileName = sFileName;
+    if( m_pStreamState == NULL )
+    {
+	m_pStreamState = (ogg_stream_state *) malloc( sizeof( ogg_stream_state ) );
+	ogg_stream_init( m_pStreamState, m_nSerial );
+    }
+    m_lPacketNo = 0;
+
+    m_pFile = fopen( m_sFileName.c_str(), "w" );
+    if( !m_pFile )
+    {
+	g_Log.Error( "can't open logfile for writing: " + m_sFileName + "\n" );
+    }
 }
 
-void COggFileOutStream::close()
+void COggFileOutStream::destroy()
 {
-    ogg_stream_flush( m_pStreamState, &m_OggPage );
-
-    writePage();
+    if( m_pStreamState )
+    {
+	ogg_stream_flush( m_pStreamState, &m_OggPage );
+	writePage();
+	ogg_stream_destroy( m_pStreamState );
+	m_pStreamState = NULL;
+    }
 
     fclose( m_pFile );
 }
 
 void COggFileOutStream::writePage()
 {
-    fwrite( m_OggPage.header, 1, m_OggPage.header_len, m_pFile );
-    fwrite( m_OggPage.body, 1, m_OggPage.body_len, m_pFile );
+    if( m_pFile != NULL )
+    {
+	fwrite( m_OggPage.header, 1, m_OggPage.header_len, m_pFile );
+	fwrite( m_OggPage.body, 1, m_OggPage.body_len, m_pFile );
+    }
 }

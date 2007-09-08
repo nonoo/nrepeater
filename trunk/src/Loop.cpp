@@ -158,11 +158,15 @@ void CLoop::Start()
 	    }
 	    else
 	    {
-		if( g_MainConfig.GetInt( "archiver", "enabled", 1 ) )
-		{
-		    m_Archiver.write( m_pBuffer, m_nFramesRead );
-		}
+		// playing roger beep
 		g_SNDCardOut->Write( m_pBuffer, m_nFramesRead );
+
+		// resampling
+		int nResampledFramesNum = 0;
+		short* pResampledData = m_Resampler.resample( m_pBuffer, m_nFramesRead, nResampledFramesNum );
+
+		// archiving
+	        m_Archiver.write( pResampledData, nResampledFramesNum );
 	    }
 	}
 
