@@ -102,16 +102,16 @@ void CSpeexCodec::initEncode( COggOutStream* pOgg, int nSampleRate, int nChannel
     tmp = 1;
     speex_preprocess_ctl( m_pPreProcState, SPEEX_PREPROCESS_SET_DENOISE, &tmp );
     speex_preprocess_ctl( m_pPreProcState, SPEEX_PREPROCESS_SET_AGC, &tmp );
-    speex_preprocess_ctl( m_pPreProcState, SPEEX_PREPROCESS_SET_VAD, &tmp );
+//    speex_preprocess_ctl( m_pPreProcState, SPEEX_PREPROCESS_SET_VAD, &tmp );
 
     speex_bits_init( &m_spxBits );
 
-    m_pOut = new char[ m_nFrameSize * 4 ];
+    m_pOut = new char[ m_nFrameSize * 2 ];
     m_pBuf = NULL;
     m_nBufSize = 0;
     m_nBufStoredFramesNum = 0;
 
-    m_pTmp = new short[ 50000 ];
+    m_pTmp = new short[ m_nFrameSize ];
 
     m_lGranulePos = 0;
 
@@ -137,10 +137,8 @@ void CSpeexCodec::initEncode( COggOutStream* pOgg, int nSampleRate, int nChannel
     m_pOut = new char[ m_nFrameSize * 2 ];
 }*/
 
-FILE*f=fopen("a.raw","w");
 void CSpeexCodec::destroy()
 {
-fclose(f);
     speex_bits_destroy( &m_spxBits );
     if( m_pState != NULL )
     {
@@ -170,17 +168,20 @@ CSpeexCodec::~CSpeexCodec()
 
 void CSpeexCodec::encode( short* pData, int nFramesNum )
 {
-//legyalulja 160 byteonkent a pDatat, aztan a maradekot beleteszi egy tmp bufferbe
-//kovetkezo hivaskor a maradek moge masolja a pDatat es azzal operal
+    // this function comminutes pData into 160*2 byte chunks and puts
+    // them in m_pBuf, and encodes.
+    // after this, encode() puts the remaining chunks to the front of
+    // the buffer.
+    // at the next encode() call, if there's remaining data at the front
+    // of m_pBuf, it puts pData after the remaining data and starts this
+    // process again
 
     if( m_nBufSize < nFramesNum + m_nBufStoredFramesNum )
     {
-	short* pTmp = NULL;
 	if( m_nBufStoredFramesNum > 0 )
 	{
 	    // we have some data in the buffer
-	    pTmp = new short[ m_nBufStoredFramesNum ];
-	    memcpy( pTmp, m_pBuf, m_nBufStoredFramesNum * 2 );
+	    memcpy( m_pTmp, m_pBuf, m_nBufStoredFramesNum * 2 );
 	}
 
 	// reallocating buffer
@@ -191,8 +192,7 @@ void CSpeexCodec::encode( short* pData, int nFramesNum )
 	if( m_nBufStoredFramesNum > 0 )
 	{
 	    // restoring previous data to the new buffer
-	    memcpy( m_pBuf, pTmp, m_nBufStoredFramesNum * 2 );
-	    SAFE_DELETE_ARRAY( pTmp );
+	    memcpy( m_pBuf, m_pTmp, m_nBufStoredFramesNum * 2 );
 	}
     }
 
@@ -206,10 +206,10 @@ void CSpeexCodec::encode( short* pData, int nFramesNum )
     while( nDataPos + 160 <= m_nBufStoredFramesNum )
     {
 	memcpy( m_pTmp, m_pBuf + nDataPos, m_nFrameSize * 2  );
-	//speex_preprocess( m_pPreProcState, m_pTmp, NULL);
+	speex_preprocess( m_pPreProcState, m_pTmp, NULL);
 	speex_bits_reset( &m_spxBits );
 	speex_encode_int( m_pState, m_pTmp, &m_spxBits );
-    fwrite( m_pTmp, 1, m_nFrameSize*2, f );
+
 	nDataPos += m_nFrameSize;
 
 	unsigned int nBytesOut = speex_bits_write( &m_spxBits, m_pOut, m_nFrameSize * 2 );
@@ -220,12 +220,11 @@ void CSpeexCodec::encode( short* pData, int nFramesNum )
 	m_Op.e_o_s = 0;
 	m_Op.granulepos = ++m_lGranulePos;
 
-	int tmp;
-	speex_encoder_ctl( m_pState, SPEEX_GET_BITRATE, &tmp );
-	cout << "spx bitrate: " << tmp << endl;
+	//int tmp;
+	//speex_encoder_ctl( m_pState, SPEEX_GET_BITRATE, &tmp );
+	//cout << "spx bitrate: " << tmp << " bytesout: " << nBytesOut << endl;
 
 	m_pOgg->feedPacket( &m_Op, false );
-	//cout << " bytesout: " << nBytesOut << endl;
     }
 
     //cout << "incoming framesnum: " << nFramesNum << " processed: " << nDataPos << " remaining frames: " << m_nBufStoredFramesNum-nDataPos << " in buffer: " << m_nBufStoredFramesNum << endl;
@@ -234,10 +233,8 @@ void CSpeexCodec::encode( short* pData, int nFramesNum )
     if( m_nBufStoredFramesNum - nDataPos > 0 )
     {
 	// we still have unprocessed data in the buffer, storing it
-	//short* pTmp = new short[ m_nBufStoredFramesNum - nDataPos ];
 	memcpy( m_pTmp, m_pBuf + nDataPos, ( m_nBufStoredFramesNum - nDataPos ) * 2 );
 	memcpy( m_pBuf, m_pTmp, ( m_nBufStoredFramesNum - nDataPos ) * 2 );
-	//SAFE_DELETE_ARRAY( pTmp );
     }
     m_nBufStoredFramesNum = m_nBufStoredFramesNum - nDataPos;
 }
