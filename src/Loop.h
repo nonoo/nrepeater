@@ -26,6 +26,9 @@ class CLoop
 public:
     void Start();
 
+    // this needs to be public because of SIGALRM callback
+    CArchiver		m_Archiver; 
+
 private:
     void setTransmitTimeout( int nMicroSecs );
     void clearTransmitTimeout();
@@ -43,7 +46,6 @@ private:
     int			m_nPlayBeepTime;
     bool		m_fPlayingBeep;
     CResampler		m_Resampler;
-    CArchiver		m_Archiver;
 };
 
 #endif

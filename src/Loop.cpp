@@ -35,6 +35,7 @@ extern CLog		g_Log;
 extern CWavFile		g_RogerBeep;
 extern CSettingsFile	g_MainConfig;
 extern bool		g_fTerminate;
+extern CLoop		g_Loop;
 
 #define SPEEX_SAMPLERATE 8000
 
@@ -43,6 +44,8 @@ void onSIGALRM( int )
     g_Log.Debug( "transmitter off\n" );
     g_ParPort->setPTT( false );
     g_SNDCardOut->Stop();
+
+    g_Loop.m_Archiver.event( "roger beep finished, transmission stopped." );
 }
 
 void CLoop::setTransmitTimeout( int nMicroSecs )
@@ -105,6 +108,8 @@ void CLoop::Start()
 
 	    m_nPlayBeepTime = 0;
 	    m_fPlayingBeep = false;
+
+	    m_Archiver.event( "receiving transmission, transmitting started" );
 	}
 
 	// receiver stopped receiving
@@ -126,11 +131,15 @@ void CLoop::Start()
 		g_Log.Debug( "transmitter off\n" );
 		g_SNDCardOut->Stop();
 		g_ParPort->setPTT( false );
+
+		m_Archiver.event( "receiving finished, transmission stopped." );
 	    }
 	    else
 	    {
 		m_nPlayBeepTime = time( NULL ) + m_nBeepDelay;
 		g_RogerBeep.rewind();
+
+		m_Archiver.event( "receiving finished" );
 	    }
 	}
 
@@ -140,6 +149,8 @@ void CLoop::Start()
 	    g_Log.Debug( "playing beep\n" );
 	    m_nPlayBeepTime = 0;
 	    m_fPlayingBeep = true;
+
+	    m_Archiver.event( "playing roger beep" );
 	}
 
 	// this plays the roger beep wave sequentially
@@ -169,6 +180,8 @@ void CLoop::Start()
 	        m_Archiver.write( pResampledData, nResampledFramesNum );
 	    }
 	}
+
+	m_Archiver.maintain();
 
 	if( !fSquelchOff )
 	{
