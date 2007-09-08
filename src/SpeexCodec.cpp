@@ -111,6 +111,8 @@ void CSpeexCodec::initEncode( COggOutStream* pOgg, int nSampleRate, int nChannel
     m_nBufSize = 0;
     m_nBufStoredFramesNum = 0;
 
+    m_pTmp = new short[ 50000 ];
+
     m_lGranulePos = 0;
 
     generateHeader();
@@ -158,6 +160,7 @@ fclose(f);
 
     SAFE_DELETE_ARRAY( m_pOut );
     SAFE_DELETE_ARRAY( m_pBuf );
+    SAFE_DELETE_ARRAY( m_pTmp );
 }
 
 CSpeexCodec::~CSpeexCodec()
@@ -199,20 +202,19 @@ void CSpeexCodec::encode( short* pData, int nFramesNum )
 
     int nDataPos = 0;
 
-    while( nDataPos + 160 < m_nBufStoredFramesNum )
+    // processing all 160 byte-sized frames in the buffer
+    while( nDataPos + 160 <= m_nBufStoredFramesNum )
     {
-	short* pTmp = new short[ 3200 ];
-	memcpy( pTmp, m_pBuf + nDataPos, 160 * 2 );
-	speex_preprocess( m_pPreProcState, pTmp, NULL);
+	memcpy( m_pTmp, m_pBuf + nDataPos, m_nFrameSize * 2  );
+	//speex_preprocess( m_pPreProcState, m_pTmp, NULL);
 	speex_bits_reset( &m_spxBits );
-	speex_encode_int( m_pState, pTmp, &m_spxBits );
-    fwrite( pTmp, 1, m_nFrameSize*2, f );
-	SAFE_DELETE_ARRAY( pTmp );
+	speex_encode_int( m_pState, m_pTmp, &m_spxBits );
+    fwrite( m_pTmp, 1, m_nFrameSize*2, f );
 	nDataPos += m_nFrameSize;
 
 	unsigned int nBytesOut = speex_bits_write( &m_spxBits, m_pOut, m_nFrameSize * 2 );
 
-	/*m_Op.packet = (unsigned char*)m_pOut;
+	m_Op.packet = (unsigned char*)m_pOut;
 	m_Op.bytes = nBytesOut;
 	m_Op.b_o_s = 0;
 	m_Op.e_o_s = 0;
@@ -222,19 +224,20 @@ void CSpeexCodec::encode( short* pData, int nFramesNum )
 	speex_encoder_ctl( m_pState, SPEEX_GET_BITRATE, &tmp );
 	cout << "spx bitrate: " << tmp << endl;
 
-	m_pOgg->feedPacket( &m_Op, false );*/
-
+	m_pOgg->feedPacket( &m_Op, false );
+	//cout << " bytesout: " << nBytesOut << endl;
     }
 
     //cout << "incoming framesnum: " << nFramesNum << " processed: " << nDataPos << " remaining frames: " << m_nBufStoredFramesNum-nDataPos << " in buffer: " << m_nBufStoredFramesNum << endl;
 
+    // do we have unprocessed data in the buffer?
     if( m_nBufStoredFramesNum - nDataPos > 0 )
     {
 	// we still have unprocessed data in the buffer, storing it
-	short* pTmp = new short[ m_nBufStoredFramesNum - nDataPos ];
-	memcpy( pTmp, m_pBuf + nDataPos, ( m_nBufStoredFramesNum - nDataPos ) * 2 );
-	memcpy( m_pBuf, pTmp, ( m_nBufStoredFramesNum - nDataPos ) * 2 );
-	SAFE_DELETE_ARRAY( pTmp );
+	//short* pTmp = new short[ m_nBufStoredFramesNum - nDataPos ];
+	memcpy( m_pTmp, m_pBuf + nDataPos, ( m_nBufStoredFramesNum - nDataPos ) * 2 );
+	memcpy( m_pBuf, m_pTmp, ( m_nBufStoredFramesNum - nDataPos ) * 2 );
+	//SAFE_DELETE_ARRAY( pTmp );
     }
     m_nBufStoredFramesNum = m_nBufStoredFramesNum - nDataPos;
 }

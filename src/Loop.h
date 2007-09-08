@@ -34,7 +34,7 @@ private:
     int			m_nFDIn;
     fd_set		m_fsReads;
     int			m_nSelectRes;
-    CCompressor*	m_pCompressor;
+    CCompressor		m_Compressor;
 
     // audio data from the sound card
     short*		m_pBuffer;

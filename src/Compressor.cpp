@@ -24,7 +24,7 @@
 extern CSettingsFile	g_MainConfig;
 extern CLog		g_Log;
 
-CCompressor::CCompressor( int nSNDCardRate, int nSNDCardBufferSize )
+void CCompressor::init( int nSNDCardRate, int nSNDCardBufferSize )
 {
     m_nSampleRate = nSNDCardRate;
 
@@ -34,6 +34,7 @@ CCompressor::CCompressor( int nSNDCardRate, int nSNDCardBufferSize )
     m_nDelayFramesCount = (int)( ( (float)g_MainConfig.GetInt( "compressor", "lookahead", 0 ) / 1000 ) * m_nSampleRate );
     m_nCurrChunk = 0;
     m_pOut = new short[ nSNDCardBufferSize ];
+    m_nOutSize = nSNDCardBufferSize;
     m_nBufferSize = 0;
     m_nOrigRatio = g_MainConfig.GetInt( "compressor", "ratio", 5 );
     m_fRatio = 1;
@@ -71,6 +72,11 @@ CCompressor::CCompressor( int nSNDCardRate, int nSNDCardBufferSize )
 }
 
 CCompressor::~CCompressor()
+{
+    destroy();
+}
+
+void CCompressor::destroy()
 {
     SAFE_DELETE_ARRAY( m_pOut );
 
@@ -181,6 +187,14 @@ int CCompressor::doCompress()
 	}
     }
 
+    // do we have enough space for storing the output?
+    if( m_nOutSize < m_vBuffer[ m_nCurrChunk ].nSize )
+    {
+	SAFE_DELETE_ARRAY( m_pOut );
+	m_pOut = new short[ m_vBuffer[ m_nCurrChunk ].nSize ];
+	m_nOutSize = m_vBuffer[ m_nCurrChunk ].nSize;
+    }
+
     // copying the audio from the current chunk to the output buffer
     for( i = 0; i < m_vBuffer[ m_nCurrChunk ].nSize; i++ )
     {
@@ -229,6 +243,10 @@ short* CCompressor::process( short* pBuffer, int nFramesIn, int& nFramesOut )
     // preparing the output
     nFramesOut = doCompress();
 
+
+
+
+
     // does the current chunk have enough memory space for the incoming audio data?
     if( m_vBuffer[ m_nCurrChunk ].nSize < nFramesIn )
     {
@@ -252,7 +270,7 @@ short* CCompressor::process( short* pBuffer, int nFramesIn, int& nFramesOut )
     // are we exceeding the current buffer chunk count?
     if( m_nCurrChunk > (int)m_vBuffer.size() - 1 )
     {
-	// do we have to allocate more buffer space?
+	// do we have to allocate more buffer space? (new chunk)
 	// (more buffer space = more delay in time)
 	if( m_nBufferSize > m_nDelayFramesCount )
 	{
@@ -261,9 +279,8 @@ short* CCompressor::process( short* pBuffer, int nFramesIn, int& nFramesOut )
 	}
     }
 
-    char sTmp[150];
-    sprintf( sTmp, "compressor | m_nCurrChunk: %d m_nBufferSize: %d m_nDelayFramesCount: %d m_vBuffer.size(): %d m_fRatio: %f m_nPeak: %d\n", m_nCurrChunk, m_nBufferSize, m_nDelayFramesCount, m_vBuffer.size(), m_fRatio, m_nPeak );
-    g_Log.Debug2( sTmp );
+    sprintf( m_sDebugString, "compressor | m_nCurrChunk: %d m_nBufferSize: %d m_nDelayFramesCount: %d m_vBuffer.size(): %d m_fRatio: %f m_nPeak: %d\n", m_nCurrChunk, m_nBufferSize, m_nDelayFramesCount, m_vBuffer.size(), m_fRatio, m_nPeak );
+    g_Log.Debug2( m_sDebugString );
 
     return m_pOut;
 }
