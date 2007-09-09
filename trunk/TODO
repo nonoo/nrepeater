@@ -6,4 +6,3 @@ long-term todos:
 - server and win32 client
 
 short-term todos:
-- reloading config file and reinitializing on SIGHUP
