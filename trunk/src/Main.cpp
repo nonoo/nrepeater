@@ -42,7 +42,7 @@ CSNDCard*	g_SNDCardIn = NULL;
 CSNDCard*	g_SNDCardOut = NULL;
 bool		g_fTerminate = false;
 CArchiver	g_Archiver;
-bool		g_fDaemonMode = false;
+bool		g_bDaemonMode = false;
 string		g_szConfigFile = string( PACKAGE_NAME ) + ".conf";
 
 void daemonize()
@@ -50,7 +50,7 @@ void daemonize()
     int res = fork();
     if( res < 0 )
     {
-        g_fDaemonMode = false;
+        g_bDaemonMode = false;
         g_Log.log( CLOG_ERROR, "can't fork into the background!\n" );
         return;
     }
@@ -125,12 +125,6 @@ void onSIGTERM( int )
     g_fTerminate = true;
 }
 
-void onSIGHUP( int )
-{
-    // reloading config file
-    g_MainConfig.loadConfig();
-}
-
 void printUsage( string szProgName )
 {
     cout << string( PACKAGE ) + " v" + string( PACKAGE_VERSION ) + " by Nonoo <nonoo@nonoo.hu>" << endl;
@@ -141,7 +135,7 @@ void printUsage( string szProgName )
     exit( EXIT_SUCCESS );
 }
 
-void parseCommandLine( int argc, char* argv[] )
+static void parseCommandLine( int argc, char* argv[] )
 {
     int next_option;
 
@@ -162,11 +156,12 @@ void parseCommandLine( int argc, char* argv[] )
     } while( next_option != -1 );
 }
 
-int main( int argc, char* argv[] )
+void mainInit()
 {
-    parseCommandLine( argc, argv );
+    SAFE_DELETE( g_ParPort );
+    SAFE_DELETE( g_SNDCardIn );
+    SAFE_DELETE( g_SNDCardOut );
 
-    g_MainConfig.setConfigFile( g_szConfigFile );
     g_MainConfig.loadConfig();
 
     g_Log.setScreenLogLevel( g_MainConfig.getInt( "logging", "loglevel_screen", 1 ) );
@@ -181,7 +176,7 @@ int main( int argc, char* argv[] )
     strftime( tmp, 50, "%Y/%m/%d", localtime( &tt ) );
     g_Log.log( CLOG_MSG, "* starting " + string( PACKAGE_NAME ) + " on " + string( tmp ) + "\n" );
 
-    if( g_MainConfig.getInt( "daemon", "daemon_mode", 0 ) )
+    if( g_MainConfig.getInt( "daemon", "daemon_mode", 0 ) && !g_bDaemonMode )
     {
 	daemonize();
     }
@@ -189,17 +184,25 @@ int main( int argc, char* argv[] )
     atexit( atExit );
     signal( SIGTERM, onSIGTERM );
     signal( SIGINT, onSIGTERM );
-    signal( SIGHUP, onSIGHUP );
+    signal( SIGHUP, SIG_IGN );
 
     initParPort();
 
     initSndCards();
 
     g_Archiver.init( SPEEX_SAMPLERATE, g_SNDCardOut->getChannelNum() );
+}
+
+int main( int argc, char* argv[] )
+{
+    parseCommandLine( argc, argv );
+
+    g_MainConfig.setConfigFile( g_szConfigFile );
+
+    mainInit();
 
     // starting main loop
     g_Loop.start();
-
 
     SAFE_DELETE( g_ParPort );
     SAFE_DELETE( g_SNDCardIn );
