@@ -14,38 +14,47 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __LOOP_H
-#define __LOOP_H
+#ifndef __GOERTZEL_H
+#define __GOERTZEL_H
 
-#include "Compressor.h"
-#include "Resampler.h"
-#include "WavFile.h"
-#include "DTMF.h"
+#include <string>
 
-class CLoop
+#define MAX_BINS	8
+#define GOERTZEL_N	92
+#define MAX_DECODED	10
+
+class CGoertzel
 {
 public:
-    void start();
+    void	init( int nSampleRate );
+    char*	process( short* pData, int nFramesNum );
 
 private:
-    void setTransmitTimeout( int nMicroSecs );
-    void clearTransmitTimeout();
+    void	calcCoeffs();
+    void	postTesting();
 
-    struct timeval	m_tTime;
-    int			m_nFDIn;
-    fd_set		m_fsReads;
-    int			m_nSelectRes;
-    CCompressor		m_Compressor;
-    CWavFile		m_RogerBeep;
+    int		m_nSampleRate;
+    char	m_caDTMFASCII[4][4];
+    double	m_daFreqs[ MAX_BINS ];
+    double	m_daCoeffs[ MAX_BINS ];
+    double	m_dQ0;
+    double	m_daQ1[ MAX_BINS ];
+    double	m_daQ2[ MAX_BINS ];
+    double	m_daR[ MAX_BINS ];
+    int		m_nSampleCount;
 
-    // audio data from the sound card
-    short*		m_pBuffer;
-    int			m_nFramesRead;
-    int			m_nBeepDelay;
-    int			m_nPlayBeepTime;
-    bool		m_fPlayingBeep;
-    CResampler		m_Resampler;
-    CDTMF		m_DTMF;
+    int		i,j;
+
+    int		m_nRow;
+    double	m_dMaxVal;
+    double	m_dT;
+    int		m_nCol;
+    bool	m_bSeeDigit;
+    int		m_nMaxIndex;
+    int		m_nPeakCount;
+
+    char	m_caDecoded[ MAX_DECODED ];
+    int		m_nDecodedNum;
 };
 
 #endif

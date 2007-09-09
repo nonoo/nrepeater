@@ -90,6 +90,7 @@ void CLoop::start()
 
     m_Compressor.init( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getBufferSize() );
     m_Resampler.init( ( 1.0 * SPEEX_SAMPLERATE ) / g_SNDCardIn->getSampleRate(), g_SNDCardOut->getChannelNum() );
+    m_DTMF.init( SPEEX_SAMPLERATE );
 
     g_Log.log( CLOG_MSG, "starting main loop\n" );
 
@@ -221,6 +222,9 @@ void CLoop::start()
 	    // resampling
 	    int nResampledFramesNum = 0;
 	    short* pResampledData = m_Resampler.resample( pCompOut, nCompressedFramesNum, nResampledFramesNum );
+
+	    // DTMF decoding
+	    m_DTMF.process( pResampledData, nResampledFramesNum );
 
 	    // archiving
 	    g_Archiver.write( pResampledData, nResampledFramesNum );
