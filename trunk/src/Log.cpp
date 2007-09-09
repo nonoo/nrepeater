@@ -16,6 +16,7 @@
 
 #include "Log.h"
 #include "Archiver.h"
+#include "SettingsFile.h"
 
 #include <iostream>
 #include <string>
@@ -23,29 +24,43 @@
 
 using namespace std;
 
-extern CArchiver g_Archiver;
+extern CArchiver	g_Archiver;
+extern CSettingsFile	g_MainConfig;
 
 CLog::CLog()
 {
     m_nScreenLogLevel = LOGLEVEL_NORMAL;
     m_nSysLogLevel = LOGLEVEL_NORMAL;
+    m_nFileLogLevel = LOGLEVEL_NONE;
 }
 
+CLog::~CLog()
+{
+    if( m_pLogFile )
+    {
+        fclose( m_pLogFile );
+    }
+}
 
 void CLog::log( int nFlags, string msg )
 {
-    bool bDispScreen = false;
-    bool bDispSys = false;
+    m_bDispScreen = false;
+    m_bDispSys = false;
+    m_bDispLogFile = false;
 
     if( nFlags & LOG_MSG )
     {
 	if( m_nScreenLogLevel > LOGLEVEL_NONE )
 	{
-	    bDispScreen = true;
+	    m_bDispScreen = true;
 	}
 	if( m_nSysLogLevel > LOGLEVEL_NONE )
 	{
-	    bDispSys = true;
+	    m_bDispSys = true;
+	}
+	if( m_nFileLogLevel > LOGLEVEL_NONE )
+	{
+	    m_bDispLogFile = true;
 	}
     }
 
@@ -53,11 +68,15 @@ void CLog::log( int nFlags, string msg )
     {
 	if( m_nScreenLogLevel > LOGLEVEL_NONE )
 	{
-	    bDispScreen = true;
+	    m_bDispScreen = true;
 	}
 	if( m_nSysLogLevel > LOGLEVEL_NONE )
 	{
-	    bDispSys = true;
+	    m_bDispSys = true;
+	}
+	if( m_nFileLogLevel > LOGLEVEL_NONE )
+	{
+	    m_bDispLogFile = true;
 	}
     }
 
@@ -65,11 +84,15 @@ void CLog::log( int nFlags, string msg )
     {
 	if( m_nScreenLogLevel > LOGLEVEL_NONE )
 	{
-	    bDispScreen = true;
+	    m_bDispScreen = true;
 	}
 	if( m_nSysLogLevel > LOGLEVEL_NONE )
 	{
-	    bDispSys = true;
+	    m_bDispSys = true;
+	}
+	if( m_nFileLogLevel > LOGLEVEL_NONE )
+	{
+	    m_bDispLogFile = true;
 	}
     }
 
@@ -77,11 +100,15 @@ void CLog::log( int nFlags, string msg )
     {
 	if( m_nScreenLogLevel > LOGLEVEL_NORMAL )
 	{
-	    bDispScreen = true;
+	    m_bDispScreen = true;
 	}
 	if( m_nSysLogLevel > LOGLEVEL_NORMAL )
 	{
-	    bDispSys = true;
+	    m_bDispSys = true;
+	}
+	if( m_nFileLogLevel > LOGLEVEL_NORMAL )
+	{
+	    m_bDispLogFile = true;
 	}
     }
 
@@ -89,11 +116,15 @@ void CLog::log( int nFlags, string msg )
     {
 	if( m_nScreenLogLevel > LOGLEVEL_DEBUG )
 	{
-	    bDispScreen = true;
+	    m_bDispScreen = true;
 	}
 	if( m_nSysLogLevel > LOGLEVEL_DEBUG )
 	{
-	    bDispSys = true;
+	    m_bDispSys = true;
+	}
+	if( m_nFileLogLevel > LOGLEVEL_DEBUG )
+	{
+	    m_bDispLogFile = true;
 	}
     }
 
@@ -102,14 +133,13 @@ void CLog::log( int nFlags, string msg )
     {
 	msg = "Error: " + msg;
     }
-    
     if( nFlags & LOG_WARNING )
     {
 	msg = "Warning: " + msg;
     }
 
 
-    if( bDispScreen )
+    if( m_bDispScreen )
     {
 	if( nFlags & LOG_NO_TIME_DISPLAY )
 	{
@@ -120,9 +150,14 @@ void CLog::log( int nFlags, string msg )
 	    cout << CurrTime() << msg;
 	}
     }
-    if( bDispSys )
+    if( m_bDispSys )
     {
 	// todo: add syslog code here
+    }
+    if( m_bDispLogFile && m_pLogFile )
+    {
+	fprintf( m_pLogFile, string( CurrTime() + msg ).c_str() );
+	fflush( m_pLogFile );
     }
 
     if( nFlags & LOG_TO_ARCHIVER )
@@ -139,6 +174,38 @@ void CLog::setScreenLogLevel( int nLogLevel )
 void CLog::setSysLogLevel( int nLogLevel )
 {
     m_nSysLogLevel = nLogLevel;
+}
+
+void CLog::setFileLogLevel( int nLogLevel )
+{
+    m_nFileLogLevel = nLogLevel;
+
+    if( m_nFileLogLevel > LOGLEVEL_NONE )
+    {
+	if( m_pLogFile == NULL )
+	{
+	    // log file already exists?
+	    bool bExists = false;
+	    m_pLogFile = fopen( g_MainConfig.Get( "logging", "logfile", string( PACKAGE_NAME ) + ".log" ).c_str(), "r" );
+	    if( m_pLogFile )
+	    {
+		bExists = true;
+		fclose( m_pLogFile );
+	    }
+	    m_pLogFile = fopen( g_MainConfig.Get( "logging", "logfile", string( PACKAGE_NAME ) + ".log" ).c_str(), "a" );
+	    if( bExists )
+	    {
+		fprintf( m_pLogFile, "\n" );
+	    }
+	}
+    }
+    else
+    {
+	if( m_pLogFile )
+	{
+	    fclose( m_pLogFile );
+	}
+    }
 }
 
 // returns the time in [H:m:s] format

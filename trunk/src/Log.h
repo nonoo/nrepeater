@@ -36,16 +36,25 @@ class CLog
 {
 public:
     CLog();
+    ~CLog();
 
     void log( int nFlags, std::string msg );
     void setScreenLogLevel( int nLogLevel );
     void setSysLogLevel( int nLogLevel );
+    void setFileLogLevel( int nLogLevel );
 
 private:
     std::string CurrTime();
 
-    int	m_nScreenLogLevel;
-    int	m_nSysLogLevel;
+    int		m_nScreenLogLevel;
+    int		m_nSysLogLevel;
+    int		m_nFileLogLevel;
+
+    bool	m_bDispScreen;
+    bool	m_bDispSys;
+    bool	m_bDispLogFile;
+
+    FILE*	m_pLogFile;
 };
 
 #endif

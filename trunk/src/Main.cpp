@@ -102,9 +102,15 @@ int main( int argc, char* argv[] )
 
     g_Log.setScreenLogLevel( g_MainConfig.GetInt( "logging", "loglevel_screen", 1 ) );
     g_Log.setSysLogLevel( g_MainConfig.GetInt( "logging", "loglevel_syslog", 1 ) );
+    g_Log.setFileLogLevel( g_MainConfig.GetInt( "logging", "loglevel_logfile", 0 ) );
 
     g_Log.log( LOG_MSG | LOG_NO_TIME_DISPLAY, PACKAGE + string( " v" ) + PACKAGE_VERSION + string( " by Nonoo <nonoo@nonoo.hu>\n" ) );
     g_Log.log( LOG_MSG | LOG_NO_TIME_DISPLAY, "http://www.nonoo.hu/projects/nrepeater/\n\n" );
+
+    char tmp[50];
+    time_t tt = time( NULL );
+    strftime( tmp, 50, "%Y/%m/%d", localtime( &tt ) );
+    g_Log.log( LOG_MSG, "* starting " + string( PACKAGE_NAME ) + " on " + string( tmp ) + "\n" );
 
     atexit( atExit );
     signal( SIGTERM, onSIGTERM );
