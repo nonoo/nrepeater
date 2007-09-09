@@ -72,7 +72,31 @@ string CArchiver::currDate()
 // returns with a generated filename
 string CArchiver::getLogFileName()
 {
-    return g_MainConfig.Get( "archiver", "prefix", "log-" ) + currDate();
+    string sLogFileName = g_MainConfig.Get( "archiver", "prefix", "log-" ) + currDate();
+    // checking if the given log file already exists
+    FILE* pFTmp1 = fopen( string( g_MainConfig.Get( "archiver", "dir", "./" ) + sLogFileName + ".spx" ).c_str(), "r" );
+    FILE* pFTmp2 = fopen( string( g_MainConfig.Get( "archiver", "dir", "./" ) + sLogFileName + ".txt" ).c_str(), "r" );
+    if( pFTmp1 || pFTmp2 )
+    {
+	// file exists, creating new filename
+	int i = 0;
+	char tmp[500];
+	do
+	{
+	    i++;
+	    if( pFTmp1 || pFTmp2 )
+	    {
+		fclose( pFTmp1 );
+		fclose( pFTmp2 );
+	    }
+	    sprintf( tmp, "%s%s.%d", g_MainConfig.Get( "archiver", "dir", "./" ).c_str(), sLogFileName.c_str(), i );
+	    pFTmp1 = fopen( string( string( tmp ) + ".spx" ).c_str(), "r" );
+	    pFTmp2 = fopen( string( string( tmp ) + ".txt" ).c_str(), "r" );
+	} while( pFTmp1 || pFTmp2 );
+	sprintf( tmp, "%s.%d", sLogFileName.c_str(), i );
+	return tmp;
+    }
+    return sLogFileName;
 }
 
 void CArchiver::event( string sEvent )
@@ -90,7 +114,7 @@ void CArchiver::event( string sEvent )
     t_tm->tm_hour--;
     strftime( tmp2, 50, "%H:%M:%S", t_tm );
 
-    fprintf( m_pEventFile, "[%s] [%s] %s\n", tmp2, tmp1, sEvent.c_str() );
+    fprintf( m_pEventFile, "[%s] [%s] %s\n", tmp1, tmp2, sEvent.c_str() );
 
     fflush( m_pEventFile );
 }
@@ -121,17 +145,16 @@ void CArchiver::maintain()
 {
     m_stTime = time( NULL );
     m_stLocalTime = localtime( &m_stTime );
-//    if( m_stLocalTime.tm_mday != m_nDay )
-//cout << m_stLocalTime->tm_min << ":" << m_stLocalTime->tm_sec << endl;
-    if( m_stLocalTime->tm_min != m_nDay )
+    if( m_stLocalTime->tm_mday != m_nDay )
     {
 	// day changed, starting new log files
-	g_Log.Debug( "starting new log files\n" );
+	g_Log.Msg( "starting new log files\n" );
 
 	m_SpeexCodec.destroy();
 	m_pOgg->destroy();
 
-	m_pOgg->init( g_MainConfig.Get( "archiver", "dir", "./" ) + getLogFileName() + ".spx" );
+	m_sLogFileName = getLogFileName();
+	m_pOgg->init( g_MainConfig.Get( "archiver", "dir", "./" ) + m_sLogFileName + ".spx" );
 	m_SpeexCodec.initEncode( m_pOgg, m_nSampleRate, m_nChannels, g_MainConfig.GetInt( "archiver", "bitrate", 10000 ) );
 
 	m_lArchivedSamples = 0;
@@ -143,14 +166,13 @@ void CArchiver::maintain()
 	{
 	    fclose( m_pEventFile );
 	}
-	m_pEventFile = fopen( string( g_MainConfig.Get( "archiver", "dir", "./" ) + getLogFileName() + ".txt" ).c_str() , "w" );
-	event2( "* " + string( PACKAGE_NAME ) + " text log for " + getLogFileName() + ".spx" );
+	m_pEventFile = fopen( string( g_MainConfig.Get( "archiver", "dir", "./" ) + m_sLogFileName + ".txt" ).c_str() , "w" );
+	event2( "* " + string( PACKAGE_NAME ) + " text log for " + m_sLogFileName + ".spx" );
 	event2( "* speex encoder bitrate: " + g_MainConfig.Get( "archiver", "bitrate", "10000" ) + " bps" );
 	char tmp[50];
 	strftime( tmp, 50, "%Y/%m/%d", m_stLocalTime );
 	event2( "* date: " + string( tmp ) );
-	fprintf( m_pEventFile, "\n[FILETIME] [REALTIME]\n" );
+	fprintf( m_pEventFile, "\n[REALTIME] [FILETIME]\n" );
     }
-//    m_nDay = m_stLocalTime.tm_mday;
-    m_nDay = m_stLocalTime->tm_min;
+    m_nDay = m_stLocalTime->tm_mday;
 }
