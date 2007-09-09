@@ -32,10 +32,10 @@ public:
     bool isSquelchOff();
 
 private:
-    int m_nReceiverPin;
-    bool m_bReceiverLow;
-    int m_nTransmitterPin1;
-    int m_nTransmitterPin2;
+    int		m_nReceiverPin;
+    bool	m_bReceiverLow;
+    int		m_nTransmitterPin1;
+    int		m_nTransmitterPin2;
 };
 
 #endif

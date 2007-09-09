@@ -44,7 +44,7 @@ private:
     int			m_nSampleRate;
     int			m_nChannels;
     bool		m_bArchiverEnabled;
-    std::string		m_sLogFileName;
+    std::string		m_szLogFileName;
 
     struct tm*		m_stLocalTime;
     time_t		m_stTime;

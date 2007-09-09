@@ -26,11 +26,11 @@ public:
     CWavFile();
     ~CWavFile();
 
-    void	openForWrite( std::string sFile, int nSampleRate, int nChannels, int nFormat );
+    void	openForWrite( std::string szFile, int nSampleRate, int nChannels, int nFormat );
     int		write( short* pData, int nFramesNum );
     int		write( char* pData, int nBytesNum );
     bool	isOpened();
-    int		loadToMemory( std::string sFile );
+    int		loadToMemory( std::string szFile );
     bool	isLoaded();
     void	close();
     void	rewind();

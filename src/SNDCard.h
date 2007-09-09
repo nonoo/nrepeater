@@ -25,32 +25,31 @@
 
 class CSNDCard {
 public:
-    CSNDCard( std::string sDevName, int nMode, int nRate, int nChannels );
+    CSNDCard( std::string szDevName, int nMode, int nRate, int nChannels );
     ~CSNDCard();
 
-    void Stop();
-    void Start();
+    void	Stop();
+    void	Start();
 
-    short* Read( int& nLength);
-    void Write( short* pBuffer, int nLength );
+    short*	Read( int& nLength);
+    void	Write( short* pBuffer, int nLength );
 
-    int getFDIn();
-    int getBufferSize();
-    int getSampleRate();
-    int getChannelNum();
+    int		getFDIn();
+    int		getBufferSize();
+    int		getSampleRate();
+    int		getChannelNum();
 
 private:
-    std::string m_sDevName;
-    int m_nFDOut, m_nFDIn;
-    int m_nMode;
-    short* m_pBuffer;
-    int m_nBufferSize;
-    int m_nRate;
-    int m_nChannels;
-    int m_nFormat;
-    unsigned int m_nFragSize;
-public:
-    bool m_bFirstTime;
+    std::string		m_szDevName;
+    int			m_nFDOut, m_nFDIn;
+    int			m_nMode;
+    short*		m_pBuffer;
+    int			m_nBufferSize;
+    int			m_nRate;
+    int			m_nChannels;
+    int			m_nFormat;
+    unsigned int	m_nFragSize;
+    bool		m_bFirstTime;
 };
 
 #endif

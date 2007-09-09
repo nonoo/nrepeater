@@ -38,7 +38,7 @@ public:
     CLog();
     ~CLog();
 
-    void log( int nFlags, std::string msg );
+    void log( int nFlags, std::string szMsg );
     void setScreenLogLevel( int nLogLevel );
     void setSysLogLevel( int nLogLevel );
     void setFileLogLevel( int nLogLevel );

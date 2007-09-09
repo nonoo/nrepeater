@@ -37,7 +37,7 @@ void COggOutStream::feedPacket( ogg_packet* m_Op, bool bFlush )
 {
 }
 
-void COggOutStream::open( std::string sFileName )
+void COggOutStream::open( std::string szFileName )
 {
 }
 

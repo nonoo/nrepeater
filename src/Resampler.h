@@ -24,10 +24,10 @@ class CResampler
 public:
     ~CResampler();
 
-    void init( double dRatio, int nChannels ); // nRatio: newsamplerate / oldsamplerate
-    void destroy();
+    void	init( double dRatio, int nChannels ); // nRatio: newsamplerate / oldsamplerate
+    void	destroy();
 
-    short* resample( short* pData, int nFramesNum, int& nFramesOut );
+    short*	resample( short* pData, int nFramesNum, int& nFramesOut );
 
 private:
     float*		m_pSRCIn;

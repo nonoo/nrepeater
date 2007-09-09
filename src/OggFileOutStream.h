@@ -29,7 +29,7 @@ public:
     ~COggFileOutStream();
 
     void feedPacket( ogg_packet* m_Op, bool bFlush );
-    void init( std::string sFileName );
+    void init( std::string szFileName );
     void destroy();
     void flush();
 
@@ -37,7 +37,7 @@ private:
     void writePage();
 
     FILE*	m_pFile;
-    std::string	m_sFileName;
+    std::string	m_szFileName;
 };
 
 #endif

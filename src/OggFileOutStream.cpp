@@ -53,9 +53,9 @@ void COggFileOutStream::feedPacket( ogg_packet* m_Op, bool bFlush )
     }
 }
 
-void COggFileOutStream::init( string sFileName )
+void COggFileOutStream::init( string szFileName )
 {
-    m_sFileName = sFileName;
+    m_szFileName = szFileName;
     if( m_pStreamState == NULL )
     {
 	m_pStreamState = (ogg_stream_state *) malloc( sizeof( ogg_stream_state ) );
@@ -63,10 +63,10 @@ void COggFileOutStream::init( string sFileName )
     }
     m_lPacketNo = 0;
 
-    m_pFile = fopen( m_sFileName.c_str(), "w" );
+    m_pFile = fopen( m_szFileName.c_str(), "w" );
     if( !m_pFile )
     {
-	g_Log.log( CLOG_ERROR, "can't open logfile for writing: " + m_sFileName + "\n" );
+	g_Log.log( CLOG_ERROR, "can't open logfile for writing: " + m_szFileName + "\n" );
     }
 }
 
