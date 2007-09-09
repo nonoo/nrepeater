@@ -23,6 +23,16 @@
 #include "Archiver.h"
 
 #include <csignal>
+#include <getopt.h>
+
+// argument list
+const struct option long_options[] =
+{
+    { "help",	0,	NULL,	'h' },
+    { "config",	1,	NULL,	'c' },
+    { NULL,	0,	NULL,	0 }
+};
+const char* const short_options = "hc:";
 
 CLog		g_Log;
 CLoop		g_Loop;
@@ -33,6 +43,7 @@ CSNDCard*	g_SNDCardOut = NULL;
 bool		g_fTerminate = false;
 CArchiver	g_Archiver;
 bool		g_fDaemonMode = false;
+string		g_szConfigFile = string( PACKAGE_NAME ) + ".conf";
 
 void daemonize()
 {
@@ -120,9 +131,42 @@ void onSIGHUP( int )
     g_MainConfig.loadConfig();
 }
 
+void printUsage( string szProgName )
+{
+    cout << string( PACKAGE ) + " v" + string( PACKAGE_VERSION ) + " by Nonoo <nonoo@nonoo.hu>" << endl;
+    cout << "http://www.nonoo.hu/projects/nrepeater/" << endl << endl;
+    cout << "Usage:  " << szProgName << " options" << endl << endl;
+    cout << "    -h  --help" << endl;
+    cout << "    -c  --config filename   Use given config file path" << endl << endl;
+    exit( EXIT_SUCCESS );
+}
+
+void parseCommandLine( int argc, char* argv[] )
+{
+    int next_option;
+
+    do
+    {
+	next_option = getopt_long( argc, argv, short_options, long_options, NULL );
+
+	switch( next_option )
+	{
+	    case 'h':
+		printUsage( argv[0] );
+	    case 'c':
+		g_szConfigFile = optarg;
+		break;
+	    default:
+		break;
+	}
+    } while( next_option != -1 );
+}
+
 int main( int argc, char* argv[] )
 {
-    g_MainConfig.setConfigFile( string( PACKAGE ) + ".conf" );
+    parseCommandLine( argc, argv );
+
+    g_MainConfig.setConfigFile( g_szConfigFile );
     g_MainConfig.loadConfig();
 
     g_Log.setScreenLogLevel( g_MainConfig.getInt( "logging", "loglevel_screen", 1 ) );

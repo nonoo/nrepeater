@@ -231,6 +231,13 @@ void CLog::setFileLogLevel( int nLogLevel )
 		fclose( m_pLogFile );
 	    }
 	    m_pLogFile = fopen( g_MainConfig.get( "logging", "logfile", string( PACKAGE_NAME ) + ".log" ).c_str(), "a" );
+	    if( m_pLogFile == NULL )
+	    {
+		// can't write to log file
+		m_nFileLogLevel = LOGLEVEL_NONE;
+		log( CLOG_ERROR, "can't open log file for writing: " + g_MainConfig.get( "logging", "logfile", string( PACKAGE_NAME ) + ".log" ) + "\n" );
+		return;
+	    }
 	    if( bExists )
 	    {
 		fprintf( m_pLogFile, "\n" );
