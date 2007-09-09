@@ -31,7 +31,7 @@ CArchiver::~CArchiver()
 {
     SAFE_DELETE( m_pOgg );
     event2( "\n" );
-    event2( "* " + string( PACKAGE_NAME ) + " exiting." );
+    event2( "* " + string( PACKAGE_NAME ) + " exiting.\n" );
     fclose( m_pEventFile );
 }
 
@@ -114,7 +114,7 @@ void CArchiver::event( string sEvent )
     t_tm->tm_hour--;
     strftime( tmp2, 50, "%H:%M:%S", t_tm );
 
-    fprintf( m_pEventFile, "[%s] [%s] %s\n", tmp1, tmp2, sEvent.c_str() );
+    fprintf( m_pEventFile, "[%s] [%s] %s", tmp1, tmp2, sEvent.c_str() );
 
     fflush( m_pEventFile );
 }
@@ -134,7 +134,7 @@ void CArchiver::event2( string sEvent )
     }
     else
     {
-	fprintf( m_pEventFile, "[%s] %s\n", tmp, sEvent.c_str() );
+	fprintf( m_pEventFile, "[%s] %s", tmp, sEvent.c_str() );
     }
 
     fflush( m_pEventFile );
@@ -148,7 +148,7 @@ void CArchiver::maintain()
     if( m_stLocalTime->tm_mday != m_nDay )
     {
 	// day changed, starting new log files
-	g_Log.Msg( "starting new log files\n" );
+	g_Log.log( LOG_MSG, "starting new log files\n" );
 
 	m_SpeexCodec.destroy();
 	m_pOgg->destroy();
@@ -161,17 +161,17 @@ void CArchiver::maintain()
 
 	// creating text logfile
 	event2( "\n" );
-	event2( "* switching log files.\n" );
+	event2( "* switching log files.\n\n" );
 	if( m_pEventFile != NULL )
 	{
 	    fclose( m_pEventFile );
 	}
 	m_pEventFile = fopen( string( g_MainConfig.Get( "archiver", "dir", "./" ) + m_sLogFileName + ".txt" ).c_str() , "w" );
-	event2( "* " + string( PACKAGE_NAME ) + " text log for " + m_sLogFileName + ".spx" );
-	event2( "* speex encoder bitrate: " + g_MainConfig.Get( "archiver", "bitrate", "10000" ) + " bps" );
+	event2( "* " + string( PACKAGE_NAME ) + " text log for " + m_sLogFileName + ".spx\n" );
+	event2( "* speex encoder bitrate: " + g_MainConfig.Get( "archiver", "bitrate", "10000" ) + " bps\n" );
 	char tmp[50];
 	strftime( tmp, 50, "%Y/%m/%d", m_stLocalTime );
-	event2( "* date: " + string( tmp ) );
+	event2( "* date: " + string( tmp ) + "\n" );
 	fprintf( m_pEventFile, "\n[REALTIME] [FILETIME]\n" );
     }
     m_nDay = m_stLocalTime->tm_mday;

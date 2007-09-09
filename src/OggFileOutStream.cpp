@@ -66,7 +66,7 @@ void COggFileOutStream::init( string sFileName )
     m_pFile = fopen( m_sFileName.c_str(), "w" );
     if( !m_pFile )
     {
-	g_Log.Error( "can't open logfile for writing: " + m_sFileName + "\n" );
+	g_Log.log( LOG_ERROR, "can't open logfile for writing: " + m_sFileName + "\n" );
     }
 }
 

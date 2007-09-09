@@ -37,7 +37,7 @@ void CResampler::init( double dRatio, int m_nChannels )
     m_pSRCState = src_new( SRC_SINC_BEST_QUALITY, m_nChannels, &err );
     if( m_pSRCState == NULL )
     {
-        g_Log.Error( "can't initialize sample rate conversion\n" );
+        g_Log.log( LOG_ERROR, "can't initialize sample rate conversion\n" );
         m_bResamplerEnabled = false;
         return;
     }

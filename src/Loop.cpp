@@ -36,16 +36,14 @@ extern CWavFile		g_RogerBeep;
 extern CSettingsFile	g_MainConfig;
 extern bool		g_fTerminate;
 extern CLoop		g_Loop;
-
-#define SPEEX_SAMPLERATE 8000
+extern CArchiver	g_Archiver;
 
 void onSIGALRM( int )
 {
-    g_Log.Debug( "transmitter off\n" );
     g_ParPort->setPTT( false );
     g_SNDCardOut->Stop();
 
-    g_Loop.m_Archiver.event( "roger beep finished, transmission stopped." );
+    g_Log.log( LOG_DEBUG | LOG_TO_ARCHIVER, "roger beep finished, transmission stopped.\n" );
 }
 
 void CLoop::setTransmitTimeout( int nMicroSecs )
@@ -82,13 +80,12 @@ void CLoop::Start()
     m_nBeepDelay = g_MainConfig.GetInt( "rogerbeep", "delay", 2 );
     m_nPlayBeepTime = 0;
 
-    g_Log.Debug( "starting main loop\n" );
-
     signal( SIGALRM, onSIGALRM );
 
     m_Compressor.init( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getBufferSize() );
     m_Resampler.init( ( 1.0 * SPEEX_SAMPLERATE ) / g_SNDCardIn->getSampleRate(), g_SNDCardOut->getChannelNum() );
-    m_Archiver.init( SPEEX_SAMPLERATE, g_SNDCardOut->getChannelNum() );
+
+    g_Log.log( LOG_MSG, "starting main loop\n" );
 
     while( !g_fTerminate )
     {
@@ -97,11 +94,9 @@ void CLoop::Start()
 	{
 	    clearTransmitTimeout();
 
-	    g_Log.Debug( "receiver on\n" );
 	    g_SNDCardIn->Start();
 	    fSquelchOff = true;
 
-	    g_Log.Debug( "transmitter on\n" );
 	    g_SNDCardOut->Stop();
 	    g_SNDCardOut->Start();
 	    g_ParPort->setPTT( true );
@@ -109,13 +104,12 @@ void CLoop::Start()
 	    m_nPlayBeepTime = 0;
 	    m_fPlayingBeep = false;
 
-	    m_Archiver.event( "receiving transmission, transmitting started" );
+	    g_Log.log( LOG_DEBUG | LOG_TO_ARCHIVER, "receiving transmission, transmitting started\n" );
 	}
 
 	// receiver stopped receiving
 	if( !g_ParPort->isSquelchOff() && fSquelchOff )
 	{
-	    g_Log.Debug( "receiver off\n" );
 	    g_SNDCardIn->Stop();
 	    fSquelchOff = false;
 
@@ -128,29 +122,27 @@ void CLoop::Start()
 	    // do we have to play a roger beep?
 	    if( !g_RogerBeep.isLoaded() )
 	    {
-		g_Log.Debug( "transmitter off\n" );
 		g_SNDCardOut->Stop();
 		g_ParPort->setPTT( false );
 
-		m_Archiver.event( "receiving finished, transmission stopped." );
+		g_Log.log( LOG_DEBUG | LOG_TO_ARCHIVER, "receiving finished, transmission stopped.\n" );
 	    }
 	    else
 	    {
 		m_nPlayBeepTime = time( NULL ) + m_nBeepDelay;
 		g_RogerBeep.rewind();
 
-		m_Archiver.event( "receiving finished" );
+		g_Log.log( LOG_DEBUG | LOG_TO_ARCHIVER, "receiving finished\n" );
 	    }
 	}
 
 	// playing roger beep if needed
 	if( ( m_nPlayBeepTime ) && ( time( NULL ) > m_nPlayBeepTime ) )
 	{
-	    g_Log.Debug( "playing beep\n" );
 	    m_nPlayBeepTime = 0;
 	    m_fPlayingBeep = true;
 
-	    m_Archiver.event( "playing roger beep" );
+	    g_Log.log( LOG_DEBUG | LOG_TO_ARCHIVER, "playing roger beep\n" );
 	}
 
 	// this plays the roger beep wave sequentially
@@ -160,7 +152,6 @@ void CLoop::Start()
 	    if( m_pBuffer == NULL )
 	    {
 		// reached the end of the wave
-		g_Log.Debug( "beep end\n" );
 		m_fPlayingBeep = false;
 
 		// turning off transmitter after given microseconds
@@ -200,13 +191,13 @@ void CLoop::Start()
 
 	if( ( m_nSelectRes = select( m_nFDIn + 1, &m_fsReads, NULL, NULL, &m_tTime ) ) == -1 )
 	{
-	    g_Log.Error( "select()\n" );
+	    g_Log.log( LOG_ERROR, "select()\n" );
 	    exit( -1 );
 	}
 
 	if( m_nSelectRes == 0 )
 	{
-    	    g_Log.Debug( "select() timeout\n");
+    	    g_Log.log( LOG_DEBUG, "select() timeout\n");
 	    continue;
 	}
 

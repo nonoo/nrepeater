@@ -32,6 +32,7 @@ CSNDCard*	g_SNDCardIn = NULL;
 CSNDCard*	g_SNDCardOut = NULL;
 CWavFile	g_RogerBeep;
 bool		g_fTerminate = false;
+CArchiver	g_Archiver;
 
 void initParPort()
 {
@@ -79,7 +80,7 @@ void initSndCards()
 
 void atExit()
 {
-    g_Log.Msg( "exiting.\n\n" );
+    g_Log.log( LOG_MSG, "exiting.\n\n" );
 }
 
 void onSIGTERM( int )
@@ -98,10 +99,11 @@ int main( int argc, char* argv[] )
     g_MainConfig.SetConfigFile( string( PACKAGE ) + ".conf" );
     g_MainConfig.LoadConfig();
 
-    g_Log.setLogLevel( g_MainConfig.GetInt( "logging", "loglevel_screen", 1 ) );
+    g_Log.setScreenLogLevel( g_MainConfig.GetInt( "logging", "loglevel_screen", 1 ) );
+    g_Log.setSysLogLevel( g_MainConfig.GetInt( "logging", "loglevel_syslog", 1 ) );
 
-    g_Log.Msg2( PACKAGE + string( " v" ) + PACKAGE_VERSION + string( " by Nonoo <nonoo@nonoo.hu>\n" ) );
-    g_Log.Msg2( "http://www.nonoo.hu/projects/nrepeater/\n\n" );
+    g_Log.log( LOG_MSG | LOG_NO_TIME_DISPLAY, PACKAGE + string( " v" ) + PACKAGE_VERSION + string( " by Nonoo <nonoo@nonoo.hu>\n" ) );
+    g_Log.log( LOG_MSG | LOG_NO_TIME_DISPLAY, "http://www.nonoo.hu/projects/nrepeater/\n\n" );
 
     atexit( atExit );
     signal( SIGTERM, onSIGTERM );
@@ -112,6 +114,8 @@ int main( int argc, char* argv[] )
 
     initSndCards();
 
+    g_Archiver.init( SPEEX_SAMPLERATE, g_SNDCardOut->getChannelNum() );
+
     // loading roger beep wave file
     if( g_MainConfig.GetInt( "rogerbeep", "enabled", 1 ) )
     {
@@ -120,16 +124,16 @@ int main( int argc, char* argv[] )
 	{
 	    char errstr[100];
 	    sprintf( errstr, "roger beep sample rate (%dhz) doesn't match output sample rate (%dhz)\n", g_RogerBeep.getSampleRate(), g_SNDCardOut->getSampleRate() );
-	    g_Log.Warning( errstr );
+	    g_Log.log( LOG_WARNING, errstr );
 	}
 	if( g_RogerBeep.getChannelNum() != g_SNDCardOut->getChannelNum() )
 	{
 	    char errstr[100];
 	    sprintf( errstr, "roger beep file has %d channel(s), output has %d\n", g_RogerBeep.getChannelNum(), g_SNDCardOut->getChannelNum() );
-	    g_Log.Warning( errstr );
+	    g_Log.log( LOG_WARNING, errstr );
 	}
 	g_RogerBeep.setVolume( g_MainConfig.GetInt( "rogerbeep", "volume", 80 ) );
-	g_Log.Debug( "roger beep file loaded into memory\n" );
+	g_Log.log( LOG_DEBUG, "roger beep file loaded into memory\n" );
     }
 
     // starting main loop

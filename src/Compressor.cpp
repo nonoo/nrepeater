@@ -280,7 +280,7 @@ short* CCompressor::process( short* pBuffer, int nFramesIn, int& nFramesOut )
     }
 
     sprintf( m_sDebugString, "compressor | m_nCurrChunk: %d m_nBufferSize: %d m_nDelayFramesCount: %d m_vBuffer.size(): %d m_fRatio: %f m_nPeak: %d\n", m_nCurrChunk, m_nBufferSize, m_nDelayFramesCount, m_vBuffer.size(), m_fRatio, m_nPeak );
-    g_Log.Debug2( m_sDebugString );
+    g_Log.log( LOG_DEBUG_EXTREME, m_sDebugString );
 
     return m_pOut;
 }
