@@ -23,8 +23,8 @@ CParPort::CParPort( int port )
 {
     if ( pin_init_user( port ) < 0 )
     {
-	char tmp[50];
-	sprintf( tmp, "failed to open LPT port 0x%x\n", port );
+	char tmp[100];
+	sprintf( tmp, "failed to open LPT port 0x%x, you should try it as root.\n", port );
 	g_Log.log( CLOG_ERROR, tmp );
 	exit( -1 );
     }

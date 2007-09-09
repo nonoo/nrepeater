@@ -14,6 +14,7 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+#include "Main.h"
 #include "SettingsFile.h"
 #include "Log.h"
 
@@ -127,13 +128,8 @@ void CSettingsFile::loadConfig()
 
     if( m_szConfigFile.size() == 0 )
     {
-	g_Log.log( CLOG_ERROR, "LoadConfig(): no config file specified!" );
+	g_Log.log( CLOG_ERROR, "LoadConfig(): no config file specified!\n" );
 	return;
-    }
-
-    if( m_szConfigPath.size() == 0 )
-    {
-	searchForConfigFile();
     }
 
     string szConfigPath = m_szConfigPath + "/" + m_szConfigFile;
@@ -141,8 +137,16 @@ void CSettingsFile::loadConfig()
     if( FileStream.fail() )
     {
 	FileStream.close();
-	g_Log.log( CLOG_ERROR, "can't open config file: " + szConfigPath );
-	return;
+
+	// couldn't find config file, searching for it
+	if( !searchForConfigFile() )
+	{
+	    // config file cannot be found
+	    return;
+	}
+	// found config file, loading it
+	szConfigPath = m_szConfigPath + "/" + m_szConfigFile;
+	FileStream.open( szConfigPath.c_str() );
     }
 
 
@@ -223,7 +227,7 @@ void CSettingsFile::loadConfig()
     FileStream.close();
 }
 
-void CSettingsFile::searchForConfigFile()
+int CSettingsFile::searchForConfigFile()
 {
     // opening config file in current directory
     string tmp = m_szInitialHomeDir + "/" + m_szConfigFile;
@@ -250,24 +254,25 @@ void CSettingsFile::searchForConfigFile()
 	    FileStream.open( tmp.c_str(), ios::in );
 	    if( FileStream.fail() )
 	    {
-		g_Log.log( CLOG_ERROR, "can't find config file: " + m_szConfigFile );
+		g_Log.log( CLOG_ERROR, "can't find/open config file: " + m_szConfigFile + "\n" );
 
-		return;
+		return 0;
 	    }
 
 	    m_szConfigPath = "/etc/";
 	    m_szConfigPath += PACKAGE;
 	    FileStream.close();
-	    return;
+	    return 1;
 	}
 
 	m_szConfigPath = szHomeDir + "/." + PACKAGE;
 	FileStream.close();
-	return;
+	return 1;
     }
 
     m_szConfigPath = m_szInitialHomeDir;
     FileStream.close();
+    return 1;
 }
 
 void CSettingsFile::setConfigFile( string szConfigFile )
@@ -315,7 +320,7 @@ void CSettingsFile::saveConfig()
 		FileStream.open( tmp.c_str() );
 		if( FileStream.fail() )
 		{
-		    g_Log.log( CLOG_ERROR, "can't save config file: " + m_szConfigFile );
+		    g_Log.log( CLOG_ERROR, "can't save config file: " + m_szConfigFile + "\n" );
 		    return;
 		}
 		m_szConfigPath = m_szInitialHomeDir;
@@ -337,7 +342,7 @@ void CSettingsFile::saveConfig()
 	FileStream.open( tmp.c_str() );
 	if( FileStream.fail() )
 	{
-	    g_Log.log( CLOG_ERROR, "can't save config file: " + m_szConfigPath + "/" + m_szConfigFile );
+	    g_Log.log( CLOG_ERROR, "can't save config file: " + m_szConfigPath + "/" + m_szConfigFile + "\n" );
 	    return;
 	}
     }

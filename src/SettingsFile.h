@@ -44,7 +44,7 @@ private:
     std::string	trimLeft( std::string szString );
     std::string	trimRight( std::string szString );
 
-    void	searchForConfigFile();
+    int		searchForConfigFile();
 
 
     std::string	m_szInitialHomeDir;
