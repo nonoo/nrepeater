@@ -21,6 +21,7 @@
 #include <iostream>
 #include <string>
 #include <time.h>
+#include <syslog.h>
 
 using namespace std;
 
@@ -40,6 +41,7 @@ CLog::~CLog()
     {
         fclose( m_pLogFile );
     }
+    closelog();
 }
 
 void CLog::log( int nFlags, string msg )
@@ -129,6 +131,32 @@ void CLog::log( int nFlags, string msg )
     }
 
 
+    if( m_bDispSys )
+    {
+	m_nSysFlags = 0;
+	if( nFlags & LOG_ERROR )
+	{
+	    m_nSysFlags |= LOG_ERR;
+	}
+	if( nFlags & LOG_WARNING )
+	{
+	    m_nSysFlags |= LOG_WARNING;
+	}
+	if( nFlags & LOG_DEBUG )
+	{
+	    m_nSysFlags |= LOG_DEBUG;
+	}
+	if( nFlags & LOG_MSG )
+	{
+	    m_nSysFlags |= LOG_INFO;
+	}
+	if( !( nFlags & LOG_NO_TIME_DISPLAY ) )
+	{
+	    syslog( m_nSysFlags, msg.c_str() );
+	}
+    }
+
+
     if( nFlags & LOG_ERROR )
     {
 	msg = "Error: " + msg;
@@ -150,10 +178,6 @@ void CLog::log( int nFlags, string msg )
 	    cout << CurrTime() << msg;
 	}
     }
-    if( m_bDispSys )
-    {
-	// todo: add syslog code here
-    }
     if( m_bDispLogFile && m_pLogFile )
     {
 	fprintf( m_pLogFile, string( CurrTime() + msg ).c_str() );
@@ -174,6 +198,20 @@ void CLog::setScreenLogLevel( int nLogLevel )
 void CLog::setSysLogLevel( int nLogLevel )
 {
     m_nSysLogLevel = nLogLevel;
+
+    if( m_nSysLogLevel > LOGLEVEL_NONE )
+    {
+	closelog();
+
+	if( m_nScreenLogLevel == LOGLEVEL_NONE )
+	{
+	    openlog( PACKAGE_NAME, LOG_CONS | LOG_PID, LOG_DAEMON );
+	}
+	else
+	{
+	    openlog( PACKAGE_NAME, LOG_PID, LOG_DAEMON );
+	}
+    }
 }
 
 void CLog::setFileLogLevel( int nLogLevel )
