@@ -123,7 +123,7 @@ void CSettingsFile::LoadConfig()
 
     if( m_szConfigFile.size() == 0 )
     {
-	g_Log.Error( "LoadConfig(): no config file specified!" );
+	g_Log.log( LOG_ERROR, "LoadConfig(): no config file specified!" );
 	return;
     }
 
@@ -137,7 +137,7 @@ void CSettingsFile::LoadConfig()
     if( FileStream.fail() )
     {
 	FileStream.close();
-	g_Log.Error( "can't open config file: " + szConfigPath );
+	g_Log.log( LOG_ERROR, "can't open config file: " + szConfigPath );
 	return;
     }
 
@@ -249,7 +249,7 @@ void CSettingsFile::SearchForConfigFile()
 	    FileStream.open( tmp.c_str(), ios::in );
 	    if( FileStream.fail() )
 	    {
-		g_Log.Error( "can't find config file: " + m_szConfigFile );
+		g_Log.log( LOG_ERROR, "can't find config file: " + m_szConfigFile );
 
 		return;
 	    }
@@ -314,7 +314,7 @@ void CSettingsFile::SaveConfig()
 		FileStream.open( tmp.c_str() );
 		if( FileStream.fail() )
 		{
-		    g_Log.Error( "can't save config file: " + m_szConfigFile );
+		    g_Log.log( LOG_ERROR, "can't save config file: " + m_szConfigFile );
 		    return;
 		}
 		m_szConfigPath = m_szInitialHomeDir;
@@ -336,7 +336,7 @@ void CSettingsFile::SaveConfig()
 	FileStream.open( tmp.c_str() );
 	if( FileStream.fail() )
 	{
-	    g_Log.Error( "can't save config file: " + m_szConfigPath + "/" + m_szConfigFile );
+	    g_Log.log( LOG_ERROR, "can't save config file: " + m_szConfigPath + "/" + m_szConfigFile );
 	    return;
 	}
     }

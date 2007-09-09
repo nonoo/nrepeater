@@ -24,6 +24,8 @@
 using namespace std;
 #endif
 
+#define SPEEX_SAMPLERATE 8000
+
 // some common macros
 //
 #define SAFE_DELETE(p)       { delete (p); (p)=NULL; }

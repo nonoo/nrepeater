@@ -25,7 +25,7 @@ CParPort::CParPort( int port )
     {
 	char tmp[50];
 	sprintf( tmp, "failed to open LPT port 0x%x\n", port );
-	g_Log.Error( tmp );
+	g_Log.log( LOG_ERROR, tmp );
 	exit( -1 );
     }
 
@@ -37,12 +37,12 @@ CParPort::CParPort( int port )
 
 void CParPort::init()
 {
-    clear_pin( LP_PIN[m_nReceiverPin] );
-    pin_input_mode( LP_PIN[m_nReceiverPin] );
-    clear_pin( LP_PIN[m_nReceiverPin] );
+    clear_pin( LP_PIN[ m_nReceiverPin ] );
+    pin_input_mode( LP_PIN[ m_nReceiverPin ] );
+    clear_pin( LP_PIN[ m_nReceiverPin ] );
 
     setPTT( false );
-    pin_output_mode( LP_PIN[m_nTransmitterPin1] | LP_PIN[m_nTransmitterPin2] );
+    pin_output_mode( LP_PIN[ m_nTransmitterPin1 ] | LP_PIN[ m_nTransmitterPin2 ] );
 }
 
 void CParPort::setReceiverPin( int nPin )
@@ -67,14 +67,14 @@ void CParPort::setTransmitterPin2( int nPin )
 
 void CParPort::setPTT( bool fState )
 {
-    change_pin( LP_PIN[m_nTransmitterPin1] | LP_PIN[m_nTransmitterPin2], fState );
+    change_pin( LP_PIN[ m_nTransmitterPin1 ] | LP_PIN[ m_nTransmitterPin2 ], fState );
 }
 
 bool CParPort::isSquelchOff()
 {
     if( m_bReceiverLow )
     {
-	if( pin_is_set( LP_PIN[m_nReceiverPin] ) )
+	if( pin_is_set( LP_PIN[ m_nReceiverPin ] ) )
 	{
 	    return false;
 	}
@@ -85,7 +85,7 @@ bool CParPort::isSquelchOff()
     }
     else
     {
-	if( pin_is_set( LP_PIN[m_nReceiverPin] ) )
+	if( pin_is_set( LP_PIN[ m_nReceiverPin ] ) )
 	{
 	    return true;
 	}

@@ -21,11 +21,6 @@ COggOutStream::COggOutStream( unsigned int nSerial )
 {
     m_nSerial = nSerial;
     m_pStreamState = NULL;
-
-/*    m_OggPage.header = NULL;
-    m_OggPage.header_len = 0;
-    m_OggPage.body = NULL;
-    m_OggPage.body_len = 0;*/
 }
 
 COggOutStream::~COggOutStream()

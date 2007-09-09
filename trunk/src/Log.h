@@ -24,23 +24,28 @@
 #define LOGLEVEL_DEBUG		2
 #define LOGLEVEL_EXTREME	3
 
+#define LOG_MSG			1
+#define LOG_ERROR		2
+#define LOG_WARNING		4
+#define LOG_DEBUG		8
+#define LOG_DEBUG_EXTREME	16
+#define LOG_NO_TIME_DISPLAY	32
+#define LOG_TO_ARCHIVER		64
+
 class CLog
 {
 public:
     CLog();
 
-    void Error( std::string msg );
-    void Warning( std::string msg );
-    void Msg( std::string msg );
-    void Msg2( std::string msg );
-    void Debug( std::string msg );
-    void Debug2( std::string msg );
-    void setLogLevel( int nLogLevel );
+    void log( int nFlags, std::string msg );
+    void setScreenLogLevel( int nLogLevel );
+    void setSysLogLevel( int nLogLevel );
 
 private:
     std::string CurrTime();
 
-    int	m_nLogLevel;
+    int	m_nScreenLogLevel;
+    int	m_nSysLogLevel;
 };
 
 #endif

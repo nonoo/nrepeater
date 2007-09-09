@@ -14,71 +14,131 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+#include "Log.h"
+#include "Archiver.h"
+
 #include <iostream>
 #include <string>
 #include <time.h>
 
-#include "Log.h"
-
 using namespace std;
+
+extern CArchiver g_Archiver;
 
 CLog::CLog()
 {
-    m_nLogLevel = LOGLEVEL_NORMAL;
+    m_nScreenLogLevel = LOGLEVEL_NORMAL;
+    m_nSysLogLevel = LOGLEVEL_NORMAL;
 }
 
-void CLog::Error( string msg )
+
+void CLog::log( int nFlags, string msg )
 {
-    if( m_nLogLevel > LOGLEVEL_NONE )
+    bool bDispScreen = false;
+    bool bDispSys = false;
+
+    if( nFlags & LOG_MSG )
     {
-	cout << CurrTime() << "Error: " << msg;
+	if( m_nScreenLogLevel > LOGLEVEL_NONE )
+	{
+	    bDispScreen = true;
+	}
+	if( m_nSysLogLevel > LOGLEVEL_NONE )
+	{
+	    bDispSys = true;
+	}
+    }
+
+    if( nFlags & LOG_ERROR )
+    {
+	if( m_nScreenLogLevel > LOGLEVEL_NONE )
+	{
+	    bDispScreen = true;
+	}
+	if( m_nSysLogLevel > LOGLEVEL_NONE )
+	{
+	    bDispSys = true;
+	}
+    }
+
+    if( nFlags & LOG_WARNING )
+    {
+	if( m_nScreenLogLevel > LOGLEVEL_NONE )
+	{
+	    bDispScreen = true;
+	}
+	if( m_nSysLogLevel > LOGLEVEL_NONE )
+	{
+	    bDispSys = true;
+	}
+    }
+
+    if( nFlags & LOG_DEBUG )
+    {
+	if( m_nScreenLogLevel > LOGLEVEL_NORMAL )
+	{
+	    bDispScreen = true;
+	}
+	if( m_nSysLogLevel > LOGLEVEL_NORMAL )
+	{
+	    bDispSys = true;
+	}
+    }
+
+    if( nFlags & LOG_DEBUG_EXTREME )
+    {
+	if( m_nScreenLogLevel > LOGLEVEL_DEBUG )
+	{
+	    bDispScreen = true;
+	}
+	if( m_nSysLogLevel > LOGLEVEL_DEBUG )
+	{
+	    bDispSys = true;
+	}
+    }
+
+
+    if( nFlags & LOG_ERROR )
+    {
+	msg = "Error: " + msg;
+    }
+    
+    if( nFlags & LOG_WARNING )
+    {
+	msg = "Warning: " + msg;
+    }
+
+
+    if( bDispScreen )
+    {
+	if( nFlags & LOG_NO_TIME_DISPLAY )
+	{
+	    cout << msg;
+	}
+	else
+	{
+	    cout << CurrTime() << msg;
+	}
+    }
+    if( bDispSys )
+    {
+	// todo: add syslog code here
+    }
+
+    if( nFlags & LOG_TO_ARCHIVER )
+    {
+	g_Archiver.event( msg );
     }
 }
 
-void CLog::Warning( string msg )
+void CLog::setScreenLogLevel( int nLogLevel )
 {
-    if( m_nLogLevel > LOGLEVEL_NONE )
-    {
-	cout << CurrTime() << "Warning: " << msg;
-    }
+    m_nScreenLogLevel = nLogLevel;
 }
 
-void CLog::Msg( string msg )
+void CLog::setSysLogLevel( int nLogLevel )
 {
-    if( m_nLogLevel > LOGLEVEL_NONE )
-    {
-	cout << CurrTime() << msg;
-    }
-}
-
-// msg without time
-void CLog::Msg2( string msg )
-{
-    if( m_nLogLevel > LOGLEVEL_NONE )
-    {
-        cout << msg;
-    }
-}
-
-void CLog::Debug( string msg )
-{
-    if( m_nLogLevel > LOGLEVEL_NORMAL )
-    {
-        cout << CurrTime() << msg;
-    }
-}
-
-void CLog::Debug2( string msg )
-{
-    if( m_nLogLevel > LOGLEVEL_DEBUG )
-    {
-        cout << CurrTime() << msg;
-    }
-}
-
-void CLog::setLogLevel( int nLogLevel )
-{
-    m_nLogLevel = nLogLevel;
+    m_nSysLogLevel = nLogLevel;
 }
 
 // returns the time in [H:m:s] format
