@@ -20,24 +20,21 @@
 #include <string>
 #include <map>
 
-// config file settings manager class
-//
 class CSettingsFile
 {
 public:
     CSettingsFile();
 
-    void	setConfigPath( std::string szConfigPath );
     void	setConfigFile( std::string szConfigFile );
 
-    // if config path is not set, loadconfig tries to
-    // figure out where the config file is
     void	loadConfig();
     void	saveConfig();
 
     std::string	get( std::string szSection, std::string szKey, std::string szDefaultValue );
     int		getInt( std::string szSection, std::string szKey, const int& nDefaultValue );
     void	set( std::string szSection, std::string szKey, std::string szValue );
+
+    std::string	getConfigFilePath();
 
 private:
     // removes whitespaces
@@ -49,7 +46,6 @@ private:
 
     std::string	m_szInitialHomeDir;
     std::string	m_szConfigFile;
-    std::string	m_szConfigPath;
 
     // ini structure in memory
     // m_Settings[section][key] == value
