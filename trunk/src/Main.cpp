@@ -23,6 +23,7 @@
 #include "SettingsFile.h"
 #include "SNDCard.h"
 #include "WavFile.h"
+#include "Archiver.h"
 
 CLog		g_Log;
 CLoop		g_Loop;

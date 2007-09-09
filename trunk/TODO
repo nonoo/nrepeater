@@ -7,4 +7,5 @@ long-term todos:
 - server and win32 client
 
 short-term todos:
-- daemon mode with proper logging
+- logging to a separate file
+- daemon mode with proper logging (syslog)
