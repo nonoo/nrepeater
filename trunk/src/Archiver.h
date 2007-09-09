@@ -29,11 +29,11 @@ public:
     CArchiver();
     ~CArchiver();
 
-    void	init( int nSampleRate, int nChannels );
-    void	write( short* pData, int nFramesNum );
-    void	event( std::string sEvent );
-    void	event2( std::string sEvent );
-    void	maintain();
+    void init( int nSampleRate, int nChannels );
+    void write( short* pData, int nFramesNum );
+    void event( std::string sEvent );
+    void event2( std::string sEvent );
+    void maintain();
 
 private:
     std::string	currDate();

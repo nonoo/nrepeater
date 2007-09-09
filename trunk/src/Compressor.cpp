@@ -28,32 +28,32 @@ void CCompressor::init( int nSNDCardRate, int nSNDCardBufferSize )
 {
     m_nSampleRate = nSNDCardRate;
 
-    m_bCompressorEnabled = g_MainConfig.GetInt( "compressor", "enabled", 0 );
+    m_bCompressorEnabled = g_MainConfig.getInt( "compressor", "enabled", 0 );
 
     // how many frames we need to buffer to delay the audio for the given time
-    m_nDelayFramesCount = (int)( ( (float)g_MainConfig.GetInt( "compressor", "lookahead", 0 ) / 1000 ) * m_nSampleRate );
+    m_nDelayFramesCount = (int)( ( (float)g_MainConfig.getInt( "compressor", "lookahead", 0 ) / 1000 ) * m_nSampleRate );
     m_nCurrChunk = 0;
     m_pOut = new short[ nSNDCardBufferSize ];
     m_nOutSize = nSNDCardBufferSize;
     m_nBufferSize = 0;
-    m_nOrigRatio = g_MainConfig.GetInt( "compressor", "ratio", 5 );
+    m_nOrigRatio = g_MainConfig.getInt( "compressor", "ratio", 5 );
     m_fRatio = 1;
-    m_nMakeUpGain = g_MainConfig.GetInt( "compressor", "makeupgain", 15 );
-    m_nThreshold = g_MainConfig.GetInt( "compressor", "threshold", -40 );
+    m_nMakeUpGain = g_MainConfig.getInt( "compressor", "makeupgain", 15 );
+    m_nThreshold = g_MainConfig.getInt( "compressor", "threshold", -40 );
     // calculating attack time from ms to frames
-    m_nAttackFramesCount = (int)( ( (float)g_MainConfig.GetInt( "compressor", "attacktime", 0 ) / 1000 ) * m_nSampleRate );
+    m_nAttackFramesCount = (int)( ( (float)g_MainConfig.getInt( "compressor", "attacktime", 0 ) / 1000 ) * m_nSampleRate );
     m_nCurrAttackFrameCount = 0;
     // calculating hold time from ms to frames
-    m_nHoldFramesCount = (int)( ( (float)g_MainConfig.GetInt( "compressor", "holdtime", 200 ) / 1000 ) * m_nSampleRate );
+    m_nHoldFramesCount = (int)( ( (float)g_MainConfig.getInt( "compressor", "holdtime", 200 ) / 1000 ) * m_nSampleRate );
     m_nCurrHoldFrameCount = 0;
     // calculating release time from ms to frames
-    m_nReleaseFramesCount = (int)( ( (float)g_MainConfig.GetInt( "compressor", "releasetime", 100 ) / 1000 ) * m_nSampleRate );
+    m_nReleaseFramesCount = (int)( ( (float)g_MainConfig.getInt( "compressor", "releasetime", 100 ) / 1000 ) * m_nSampleRate );
     m_nCurrReleaseFrameCount = m_nReleaseFramesCount;
 
     // when the receiver starts receiving, start the compressor?
-    if( g_MainConfig.GetInt( "compressor", "fadein", 1 ) )
+    if( g_MainConfig.getInt( "compressor", "fadein", 1 ) )
     {
-	if( g_MainConfig.GetInt( "compressor", "fadein_hold", 1 ) )
+	if( g_MainConfig.getInt( "compressor", "fadein_hold", 1 ) )
 	{
 	    m_sState = COMPSTATE_COMPRESSING;
 	}
@@ -94,9 +94,9 @@ void CCompressor::flush()
     }
 
     // when the receiver starts receiving, start the compressor?
-    if( g_MainConfig.GetInt( "compressor", "fadein", 1 ) )
+    if( g_MainConfig.getInt( "compressor", "fadein", 1 ) )
     {
-	if( g_MainConfig.GetInt( "compressor", "fadein_hold", 1 ) )
+	if( g_MainConfig.getInt( "compressor", "fadein_hold", 1 ) )
 	{
 	    m_sState = COMPSTATE_COMPRESSING;
 	}

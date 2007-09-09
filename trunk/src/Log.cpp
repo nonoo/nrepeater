@@ -224,13 +224,13 @@ void CLog::setFileLogLevel( int nLogLevel )
 	{
 	    // log file already exists?
 	    bool bExists = false;
-	    m_pLogFile = fopen( g_MainConfig.Get( "logging", "logfile", string( PACKAGE_NAME ) + ".log" ).c_str(), "r" );
+	    m_pLogFile = fopen( g_MainConfig.get( "logging", "logfile", string( PACKAGE_NAME ) + ".log" ).c_str(), "r" );
 	    if( m_pLogFile )
 	    {
 		bExists = true;
 		fclose( m_pLogFile );
 	    }
-	    m_pLogFile = fopen( g_MainConfig.Get( "logging", "logfile", string( PACKAGE_NAME ) + ".log" ).c_str(), "a" );
+	    m_pLogFile = fopen( g_MainConfig.get( "logging", "logfile", string( PACKAGE_NAME ) + ".log" ).c_str(), "a" );
 	    if( bExists )
 	    {
 		fprintf( m_pLogFile, "\n" );

@@ -23,12 +23,12 @@ using namespace std;
 
 extern CLog g_Log;
 
-void CSettingsFile::Set( string szSection, string szKey, string szValue )
+void CSettingsFile::set( string szSection, string szKey, string szValue )
 {
     m_Settings[ szSection ][ szKey ] = szValue;
 }
 
-string CSettingsFile::Get( string szSection, string szKey, string szDefaultValue )
+string CSettingsFile::get( string szSection, string szKey, string szDefaultValue )
 {
     if( m_Settings.count( szSection ) > 0 )
     {
@@ -41,7 +41,7 @@ string CSettingsFile::Get( string szSection, string szKey, string szDefaultValue
     return szDefaultValue;
 }
 
-int CSettingsFile::GetInt( string szSection, string szKey, const int& nDefaultValue )
+int CSettingsFile::getInt( string szSection, string szKey, const int& nDefaultValue )
 {
     if( m_Settings.count( szSection ) > 0 )
     {
@@ -71,7 +71,7 @@ int CSettingsFile::GetInt( string szSection, string szKey, const int& nDefaultVa
     return nDefaultValue;
 }
 
-string CSettingsFile::TrimLeft( string szString )
+string CSettingsFile::trimLeft( string szString )
 {
     string out="";
 
@@ -98,7 +98,7 @@ string CSettingsFile::TrimLeft( string szString )
     return out;
 }
 
-string CSettingsFile::TrimRight( string szString )
+string CSettingsFile::trimRight( string szString )
 {
     string out="";
 
@@ -121,7 +121,7 @@ string CSettingsFile::TrimRight( string szString )
     return out;
 }
 
-void CSettingsFile::LoadConfig()
+void CSettingsFile::loadConfig()
 {
     string tmp;
 
@@ -133,7 +133,7 @@ void CSettingsFile::LoadConfig()
 
     if( m_szConfigPath.size() == 0 )
     {
-	SearchForConfigFile();
+	searchForConfigFile();
     }
 
     string szConfigPath = m_szConfigPath + "/" + m_szConfigFile;
@@ -158,7 +158,7 @@ void CSettingsFile::LoadConfig()
 	FileStream.getline( buf, 499 );
 	tmp = buf;
 
-	tmp = TrimLeft( tmp );
+	tmp = trimLeft( tmp );
 
 	if( tmp[0] == '#' ) // comments
 	{
@@ -181,7 +181,7 @@ void CSettingsFile::LoadConfig()
 		tmp = tmp.substr( 1, loc-1 );
 	    }
 
-	    tmp = TrimRight( TrimLeft( tmp ) );
+	    tmp = trimRight( trimLeft( tmp ) );
 
 	    if( tmp.size() == 0 ) // invalid section
 	    {
@@ -205,13 +205,13 @@ void CSettingsFile::LoadConfig()
 	}
 
 	string key = tmp.substr( 0, loc );
-	key = TrimRight( key );
+	key = trimRight( key );
 	if( key.size() == 0 )
 	{
 	    continue;
 	}
 	string value = tmp.substr( loc+1, tmp.size()-loc-1 );
-	value = TrimRight( TrimLeft( value ) );
+	value = trimRight( trimLeft( value ) );
 	if( value.size() == 0 )
 	{
 	    continue;
@@ -223,7 +223,7 @@ void CSettingsFile::LoadConfig()
     FileStream.close();
 }
 
-void CSettingsFile::SearchForConfigFile()
+void CSettingsFile::searchForConfigFile()
 {
     // opening config file in current directory
     string tmp = m_szInitialHomeDir + "/" + m_szConfigFile;
@@ -270,12 +270,12 @@ void CSettingsFile::SearchForConfigFile()
     FileStream.close();
 }
 
-void CSettingsFile::SetConfigFile( string szConfigFile )
+void CSettingsFile::setConfigFile( string szConfigFile )
 {
     m_szConfigFile = szConfigFile;
 }
 
-void CSettingsFile::SetConfigPath( string szConfigPath )
+void CSettingsFile::setConfigPath( string szConfigPath )
 {
     m_szConfigPath = szConfigPath;
 }
@@ -288,7 +288,7 @@ CSettingsFile::CSettingsFile()
     m_szInitialHomeDir = pBuffer;
 }
 
-void CSettingsFile::SaveConfig()
+void CSettingsFile::saveConfig()
 {
     ofstream FileStream;
     string tmp;
