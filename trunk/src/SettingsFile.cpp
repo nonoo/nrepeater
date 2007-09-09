@@ -248,24 +248,30 @@ int CSettingsFile::searchForConfigFile()
 	    // trying in /etc/PACKAGE
 	    FileStream.close();
 
-	    tmp = "/etc/";
-	    tmp += PACKAGE;
-	    tmp += "/" + m_szConfigFile;
+	    tmp = "/etc/" + string( PACKAGE_NAME ) + "/" + m_szConfigFile;
 	    FileStream.open( tmp.c_str(), ios::in );
 	    if( FileStream.fail() )
 	    {
-		g_Log.log( CLOG_ERROR, "can't find/open config file: " + m_szConfigFile + "\n" );
+		// trying in /usr/local/etc/PACKAGE
+		FileStream.close();
 
-		return 0;
+		tmp = "/usr/local/etc/" + string( PACKAGE_NAME ) + "/" + m_szConfigFile;
+		FileStream.open( tmp.c_str(), ios::in );
+		if( FileStream.fail() )
+		{
+	    	    g_Log.log( CLOG_ERROR, "can't find/open config file: " + m_szConfigFile + "\n" );
+		    return 0;
+		}
+		m_szConfigPath = "/usr/local/etc/" + string( PACKAGE_NAME );
+		FileStream.close();
 	    }
 
-	    m_szConfigPath = "/etc/";
-	    m_szConfigPath += PACKAGE;
+	    m_szConfigPath = "/etc/" + string( PACKAGE_NAME );
 	    FileStream.close();
 	    return 1;
 	}
 
-	m_szConfigPath = szHomeDir + "/." + PACKAGE;
+	m_szConfigPath = szHomeDir + "/." + PACKAGE_NAME;
 	FileStream.close();
 	return 1;
     }
