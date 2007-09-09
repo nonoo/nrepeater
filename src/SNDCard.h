@@ -28,11 +28,11 @@ public:
     CSNDCard( std::string szDevName, int nMode, int nRate, int nChannels );
     ~CSNDCard();
 
-    void	Stop();
-    void	Start();
+    void	stop();
+    void	start();
 
-    short*	Read( int& nLength);
-    void	Write( short* pBuffer, int nLength );
+    short*	read( int& nLength);
+    void	write( short* pBuffer, int nLength );
 
     int		getFDIn();
     int		getBufferSize();

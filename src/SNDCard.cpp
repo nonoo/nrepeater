@@ -156,15 +156,15 @@ CSNDCard::CSNDCard( string szDevName, int nMode, int nRate, int nChannels )
 	    break;
 	case SNDCARDMODE_IN:
 	    m_nFDIn = fd;
-	    Read( tmp ); // initializing sound card, if we don't do this, select() will timeout
+	    read( tmp ); // initializing sound card, if we don't do this, select() will timeout
 	    break;
 	default:
 	    m_nFDOut = m_nFDIn = fd;
-	    Read( tmp ); // initializing sound card, if we don't do this, select() will timeout
+	    read( tmp ); // initializing sound card, if we don't do this, select() will timeout
 	    break;
     }
 
-    Stop();
+    stop();
 
     char etmp[100];
     sprintf( etmp, "Initialized %s using fragment size %d, buffer size %d.\n", m_szDevName.c_str(), m_nFragSize, m_nBufferSize );
@@ -188,7 +188,7 @@ CSNDCard::~CSNDCard()
 }
 
 // starts the device
-void CSNDCard::Start()
+void CSNDCard::start()
 {
     int trig = 0;
     switch( m_nMode )
@@ -217,7 +217,7 @@ void CSNDCard::Start()
 }
 
 // stops the device
-void CSNDCard::Stop()
+void CSNDCard::stop()
 {
     int trig = 0; // trigger off
     switch( m_nMode )
@@ -246,7 +246,7 @@ void CSNDCard::Stop()
     ioctl( m_nFDOut, SNDCTL_DSP_HALT, NULL);
 }
 
-short* CSNDCard::Read( int& nLength )
+short* CSNDCard::read( int& nLength )
 {
     struct audio_buf_info info;
     if( ioctl( m_nFDIn, SNDCTL_DSP_GETISPACE, &info ) == -1 )
@@ -257,7 +257,7 @@ short* CSNDCard::Read( int& nLength )
 
     int n = info.bytes; // how much to read
 
-    if( read( m_nFDIn, m_pBuffer, n * 2 ) != n * 2 ) // n * 2 because we read shorts
+    if( ::read( m_nFDIn, m_pBuffer, n * 2 ) != n * 2 ) // n * 2 because we read shorts
     {
 	g_Log.log( CLOG_ERROR, "error reading audio data from " + m_szDevName + "\n" );
 	exit( -1 );
@@ -268,13 +268,13 @@ short* CSNDCard::Read( int& nLength )
     return m_pBuffer;
 }
 
-void CSNDCard::Write( short* pBuffer, int nLength )
+void CSNDCard::write( short* pBuffer, int nLength )
 {
     if( m_bFirstTime)
     {
 	short* pSilence = new short[ m_nFragSize ];
 	memset( pSilence, 0, m_nFragSize * 2 );
-	if( write( m_nFDOut, pSilence, m_nFragSize * 2 ) != (int)m_nFragSize * 2 )
+	if( ::write( m_nFDOut, pSilence, m_nFragSize * 2 ) != (int)m_nFragSize * 2 )
 	{
 	    g_Log.log( CLOG_ERROR, "error writing audio data to " + m_szDevName + "\n" );
 	    exit( -1 );
@@ -284,7 +284,7 @@ void CSNDCard::Write( short* pBuffer, int nLength )
     }
 
     // n * 2 because we read shorts
-    if( write( m_nFDOut, pBuffer, nLength * 2 ) != (int)nLength * 2 )
+    if( ::write( m_nFDOut, pBuffer, nLength * 2 ) != (int)nLength * 2 )
     {
 	g_Log.log( CLOG_ERROR, "error writing audio data to " + m_szDevName + "\n" );
 	exit( -1 );

@@ -42,7 +42,7 @@ extern CArchiver	g_Archiver;
 void onSIGALRM( int )
 {
     g_ParPort->setPTT( false );
-    g_SNDCardOut->Stop();
+    g_SNDCardOut->stop();
 
     g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "roger beep finished, transmission stopped.\n" );
 }
@@ -72,18 +72,18 @@ void CLoop::clearTransmitTimeout()
 }
 
 // main loop
-void CLoop::Start()
+void CLoop::start()
 {
     bool fSquelchOff = false;
     m_nFDIn = g_SNDCardIn->getFDIn();
     m_nSelectRes = -1;
 
-    if( m_RogerBeep.loadToMemory( g_MainConfig.Get( "rogerbeep", "file", "beep.wav" ) ) )
+    if( m_RogerBeep.loadToMemory( g_MainConfig.get( "rogerbeep", "file", "beep.wav" ) ) )
     {
-	m_RogerBeep.setVolume( g_MainConfig.GetInt( "rogerbeep", "volume", 80 ) );
+	m_RogerBeep.setVolume( g_MainConfig.getInt( "rogerbeep", "volume", 80 ) );
 	g_Log.log( CLOG_DEBUG, "roger beep file loaded into memory\n" );
     }
-    m_nBeepDelay = g_MainConfig.GetInt( "rogerbeep", "delay", 2 );
+    m_nBeepDelay = g_MainConfig.getInt( "rogerbeep", "delay", 2 );
     m_nPlayBeepTime = 0;
 
     signal( SIGALRM, onSIGALRM );
@@ -100,11 +100,11 @@ void CLoop::Start()
 	{
 	    clearTransmitTimeout();
 
-	    g_SNDCardIn->Start();
+	    g_SNDCardIn->start();
 	    fSquelchOff = true;
 
-	    g_SNDCardOut->Stop();
-	    g_SNDCardOut->Start();
+	    g_SNDCardOut->stop();
+	    g_SNDCardOut->start();
 	    g_ParPort->setPTT( true );
 
 	    m_nPlayBeepTime = 0;
@@ -116,10 +116,10 @@ void CLoop::Start()
 	// receiver stopped receiving
 	if( !g_ParPort->isSquelchOff() && fSquelchOff )
 	{
-	    g_SNDCardIn->Stop();
+	    g_SNDCardIn->stop();
 	    fSquelchOff = false;
 
-	    if( g_MainConfig.GetInt( "compressor", "enabled", 0 ) )
+	    if( g_MainConfig.getInt( "compressor", "enabled", 0 ) )
 	    {
 		// resetting compressor
 		m_Compressor.flush();
@@ -128,7 +128,7 @@ void CLoop::Start()
 	    // do we have to play a roger beep?
 	    if( !m_RogerBeep.isLoaded() )
 	    {
-		g_SNDCardOut->Stop();
+		g_SNDCardOut->stop();
 		g_ParPort->setPTT( false );
 
 		g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving finished, transmission stopped.\n" );
@@ -162,12 +162,12 @@ void CLoop::Start()
 
 		// turning off transmitter after given microseconds
 		// setting up timer
-		setTransmitTimeout( g_MainConfig.GetInt( "rogerbeep", "delayafter", 250000 ) );
+		setTransmitTimeout( g_MainConfig.getInt( "rogerbeep", "delayafter", 250000 ) );
 	    }
 	    else
 	    {
 		// playing roger beep
-		g_SNDCardOut->Write( m_pBuffer, m_nFramesRead );
+		g_SNDCardOut->write( m_pBuffer, m_nFramesRead );
 
 		// resampling
 		int nResampledFramesNum = 0;
@@ -209,14 +209,14 @@ void CLoop::Start()
 
 	if( FD_ISSET( m_nFDIn, &m_fsReads) )
 	{
-	    m_pBuffer = g_SNDCardIn->Read( m_nFramesRead );
+	    m_pBuffer = g_SNDCardIn->read( m_nFramesRead );
 
 	    // compressing
 	    int nCompressedFramesNum = 0;
 	    short* pCompOut = m_Compressor.process( m_pBuffer, m_nFramesRead, nCompressedFramesNum );
 
 	    // playing processed samples
-	    g_SNDCardOut->Write( pCompOut, nCompressedFramesNum );
+	    g_SNDCardOut->write( pCompOut, nCompressedFramesNum );
 
 	    // resampling
 	    int nResampledFramesNum = 0;

@@ -48,7 +48,7 @@ void CArchiver::init( int nSampleRate, int nChannels )
 {
     m_nSampleRate = nSampleRate;
     m_nChannels = nChannels;
-    m_bArchiverEnabled = g_MainConfig.GetInt( "archiver", "enabled", 1 );
+    m_bArchiverEnabled = g_MainConfig.getInt( "archiver", "enabled", 1 );
 
     m_nDay = -1;
     m_lArchivedSamples = 0;
@@ -81,10 +81,10 @@ string CArchiver::currDate()
 // returns with a generated filename
 string CArchiver::getLogFileName()
 {
-    string szLogFileName = g_MainConfig.Get( "archiver", "prefix", "log-" ) + currDate();
+    string szLogFileName = g_MainConfig.get( "archiver", "prefix", "log-" ) + currDate();
     // checking if the given log file already exists
-    FILE* pFTmp1 = fopen( string( g_MainConfig.Get( "archiver", "dir", "./" ) + szLogFileName + ".spx" ).c_str(), "r" );
-    FILE* pFTmp2 = fopen( string( g_MainConfig.Get( "archiver", "dir", "./" ) + szLogFileName + ".txt" ).c_str(), "r" );
+    FILE* pFTmp1 = fopen( string( g_MainConfig.get( "archiver", "dir", "./" ) + szLogFileName + ".spx" ).c_str(), "r" );
+    FILE* pFTmp2 = fopen( string( g_MainConfig.get( "archiver", "dir", "./" ) + szLogFileName + ".txt" ).c_str(), "r" );
     if( pFTmp1 || pFTmp2 )
     {
 	// file exists, creating new filename
@@ -98,7 +98,7 @@ string CArchiver::getLogFileName()
 		fclose( pFTmp1 );
 		fclose( pFTmp2 );
 	    }
-	    sprintf( tmp, "%s%s.%d", g_MainConfig.Get( "archiver", "dir", "./" ).c_str(), szLogFileName.c_str(), i );
+	    sprintf( tmp, "%s%s.%d", g_MainConfig.get( "archiver", "dir", "./" ).c_str(), szLogFileName.c_str(), i );
 	    pFTmp1 = fopen( string( string( tmp ) + ".spx" ).c_str(), "r" );
 	    pFTmp2 = fopen( string( string( tmp ) + ".txt" ).c_str(), "r" );
 	} while( pFTmp1 || pFTmp2 );
@@ -163,8 +163,8 @@ void CArchiver::maintain()
 	m_pOgg->destroy();
 
 	m_szLogFileName = getLogFileName();
-	m_pOgg->init( g_MainConfig.Get( "archiver", "dir", "./" ) + m_szLogFileName + ".spx" );
-	m_SpeexCodec.initEncode( m_pOgg, m_nSampleRate, m_nChannels, g_MainConfig.GetInt( "archiver", "bitrate", 10000 ) );
+	m_pOgg->init( g_MainConfig.get( "archiver", "dir", "./" ) + m_szLogFileName + ".spx" );
+	m_SpeexCodec.initEncode( m_pOgg, m_nSampleRate, m_nChannels, g_MainConfig.getInt( "archiver", "bitrate", 10000 ) );
 
 	m_lArchivedSamples = 0;
 
@@ -175,9 +175,9 @@ void CArchiver::maintain()
 	{
 	    fclose( m_pEventFile );
 	}
-	m_pEventFile = fopen( string( g_MainConfig.Get( "archiver", "dir", "./" ) + m_szLogFileName + ".txt" ).c_str() , "w" );
+	m_pEventFile = fopen( string( g_MainConfig.get( "archiver", "dir", "./" ) + m_szLogFileName + ".txt" ).c_str() , "w" );
 	event2( "* " + string( PACKAGE_NAME ) + " text log for " + m_szLogFileName + ".spx\n" );
-	event2( "* speex encoder bitrate: " + g_MainConfig.Get( "archiver", "bitrate", "10000" ) + " bps\n" );
+	event2( "* speex encoder bitrate: " + g_MainConfig.get( "archiver", "bitrate", "10000" ) + " bps\n" );
 	char tmp[50];
 	strftime( tmp, 50, "%Y/%m/%d", m_stLocalTime );
 	event2( "* date: " + string( tmp ) + "\n" );

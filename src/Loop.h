@@ -24,7 +24,7 @@
 class CLoop
 {
 public:
-    void Start();
+    void start();
 
 private:
     void setTransmitTimeout( int nMicroSecs );

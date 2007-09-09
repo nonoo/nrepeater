@@ -23,6 +23,7 @@ class CParPort
 {
 public:
     CParPort( int port );
+
     void init();
     void setReceiverPin( int nPin );
     void setReceiverLow( bool fLow );
