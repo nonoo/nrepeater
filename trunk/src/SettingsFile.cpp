@@ -24,6 +24,14 @@ using namespace std;
 
 extern CLog g_Log;
 
+CSettingsFile::CSettingsFile()
+{
+    char pBuffer[500];
+
+    getcwd( pBuffer, 500 );
+    m_szInitialHomeDir = pBuffer;
+}
+
 void CSettingsFile::set( string szSection, string szKey, string szValue )
 {
     m_Settings[ szSection ][ szKey ] = szValue;
@@ -132,8 +140,7 @@ void CSettingsFile::loadConfig()
 	return;
     }
 
-    string szConfigPath = m_szConfigPath + "/" + m_szConfigFile;
-    ifstream FileStream( szConfigPath.c_str() );
+    ifstream FileStream( m_szConfigFile.c_str() );
     if( FileStream.fail() )
     {
 	FileStream.close();
@@ -145,8 +152,7 @@ void CSettingsFile::loadConfig()
 	    return;
 	}
 	// found config file, loading it
-	szConfigPath = m_szConfigPath + "/" + m_szConfigFile;
-	FileStream.open( szConfigPath.c_str() );
+	FileStream.open( m_szConfigFile.c_str() );
     }
 
 
@@ -237,10 +243,7 @@ int CSettingsFile::searchForConfigFile()
 	// trying in $HOME/.PACKAGE
 	FileStream.close();
 
-	char* pHomeDir = getenv( "HOME" );
-	string szHomeDir = pHomeDir;
-	tmp = szHomeDir + "/." + PACKAGE + "/" + m_szConfigFile;
-	free( pHomeDir );
+	tmp = string( getenv( "HOME" ) ) + "/." + PACKAGE_NAME + "/" + m_szConfigFile;
 
 	FileStream.open( tmp.c_str(), ios::in );
 	if( FileStream.fail() )
@@ -262,21 +265,21 @@ int CSettingsFile::searchForConfigFile()
 	    	    g_Log.log( CLOG_ERROR, "can't find/open config file: " + m_szConfigFile + "\n" );
 		    return 0;
 		}
-		m_szConfigPath = "/usr/local/etc/" + string( PACKAGE_NAME );
+		m_szConfigFile = tmp;
 		FileStream.close();
 	    }
 
-	    m_szConfigPath = "/etc/" + string( PACKAGE_NAME );
+	    m_szConfigFile = tmp;
 	    FileStream.close();
 	    return 1;
 	}
 
-	m_szConfigPath = szHomeDir + "/." + PACKAGE_NAME;
+	m_szConfigFile = tmp;
 	FileStream.close();
 	return 1;
     }
 
-    m_szConfigPath = m_szInitialHomeDir;
+    m_szConfigFile = tmp;
     FileStream.close();
     return 1;
 }
@@ -286,71 +289,26 @@ void CSettingsFile::setConfigFile( string szConfigFile )
     m_szConfigFile = szConfigFile;
 }
 
-void CSettingsFile::setConfigPath( string szConfigPath )
+string CSettingsFile::getConfigFilePath()
 {
-    m_szConfigPath = szConfigPath;
-}
-
-CSettingsFile::CSettingsFile()
-{
-    char pBuffer[500];
-
-    getcwd( pBuffer, 500 );
-    m_szInitialHomeDir = pBuffer;
+    int i;
+    for( i = m_szConfigFile.size(); i > 0 && m_szConfigFile[i] != '/'; i-- );
+    char tmp[500];
+    memcpy( tmp, m_szConfigFile.c_str(), i );
+    tmp[i] = 0;
+    return tmp;
 }
 
 void CSettingsFile::saveConfig()
 {
     ofstream FileStream;
-    string tmp;
 
-    if( m_szConfigPath.size() == 0 )
-    // we try to search directory where we can write the config
+    FileStream.open( m_szConfigFile.c_str() );
+    if( FileStream.fail() )
     {
-	tmp = "/etc/";
-	tmp += PACKAGE;
-	tmp += "/" + m_szConfigFile;
-	FileStream.open( tmp.c_str() );
-	if( FileStream.fail() )
-	{
-	    FileStream.close();
-	    char* pHomeDir = getenv( "HOME" );
-	    string szHomeDir = pHomeDir;
-	    tmp = szHomeDir + "/." + PACKAGE + "/" + m_szConfigFile;
-	    free( pHomeDir );
-	    FileStream.open( szHomeDir.c_str() );
-	    if( FileStream.fail() )
-	    {
-		FileStream.close();
-		tmp = m_szInitialHomeDir + "/" + m_szConfigFile;
-		FileStream.open( tmp.c_str() );
-		if( FileStream.fail() )
-		{
-		    g_Log.log( CLOG_ERROR, "can't save config file: " + m_szConfigFile + "\n" );
-		    return;
-		}
-		m_szConfigPath = m_szInitialHomeDir;
-	    }
-	    else
-	    {
-		m_szConfigPath = szHomeDir + "/." + PACKAGE;
-	    }
-	}
-	else
-	{
-	    m_szConfigPath = "/etc/";
-	    m_szConfigPath += PACKAGE;
-	}
-    }
-    else
-    {
-	tmp = m_szConfigPath + "/" + m_szConfigFile;
-	FileStream.open( tmp.c_str() );
-	if( FileStream.fail() )
-	{
-	    g_Log.log( CLOG_ERROR, "can't save config file: " + m_szConfigPath + "/" + m_szConfigFile + "\n" );
-	    return;
-	}
+        FileStream.close();
+        g_Log.log( CLOG_ERROR, "can't save config file: " + m_szConfigFile + "\n" );
+        return;
     }
 
     bool fLeadingLine = false;

@@ -18,8 +18,11 @@
 #include "WavFile.h"
 #include "Log.h"
 #include "SNDCard.h"
+#include "SettingsFile.h"
 
 #include <math.h>
+
+extern CSettingsFile g_MainConfig;
 
 using namespace std;
 
@@ -83,10 +86,14 @@ int CWavFile::loadToMemory( string szFile )
     memset( &m_SFINFO, 0, sizeof( m_SFINFO ) );
     if( ( m_pSNDFILE = sf_open( szFile.c_str(), SFM_READ, &m_SFINFO ) ) == NULL )
     {
-	char errstr[500];
-	sf_error_str( m_pSNDFILE, errstr, 100 );
-	g_Log.log( CLOG_WARNING, "can't open wav file " + szFile + ": " + errstr + "\n" );
-	return 0;
+	// can't open wave file, trying in config file's dir
+	if( ( m_pSNDFILE = sf_open( string( g_MainConfig.getConfigFilePath() + "/" + szFile ).c_str(), SFM_READ, &m_SFINFO ) ) == NULL )
+	{
+	    char errstr[500];
+	    sf_error_str( m_pSNDFILE, errstr, 100 );
+	    g_Log.log( CLOG_WARNING, "can't open wav file " + szFile + ": " + errstr + "\n" );
+	    return 0;
+	}
     }
 
     // loading wave data to memory
