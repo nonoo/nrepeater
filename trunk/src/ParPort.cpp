@@ -25,7 +25,7 @@ CParPort::CParPort( int port )
     {
 	char tmp[50];
 	sprintf( tmp, "failed to open LPT port 0x%x\n", port );
-	g_Log.log( LOG_ERROR, tmp );
+	g_Log.log( CLOG_ERROR, tmp );
 	exit( -1 );
     }
 

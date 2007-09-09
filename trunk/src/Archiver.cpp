@@ -14,8 +14,8 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "Archiver.h"
 #include "Main.h"
+#include "Archiver.h"
 #include "SettingsFile.h"
 #include "Log.h"
 
@@ -27,12 +27,21 @@ using namespace std;
 extern CSettingsFile	g_MainConfig;
 extern CLog		g_Log;
 
+CArchiver::CArchiver()
+{
+    m_pEventFile = NULL;
+}
+
 CArchiver::~CArchiver()
 {
     SAFE_DELETE( m_pOgg );
     event2( "\n" );
     event2( "* " + string( PACKAGE_NAME ) + " exiting.\n" );
-    fclose( m_pEventFile );
+
+    if( m_pEventFile )
+    {
+	fclose( m_pEventFile );
+    }
 }
 
 void CArchiver::init( int nSampleRate, int nChannels )
@@ -43,9 +52,9 @@ void CArchiver::init( int nSampleRate, int nChannels )
 
     m_nDay = -1;
     m_lArchivedSamples = 0;
+    m_pEventFile = NULL;
 
     m_pOgg = new COggFileOutStream( 0 );
-    m_pEventFile = NULL;
 
     maintain();
 }
@@ -148,7 +157,7 @@ void CArchiver::maintain()
     if( m_stLocalTime->tm_mday != m_nDay )
     {
 	// day changed, starting new log files
-	g_Log.log( LOG_MSG, "starting new log files\n" );
+	g_Log.log( CLOG_MSG, "starting new log files\n" );
 
 	m_SpeexCodec.destroy();
 	m_pOgg->destroy();

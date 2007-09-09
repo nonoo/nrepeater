@@ -14,8 +14,8 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "Resampler.h"
 #include "Main.h"
+#include "Resampler.h"
 #include "Log.h"
 
 extern CLog g_Log;
@@ -37,7 +37,7 @@ void CResampler::init( double dRatio, int m_nChannels )
     m_pSRCState = src_new( SRC_SINC_BEST_QUALITY, m_nChannels, &err );
     if( m_pSRCState == NULL )
     {
-        g_Log.log( LOG_ERROR, "can't initialize sample rate conversion\n" );
+        g_Log.log( CLOG_ERROR, "can't initialize sample rate conversion\n" );
         m_bResamplerEnabled = false;
         return;
     }

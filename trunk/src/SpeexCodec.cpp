@@ -14,8 +14,8 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "SpeexCodec.h"
 #include "Main.h"
+#include "SpeexCodec.h"
 
 #include <speex/speex_header.h>
 

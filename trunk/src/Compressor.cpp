@@ -14,12 +14,12 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include <math.h>
-
-#include "Compressor.h"
 #include "Main.h"
+#include "Compressor.h"
 #include "SettingsFile.h"
 #include "Log.h"
+
+#include <math.h>
 
 extern CSettingsFile	g_MainConfig;
 extern CLog		g_Log;
@@ -280,7 +280,7 @@ short* CCompressor::process( short* pBuffer, int nFramesIn, int& nFramesOut )
     }
 
     sprintf( m_sDebugString, "compressor | m_nCurrChunk: %d m_nBufferSize: %d m_nDelayFramesCount: %d m_vBuffer.size(): %d m_fRatio: %f m_nPeak: %d\n", m_nCurrChunk, m_nBufferSize, m_nDelayFramesCount, m_vBuffer.size(), m_fRatio, m_nPeak );
-    g_Log.log( LOG_DEBUG_EXTREME, m_sDebugString );
+    g_Log.log( CLOG_DEBUG_EXTREME, m_sDebugString );
 
     return m_pOut;
 }
