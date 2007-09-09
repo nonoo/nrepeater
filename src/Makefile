@@ -50,7 +50,8 @@ am_nrepeater_OBJECTS = Main.$(OBJEXT) Log.$(OBJEXT) ParPort.$(OBJEXT) \
 	Loop.$(OBJEXT) SettingsFile.$(OBJEXT) SNDCard.$(OBJEXT) \
 	WavFile.$(OBJEXT) Compressor.$(OBJEXT) Archiver.$(OBJEXT) \
 	SpeexCodec.$(OBJEXT) OggOutStream.$(OBJEXT) \
-	OggFileOutStream.$(OBJEXT) Resampler.$(OBJEXT)
+	OggFileOutStream.$(OBJEXT) Resampler.$(OBJEXT) DTMF.$(OBJEXT) \
+	Goertzel.$(OBJEXT)
 nrepeater_OBJECTS = $(am_nrepeater_OBJECTS)
 nrepeater_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -167,7 +168,9 @@ nrepeater_SOURCES = \
 	SpeexCodec.cpp SpeexCodec.h \
 	OggOutStream.cpp OggOutStream.h \
 	OggFileOutStream.cpp OggFileOutStream.h \
-	Resampler.cpp Resampler.h
+	Resampler.cpp Resampler.h \
+	DTMF.cpp DTMF.h \
+	Goertzel.cpp Goertzel.h
 
 all: all-am
 
@@ -237,6 +240,8 @@ distclean-compile:
 
 include ./$(DEPDIR)/Archiver.Po
 include ./$(DEPDIR)/Compressor.Po
+include ./$(DEPDIR)/DTMF.Po
+include ./$(DEPDIR)/Goertzel.Po
 include ./$(DEPDIR)/Log.Po
 include ./$(DEPDIR)/Loop.Po
 include ./$(DEPDIR)/Main.Po

@@ -14,38 +14,30 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __LOOP_H
-#define __LOOP_H
-
-#include "Compressor.h"
-#include "Resampler.h"
-#include "WavFile.h"
+#include "Main.h"
 #include "DTMF.h"
+#include "SettingsFile.h"
 
-class CLoop
+extern CSettingsFile g_MainConfig;
+
+void CDTMF::init( int nSampleRate )
 {
-public:
-    void start();
+    m_nSampleRate = nSampleRate;
 
-private:
-    void setTransmitTimeout( int nMicroSecs );
-    void clearTransmitTimeout();
+    m_Goertzel.init( m_nSampleRate );
+}
 
-    struct timeval	m_tTime;
-    int			m_nFDIn;
-    fd_set		m_fsReads;
-    int			m_nSelectRes;
-    CCompressor		m_Compressor;
-    CWavFile		m_RogerBeep;
+void CDTMF::process( short* pData, int nFramesNum )
+{
+    if( !g_MainConfig.getInt( "dtmf", "enabled", 0 ) )
+    {
+	return;
+    }
 
-    // audio data from the sound card
-    short*		m_pBuffer;
-    int			m_nFramesRead;
-    int			m_nBeepDelay;
-    int			m_nPlayBeepTime;
-    bool		m_fPlayingBeep;
-    CResampler		m_Resampler;
-    CDTMF		m_DTMF;
-};
+    m_caDecoded = m_Goertzel.process( pData, nFramesNum );
 
-#endif
+    if( m_caDecoded != NULL )
+    {
+	cout << "DTMF: " << m_caDecoded << endl;
+    }
+}

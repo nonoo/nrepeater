@@ -14,38 +14,22 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef __LOOP_H
-#define __LOOP_H
+#ifndef __DTMF_H
+#define __DTMF_H
 
-#include "Compressor.h"
-#include "Resampler.h"
-#include "WavFile.h"
-#include "DTMF.h"
+#include "Goertzel.h"
 
-class CLoop
+class CDTMF
 {
 public:
-    void start();
+    void init( int nSampleRate );
+    void process( short* pData, int nFramesNum );
 
 private:
-    void setTransmitTimeout( int nMicroSecs );
-    void clearTransmitTimeout();
+    CGoertzel	m_Goertzel;
+    int		m_nSampleRate;
 
-    struct timeval	m_tTime;
-    int			m_nFDIn;
-    fd_set		m_fsReads;
-    int			m_nSelectRes;
-    CCompressor		m_Compressor;
-    CWavFile		m_RogerBeep;
-
-    // audio data from the sound card
-    short*		m_pBuffer;
-    int			m_nFramesRead;
-    int			m_nBeepDelay;
-    int			m_nPlayBeepTime;
-    bool		m_fPlayingBeep;
-    CResampler		m_Resampler;
-    CDTMF		m_DTMF;
+    char*	m_caDecoded;
 };
 
 #endif
