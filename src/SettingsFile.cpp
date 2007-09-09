@@ -14,9 +14,10 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include <fstream>
 #include "SettingsFile.h"
 #include "Log.h"
+
+#include <fstream>
 
 using namespace std;
 
@@ -27,43 +28,47 @@ void CSettingsFile::Set( string Section, string Key, string Value )
     m_Settings[Section][Key] = Value;
 }
 
-string CSettingsFile::Get( string Section, string Key, string DefaultValue )
+string CSettingsFile::Get( string szSection, string szKey, string szDefaultValue )
 {
-    if( m_Settings.count( Section ) > 0 )
+    if( m_Settings.count( szSection ) > 0 )
     {
-	if( m_Settings[Section].count( Key ) > 0 )
+	if( m_Settings[ szSection ].count( szKey ) > 0 )
 	{
-	    return m_Settings[Section][Key];
+	    return m_Settings[ szSection ][ szKey ];
 	}
     }
-    return DefaultValue;
+    g_Log.log( CLOG_DEBUG, "Warning: invalid value in config file section '" + szSection + "', key '" + szKey + "': " + m_Settings[ szSection ][ szKey ] + " - using default value: " + szDefaultValue + "\n" );
+    return szDefaultValue;
 }
 
-int CSettingsFile::GetInt( string Section, string Key, const int& DefaultValue )
+int CSettingsFile::GetInt( string szSection, string szKey, const int& nDefaultValue )
 {
-    if( m_Settings.count( Section ) > 0 )
+    if( m_Settings.count( szSection ) > 0 )
     {
-	if( m_Settings[Section].count( Key ) > 0 )
+	if( m_Settings[ szSection ].count( szKey ) > 0 )
 	{
-	    if( strcasecmp( m_Settings[Section][Key].c_str(), "yes" ) == 0 )
+	    if( strcasecmp( m_Settings[ szSection ][ szKey ].c_str(), "yes" ) == 0 )
 	    {
 		return 1;
 	    }
-	    if( strcasecmp( m_Settings[Section][Key].c_str(), "no" ) == 0 )
+	    if( strcasecmp( m_Settings[ szSection ][ szKey ].c_str(), "no" ) == 0 )
 	    {
 		return 0;
 	    }
 
 	    char* p;
-	    int res = strtol( m_Settings[Section][Key].c_str(), &p, 0 );
+	    int res = strtol( m_Settings[ szSection ][ szKey ].c_str(), &p, 0 );
 	    if( *p != 0 ) // the whole string was not valid
 	    {
-		return DefaultValue;
+		char tmp[500];
+		sprintf( tmp, "Warning: invalid value in config file section '%s', key '%s': %s - using default value: %d\n", szSection.c_str(), szKey.c_str(), m_Settings[ szSection ][ szKey ].c_str(), nDefaultValue );
+		g_Log.log( CLOG_DEBUG, tmp );
+		return nDefaultValue;
 	    }
 	    return res;
 	}
     }
-    return DefaultValue;
+    return nDefaultValue;
 }
 
 string CSettingsFile::TrimLeft( string szString )
@@ -123,7 +128,7 @@ void CSettingsFile::LoadConfig()
 
     if( m_szConfigFile.size() == 0 )
     {
-	g_Log.log( LOG_ERROR, "LoadConfig(): no config file specified!" );
+	g_Log.log( CLOG_ERROR, "LoadConfig(): no config file specified!" );
 	return;
     }
 
@@ -137,7 +142,7 @@ void CSettingsFile::LoadConfig()
     if( FileStream.fail() )
     {
 	FileStream.close();
-	g_Log.log( LOG_ERROR, "can't open config file: " + szConfigPath );
+	g_Log.log( CLOG_ERROR, "can't open config file: " + szConfigPath );
 	return;
     }
 
@@ -249,7 +254,7 @@ void CSettingsFile::SearchForConfigFile()
 	    FileStream.open( tmp.c_str(), ios::in );
 	    if( FileStream.fail() )
 	    {
-		g_Log.log( LOG_ERROR, "can't find config file: " + m_szConfigFile );
+		g_Log.log( CLOG_ERROR, "can't find config file: " + m_szConfigFile );
 
 		return;
 	    }
@@ -314,7 +319,7 @@ void CSettingsFile::SaveConfig()
 		FileStream.open( tmp.c_str() );
 		if( FileStream.fail() )
 		{
-		    g_Log.log( LOG_ERROR, "can't save config file: " + m_szConfigFile );
+		    g_Log.log( CLOG_ERROR, "can't save config file: " + m_szConfigFile );
 		    return;
 		}
 		m_szConfigPath = m_szInitialHomeDir;
@@ -336,7 +341,7 @@ void CSettingsFile::SaveConfig()
 	FileStream.open( tmp.c_str() );
 	if( FileStream.fail() )
 	{
-	    g_Log.log( LOG_ERROR, "can't save config file: " + m_szConfigPath + "/" + m_szConfigFile );
+	    g_Log.log( CLOG_ERROR, "can't save config file: " + m_szConfigPath + "/" + m_szConfigFile );
 	    return;
 	}
     }

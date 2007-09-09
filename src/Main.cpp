@@ -14,16 +14,15 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include <csignal>
-
 #include "Main.h"
 #include "Log.h"
 #include "ParPort.h"
 #include "Loop.h"
 #include "SettingsFile.h"
 #include "SNDCard.h"
-#include "WavFile.h"
 #include "Archiver.h"
+
+#include <csignal>
 
 CLog		g_Log;
 CLoop		g_Loop;
@@ -31,9 +30,35 @@ CSettingsFile	g_MainConfig;
 CParPort*	g_ParPort = NULL;
 CSNDCard*	g_SNDCardIn = NULL;
 CSNDCard*	g_SNDCardOut = NULL;
-CWavFile	g_RogerBeep;
 bool		g_fTerminate = false;
 CArchiver	g_Archiver;
+bool		g_fDaemonMode = false;
+
+void daemonize()
+{
+    int res = fork();
+    if( res < 0 )
+    {
+        g_fDaemonMode = false;
+        g_Log.log( CLOG_ERROR, "can't fork into the background!\n" );
+        return;
+    }
+    if( res > 0 )
+    {
+        // parent exiting
+        exit( EXIT_SUCCESS );
+    }
+
+    // become a process group leader
+    setsid();
+
+    // ignoring SIGCHLD
+    signal( SIGCHLD, SIG_IGN );
+
+    chdir( "/" );
+
+    g_Log.log( CLOG_MSG, "forked into the background\n" );
+}
 
 void initParPort()
 {
@@ -81,7 +106,7 @@ void initSndCards()
 
 void atExit()
 {
-    g_Log.log( LOG_MSG, "exiting.\n\n" );
+    g_Log.log( CLOG_MSG, "exiting.\n\n" );
 }
 
 void onSIGTERM( int )
@@ -104,13 +129,18 @@ int main( int argc, char* argv[] )
     g_Log.setSysLogLevel( g_MainConfig.GetInt( "logging", "loglevel_syslog", 1 ) );
     g_Log.setFileLogLevel( g_MainConfig.GetInt( "logging", "loglevel_logfile", 0 ) );
 
-    g_Log.log( LOG_MSG | LOG_NO_TIME_DISPLAY, PACKAGE + string( " v" ) + PACKAGE_VERSION + string( " by Nonoo <nonoo@nonoo.hu>\n" ) );
-    g_Log.log( LOG_MSG | LOG_NO_TIME_DISPLAY, "http://www.nonoo.hu/projects/nrepeater/\n\n" );
+    g_Log.log( CLOG_MSG | CLOG_NO_TIME_DISPLAY, PACKAGE + string( " v" ) + PACKAGE_VERSION + string( " by Nonoo <nonoo@nonoo.hu>\n" ) );
+    g_Log.log( CLOG_MSG | CLOG_NO_TIME_DISPLAY, "http://www.nonoo.hu/projects/nrepeater/\n\n" );
 
     char tmp[50];
     time_t tt = time( NULL );
     strftime( tmp, 50, "%Y/%m/%d", localtime( &tt ) );
-    g_Log.log( LOG_MSG, "* starting " + string( PACKAGE_NAME ) + " on " + string( tmp ) + "\n" );
+    g_Log.log( CLOG_MSG, "* starting " + string( PACKAGE_NAME ) + " on " + string( tmp ) + "\n" );
+
+    if( g_MainConfig.GetInt( "daemon", "daemon_mode", 0 ) )
+    {
+	daemonize();
+    }
 
     atexit( atExit );
     signal( SIGTERM, onSIGTERM );
@@ -123,26 +153,6 @@ int main( int argc, char* argv[] )
 
     g_Archiver.init( SPEEX_SAMPLERATE, g_SNDCardOut->getChannelNum() );
 
-    // loading roger beep wave file
-    if( g_MainConfig.GetInt( "rogerbeep", "enabled", 1 ) )
-    {
-	g_RogerBeep.loadToMemory( g_MainConfig.Get( "rogerbeep", "file", "beep.wav" ) );
-	if( g_RogerBeep.getSampleRate() != g_SNDCardOut->getSampleRate() )
-	{
-	    char errstr[100];
-	    sprintf( errstr, "roger beep sample rate (%dhz) doesn't match output sample rate (%dhz)\n", g_RogerBeep.getSampleRate(), g_SNDCardOut->getSampleRate() );
-	    g_Log.log( LOG_WARNING, errstr );
-	}
-	if( g_RogerBeep.getChannelNum() != g_SNDCardOut->getChannelNum() )
-	{
-	    char errstr[100];
-	    sprintf( errstr, "roger beep file has %d channel(s), output has %d\n", g_RogerBeep.getChannelNum(), g_SNDCardOut->getChannelNum() );
-	    g_Log.log( LOG_WARNING, errstr );
-	}
-	g_RogerBeep.setVolume( g_MainConfig.GetInt( "rogerbeep", "volume", 80 ) );
-	g_Log.log( LOG_DEBUG, "roger beep file loaded into memory\n" );
-    }
-
     // starting main loop
     g_Loop.Start();
 
@@ -151,6 +161,6 @@ int main( int argc, char* argv[] )
     SAFE_DELETE( g_SNDCardIn );
     SAFE_DELETE( g_SNDCardOut );
 
-    g_Log.log( LOG_MSG, "exiting with errcode = 0\n" );
-    return 0;
+    g_Log.log( CLOG_MSG, "exiting with errcode = 0\n" );
+    return EXIT_SUCCESS;
 }

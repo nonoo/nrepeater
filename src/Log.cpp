@@ -50,7 +50,7 @@ void CLog::log( int nFlags, string msg )
     m_bDispSys = false;
     m_bDispLogFile = false;
 
-    if( nFlags & LOG_MSG )
+    if( nFlags & CLOG_MSG )
     {
 	if( m_nScreenLogLevel > LOGLEVEL_NONE )
 	{
@@ -66,7 +66,7 @@ void CLog::log( int nFlags, string msg )
 	}
     }
 
-    if( nFlags & LOG_ERROR )
+    if( nFlags & CLOG_ERROR )
     {
 	if( m_nScreenLogLevel > LOGLEVEL_NONE )
 	{
@@ -82,7 +82,7 @@ void CLog::log( int nFlags, string msg )
 	}
     }
 
-    if( nFlags & LOG_WARNING )
+    if( nFlags & CLOG_WARNING )
     {
 	if( m_nScreenLogLevel > LOGLEVEL_NONE )
 	{
@@ -98,7 +98,7 @@ void CLog::log( int nFlags, string msg )
 	}
     }
 
-    if( nFlags & LOG_DEBUG )
+    if( nFlags & CLOG_DEBUG )
     {
 	if( m_nScreenLogLevel > LOGLEVEL_NORMAL )
 	{
@@ -114,7 +114,7 @@ void CLog::log( int nFlags, string msg )
 	}
     }
 
-    if( nFlags & LOG_DEBUG_EXTREME )
+    if( nFlags & CLOG_DEBUG_EXTREME )
     {
 	if( m_nScreenLogLevel > LOGLEVEL_DEBUG )
 	{
@@ -134,34 +134,34 @@ void CLog::log( int nFlags, string msg )
     if( m_bDispSys )
     {
 	m_nSysFlags = 0;
-	if( nFlags & LOG_ERROR )
+	if( nFlags & CLOG_ERROR )
 	{
 	    m_nSysFlags |= LOG_ERR;
 	}
-	if( nFlags & LOG_WARNING )
+	if( nFlags & CLOG_WARNING )
 	{
 	    m_nSysFlags |= LOG_WARNING;
 	}
-	if( nFlags & LOG_DEBUG )
+	if( nFlags & CLOG_DEBUG )
 	{
 	    m_nSysFlags |= LOG_DEBUG;
 	}
-	if( nFlags & LOG_MSG )
+	if( nFlags & CLOG_MSG )
 	{
 	    m_nSysFlags |= LOG_INFO;
 	}
-	if( !( nFlags & LOG_NO_TIME_DISPLAY ) )
+	if( !( nFlags & CLOG_NO_TIME_DISPLAY ) )
 	{
 	    syslog( m_nSysFlags, msg.c_str() );
 	}
     }
 
 
-    if( nFlags & LOG_ERROR )
+    if( nFlags & CLOG_ERROR )
     {
 	msg = "Error: " + msg;
     }
-    if( nFlags & LOG_WARNING )
+    if( nFlags & CLOG_WARNING )
     {
 	msg = "Warning: " + msg;
     }
@@ -169,7 +169,7 @@ void CLog::log( int nFlags, string msg )
 
     if( m_bDispScreen )
     {
-	if( nFlags & LOG_NO_TIME_DISPLAY )
+	if( nFlags & CLOG_NO_TIME_DISPLAY )
 	{
 	    cout << msg;
 	}
@@ -184,7 +184,7 @@ void CLog::log( int nFlags, string msg )
 	fflush( m_pLogFile );
     }
 
-    if( nFlags & LOG_TO_ARCHIVER )
+    if( nFlags & CLOG_TO_ARCHIVER )
     {
 	g_Archiver.event( msg );
     }

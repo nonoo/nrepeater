@@ -19,6 +19,7 @@
 
 #include "Compressor.h"
 #include "Resampler.h"
+#include "WavFile.h"
 
 class CLoop
 {
@@ -34,6 +35,7 @@ private:
     fd_set		m_fsReads;
     int			m_nSelectRes;
     CCompressor		m_Compressor;
+    CWavFile		m_RogerBeep;
 
     // audio data from the sound card
     short*		m_pBuffer;

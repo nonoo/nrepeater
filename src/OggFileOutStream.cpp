@@ -14,8 +14,8 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "OggFileOutStream.h"
 #include "Main.h"
+#include "OggFileOutStream.h"
 #include "Log.h"
 
 #include <stdio.h>
@@ -66,7 +66,7 @@ void COggFileOutStream::init( string sFileName )
     m_pFile = fopen( m_sFileName.c_str(), "w" );
     if( !m_pFile )
     {
-	g_Log.log( LOG_ERROR, "can't open logfile for writing: " + m_sFileName + "\n" );
+	g_Log.log( CLOG_ERROR, "can't open logfile for writing: " + m_sFileName + "\n" );
     }
 }
 

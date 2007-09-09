@@ -36,8 +36,8 @@ public:
     void	LoadConfig();
     void	SaveConfig();
 
-    std::string	Get( std::string Section, std::string Key, std::string DefaultValue );
-    int		GetInt( std::string Section, std::string Key, const int& DefaultValue );
+    std::string	Get( std::string szSection, std::string szKey, std::string szDefaultValue );
+    int		GetInt( std::string szSection, std::string szKey, const int& nDefaultValue );
     void	Set( std::string Section, std::string Key, std::string Value );
 
 private:

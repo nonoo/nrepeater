@@ -14,26 +14,26 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include <unistd.h>
-#include <stdio.h>
-#include <sys/select.h>
-#include <signal.h>
-#include <sys/time.h>
-
+#include "Main.h"
 #include "Loop.h"
 #include "ParPort.h"
 #include "SNDCard.h"
 #include "Log.h"
 #include "WavFile.h"
 #include "SettingsFile.h"
-#include "Main.h"
 #include "Archiver.h"
+
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/select.h>
+#include <signal.h>
+#include <sys/time.h>
 
 extern CParPort*	g_ParPort;
 extern CSNDCard*	g_SNDCardIn;
 extern CSNDCard*	g_SNDCardOut;
 extern CLog		g_Log;
-extern CWavFile		g_RogerBeep;
+extern CWavFile		m_RogerBeep;
 extern CSettingsFile	g_MainConfig;
 extern bool		g_fTerminate;
 extern CLoop		g_Loop;
@@ -44,7 +44,7 @@ void onSIGALRM( int )
     g_ParPort->setPTT( false );
     g_SNDCardOut->Stop();
 
-    g_Log.log( LOG_DEBUG | LOG_TO_ARCHIVER, "roger beep finished, transmission stopped.\n" );
+    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "roger beep finished, transmission stopped.\n" );
 }
 
 void CLoop::setTransmitTimeout( int nMicroSecs )
@@ -78,6 +78,11 @@ void CLoop::Start()
     m_nFDIn = g_SNDCardIn->getFDIn();
     m_nSelectRes = -1;
 
+    if( m_RogerBeep.loadToMemory( g_MainConfig.Get( "rogerbeep", "file", "beep.wav" ) ) )
+    {
+	m_RogerBeep.setVolume( g_MainConfig.GetInt( "rogerbeep", "volume", 80 ) );
+	g_Log.log( CLOG_DEBUG, "roger beep file loaded into memory\n" );
+    }
     m_nBeepDelay = g_MainConfig.GetInt( "rogerbeep", "delay", 2 );
     m_nPlayBeepTime = 0;
 
@@ -86,7 +91,7 @@ void CLoop::Start()
     m_Compressor.init( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getBufferSize() );
     m_Resampler.init( ( 1.0 * SPEEX_SAMPLERATE ) / g_SNDCardIn->getSampleRate(), g_SNDCardOut->getChannelNum() );
 
-    g_Log.log( LOG_MSG, "starting main loop\n" );
+    g_Log.log( CLOG_MSG, "starting main loop\n" );
 
     while( !g_fTerminate )
     {
@@ -105,7 +110,7 @@ void CLoop::Start()
 	    m_nPlayBeepTime = 0;
 	    m_fPlayingBeep = false;
 
-	    g_Log.log( LOG_DEBUG | LOG_TO_ARCHIVER, "receiving transmission, transmitting started\n" );
+	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving transmission, transmitting started\n" );
 	}
 
 	// receiver stopped receiving
@@ -121,19 +126,19 @@ void CLoop::Start()
 	    }
 
 	    // do we have to play a roger beep?
-	    if( !g_RogerBeep.isLoaded() )
+	    if( !m_RogerBeep.isLoaded() )
 	    {
 		g_SNDCardOut->Stop();
 		g_ParPort->setPTT( false );
 
-		g_Log.log( LOG_DEBUG | LOG_TO_ARCHIVER, "receiving finished, transmission stopped.\n" );
+		g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving finished, transmission stopped.\n" );
 	    }
 	    else
 	    {
 		m_nPlayBeepTime = time( NULL ) + m_nBeepDelay;
-		g_RogerBeep.rewind();
+		m_RogerBeep.rewind();
 
-		g_Log.log( LOG_DEBUG | LOG_TO_ARCHIVER, "receiving finished\n" );
+		g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving finished\n" );
 	    }
 	}
 
@@ -143,13 +148,13 @@ void CLoop::Start()
 	    m_nPlayBeepTime = 0;
 	    m_fPlayingBeep = true;
 
-	    g_Log.log( LOG_DEBUG | LOG_TO_ARCHIVER, "playing roger beep\n" );
+	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "playing roger beep\n" );
 	}
 
 	// this plays the roger beep wave sequentially
 	if( m_fPlayingBeep )
 	{
-	    m_pBuffer = g_RogerBeep.play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
+	    m_pBuffer = m_RogerBeep.play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
 	    if( m_pBuffer == NULL )
 	    {
 		// reached the end of the wave
@@ -192,13 +197,13 @@ void CLoop::Start()
 
 	if( ( m_nSelectRes = select( m_nFDIn + 1, &m_fsReads, NULL, NULL, &m_tTime ) ) == -1 )
 	{
-	    g_Log.log( LOG_ERROR, "select()\n" );
+	    g_Log.log( CLOG_ERROR, "select()\n" );
 	    exit( -1 );
 	}
 
 	if( m_nSelectRes == 0 )
 	{
-    	    g_Log.log( LOG_DEBUG, "select() timeout\n");
+    	    g_Log.log( CLOG_DEBUG, "select() timeout\n");
 	    continue;
 	}
 

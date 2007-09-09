@@ -14,15 +14,17 @@
 //  along with nrepeater; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include <math.h>
-
+#include "Main.h"
 #include "WavFile.h"
 #include "Log.h"
-#include "Main.h"
+#include "SNDCard.h"
+
+#include <math.h>
 
 using namespace std;
 
-extern CLog g_Log;
+extern CLog		g_Log;
+extern CSNDCard*	g_SNDCardOut;
 
 CWavFile::CWavFile()
 {
@@ -43,7 +45,7 @@ void CWavFile::openForWrite( string sFile, int nSampleRate, int nChannels, int n
     {
 	char errstr[100];
 	sf_error_str( m_pSNDFILE, errstr, 100 );
-	g_Log.log( LOG_WARNING, "can't open wav file for writing " + sFile + ": " + errstr + "\n" );
+	g_Log.log( CLOG_WARNING, "can't open wav file for writing " + sFile + ": " + errstr + "\n" );
     }
 
     sf_set_string( m_pSNDFILE, SF_STR_SOFTWARE, PACKAGE_STRING );
@@ -74,31 +76,45 @@ int CWavFile::write( char* pData, int nBytesNum )
     return sf_write_raw( m_pSNDFILE, pData, nBytesNum );
 }
 
-void CWavFile::loadToMemory( string sFile )
+int CWavFile::loadToMemory( string sFile )
 {
     close();
 
     memset( &m_SFINFO, 0, sizeof( m_SFINFO ) );
     if( ( m_pSNDFILE = sf_open( sFile.c_str(), SFM_READ, &m_SFINFO ) ) == NULL )
     {
-	char errstr[100];
+	char errstr[500];
 	sf_error_str( m_pSNDFILE, errstr, 100 );
-	g_Log.log( LOG_WARNING, "can't open wav file " + sFile + ": " + errstr + "\n" );
-	return;
+	g_Log.log( CLOG_WARNING, "can't open wav file " + sFile + ": " + errstr + "\n" );
+	return 0;
     }
 
     // loading wave data to memory
     m_pWave = new short[ m_SFINFO.frames + 200 ]; // without + 200 there's a SIGSEGV when freeing
     if( sf_read_short( m_pSNDFILE, m_pWave, m_SFINFO.frames ) < m_SFINFO.frames )
     {
-	char errstr[100];
+	char errstr[500];
 	sf_error_str( m_pSNDFILE, errstr, 100 );
-	g_Log.log( LOG_WARNING, "can't load wav file " + sFile + ": " + errstr + "\n" );
+	g_Log.log( CLOG_WARNING, "can't load wav file " + sFile + ": " + errstr + "\n" );
 	SAFE_DELETE_ARRAY( m_pWave );
-	return;
+	return 0;
+    }
+
+    if( m_SFINFO.samplerate != g_SNDCardOut->getSampleRate() )
+    {
+	char errstr[500];
+	sprintf( errstr, "%s sample rate (%dhz) doesn't match output sample rate (%dhz)\n", sFile.c_str(), m_SFINFO.samplerate, g_SNDCardOut->getSampleRate() );
+	g_Log.log( CLOG_WARNING, errstr );
+    }
+    if( m_SFINFO.channels != g_SNDCardOut->getChannelNum() )
+    {
+    	char errstr[500];
+	sprintf( errstr, "%s has %d channel(s), output has %d\n", sFile.c_str(), m_SFINFO.channels, g_SNDCardOut->getChannelNum() );
+	g_Log.log( CLOG_WARNING, errstr );
     }
 
     rewind();
+    return 1;
 }
 
 bool CWavFile::isLoaded()

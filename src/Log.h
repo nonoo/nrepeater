@@ -24,13 +24,13 @@
 #define LOGLEVEL_DEBUG		2
 #define LOGLEVEL_EXTREME	3
 
-#define LOG_MSG			1
-#define LOG_ERROR		2
-#define LOG_WARNING		4
-#define LOG_DEBUG		8
-#define LOG_DEBUG_EXTREME	16
-#define LOG_NO_TIME_DISPLAY	32
-#define LOG_TO_ARCHIVER		64
+#define CLOG_MSG		1
+#define CLOG_ERROR		2
+#define CLOG_WARNING		4
+#define CLOG_DEBUG		8
+#define CLOG_DEBUG_EXTREME	16
+#define CLOG_NO_TIME_DISPLAY	32
+#define CLOG_TO_ARCHIVER	64
 
 class CLog
 {

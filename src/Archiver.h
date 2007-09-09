@@ -26,6 +26,7 @@
 class CArchiver
 {
 public:
+    CArchiver();
     ~CArchiver();
 
     void	init( int nSampleRate, int nChannels );
