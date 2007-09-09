@@ -18,16 +18,12 @@
 #define __LOOP_H
 
 #include "Compressor.h"
-#include "Archiver.h"
 #include "Resampler.h"
 
 class CLoop
 {
 public:
     void Start();
-
-    // this needs to be public because of SIGALRM callback
-    CArchiver		m_Archiver; 
 
 private:
     void setTransmitTimeout( int nMicroSecs );

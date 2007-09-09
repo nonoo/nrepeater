@@ -27,6 +27,7 @@
 #include "WavFile.h"
 #include "SettingsFile.h"
 #include "Main.h"
+#include "Archiver.h"
 
 extern CParPort*	g_ParPort;
 extern CSNDCard*	g_SNDCardIn;
@@ -168,11 +169,11 @@ void CLoop::Start()
 		short* pResampledData = m_Resampler.resample( m_pBuffer, m_nFramesRead, nResampledFramesNum );
 
 		// archiving
-	        m_Archiver.write( pResampledData, nResampledFramesNum );
+	        g_Archiver.write( pResampledData, nResampledFramesNum );
 	    }
 	}
 
-	m_Archiver.maintain();
+	g_Archiver.maintain();
 
 	if( !fSquelchOff )
 	{
@@ -217,7 +218,7 @@ void CLoop::Start()
 	    short* pResampledData = m_Resampler.resample( pCompOut, nCompressedFramesNum, nResampledFramesNum );
 
 	    // archiving
-	    m_Archiver.write( pResampledData, nResampledFramesNum );
+	    g_Archiver.write( pResampledData, nResampledFramesNum );
 	}
     }
 }
