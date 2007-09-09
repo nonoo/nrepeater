@@ -65,7 +65,7 @@ void CArchiver::write( short* pData, int nFramesNum )
 string CArchiver::currDate()
 {
     char tmp[50];
-    strftime( tmp, 50, "%y%m%d%S", m_stLocalTime );
+    strftime( tmp, 50, "%y%m%d", m_stLocalTime );
     return tmp;
 }
 
