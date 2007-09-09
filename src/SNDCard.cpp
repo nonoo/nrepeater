@@ -255,15 +255,24 @@ short* CSNDCard::read( int& nLength )
 	exit( -1 );
     }
 
-    int n = info.bytes; // how much to read
+    int nReadFrames; // how much to read
 
-    if( ::read( m_nFDIn, m_pBuffer, n * 2 ) != n * 2 ) // n * 2 because we read shorts
+    if( info.bytes > m_nBufferSize * 2 )
+    {
+	nReadFrames = m_nBufferSize;
+    }
+    else
+    {
+	nReadFrames = info.bytes / 2;
+    }
+
+    if( ( nLength = ::read( m_nFDIn, m_pBuffer, nReadFrames * 2 ) ) != nReadFrames * 2 )
     {
 	g_Log.log( CLOG_ERROR, "error reading audio data from " + m_szDevName + "\n" );
 	exit( -1 );
     }
 
-    nLength = n;
+    nLength /= 2;
 
     return m_pBuffer;
 }
