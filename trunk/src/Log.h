@@ -55,6 +55,8 @@ private:
     bool	m_bDispLogFile;
 
     FILE*	m_pLogFile;
+
+    int		m_nSysFlags;
 };
 
 #endif

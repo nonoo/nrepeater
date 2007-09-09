@@ -150,5 +150,7 @@ int main( int argc, char* argv[] )
     SAFE_DELETE( g_ParPort );
     SAFE_DELETE( g_SNDCardIn );
     SAFE_DELETE( g_SNDCardOut );
+
+    g_Log.log( LOG_MSG, "exiting with errcode = 0\n" );
     return 0;
 }
