@@ -27,28 +27,24 @@ class CSettingsFile
 public:
     CSettingsFile();
 
-    // if config path is not set, loadconfig tries to
-    // figure out where the config file is
-    //
     void	SetConfigPath( std::string szConfigPath );
     void	SetConfigFile( std::string szConfigFile );
 
+    // if config path is not set, loadconfig tries to
+    // figure out where the config file is
     void	LoadConfig();
     void	SaveConfig();
 
     std::string	Get( std::string szSection, std::string szKey, std::string szDefaultValue );
     int		GetInt( std::string szSection, std::string szKey, const int& nDefaultValue );
-    void	Set( std::string Section, std::string Key, std::string Value );
+    void	Set( std::string szSection, std::string szKey, std::string szValue );
 
 private:
     // removes whitespaces
-    //
     std::string	TrimLeft( std::string szString );
     std::string	TrimRight( std::string szString );
 
     void	SearchForConfigFile();
-
-
 
 
     std::string	m_szInitialHomeDir;
@@ -57,7 +53,6 @@ private:
 
     // ini structure in memory
     // m_Settings[section][key] == value
-    //
     typedef std::map< std::string, std::string >	t_mKeys;
     std::map< std::string, t_mKeys >			m_Settings;
 };

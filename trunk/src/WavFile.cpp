@@ -33,7 +33,7 @@ CWavFile::CWavFile()
     m_nSeek = 0;
 }
 
-void CWavFile::openForWrite( string sFile, int nSampleRate, int nChannels, int nFormat )
+void CWavFile::openForWrite( string szFile, int nSampleRate, int nChannels, int nFormat )
 {
     close();
 
@@ -41,11 +41,11 @@ void CWavFile::openForWrite( string sFile, int nSampleRate, int nChannels, int n
     m_SFINFO.samplerate = nSampleRate;
     m_SFINFO.channels = nChannels;
     m_SFINFO.format = nFormat;
-    if( ( m_pSNDFILE = sf_open( sFile.c_str(), SFM_WRITE, &m_SFINFO ) ) == NULL )
+    if( ( m_pSNDFILE = sf_open( szFile.c_str(), SFM_WRITE, &m_SFINFO ) ) == NULL )
     {
 	char errstr[100];
 	sf_error_str( m_pSNDFILE, errstr, 100 );
-	g_Log.log( CLOG_WARNING, "can't open wav file for writing " + sFile + ": " + errstr + "\n" );
+	g_Log.log( CLOG_WARNING, "can't open wav file for writing " + szFile + ": " + errstr + "\n" );
     }
 
     sf_set_string( m_pSNDFILE, SF_STR_SOFTWARE, PACKAGE_STRING );
@@ -76,16 +76,16 @@ int CWavFile::write( char* pData, int nBytesNum )
     return sf_write_raw( m_pSNDFILE, pData, nBytesNum );
 }
 
-int CWavFile::loadToMemory( string sFile )
+int CWavFile::loadToMemory( string szFile )
 {
     close();
 
     memset( &m_SFINFO, 0, sizeof( m_SFINFO ) );
-    if( ( m_pSNDFILE = sf_open( sFile.c_str(), SFM_READ, &m_SFINFO ) ) == NULL )
+    if( ( m_pSNDFILE = sf_open( szFile.c_str(), SFM_READ, &m_SFINFO ) ) == NULL )
     {
 	char errstr[500];
 	sf_error_str( m_pSNDFILE, errstr, 100 );
-	g_Log.log( CLOG_WARNING, "can't open wav file " + sFile + ": " + errstr + "\n" );
+	g_Log.log( CLOG_WARNING, "can't open wav file " + szFile + ": " + errstr + "\n" );
 	return 0;
     }
 
@@ -95,7 +95,7 @@ int CWavFile::loadToMemory( string sFile )
     {
 	char errstr[500];
 	sf_error_str( m_pSNDFILE, errstr, 100 );
-	g_Log.log( CLOG_WARNING, "can't load wav file " + sFile + ": " + errstr + "\n" );
+	g_Log.log( CLOG_WARNING, "can't load wav file " + szFile + ": " + errstr + "\n" );
 	SAFE_DELETE_ARRAY( m_pWave );
 	return 0;
     }
@@ -103,13 +103,13 @@ int CWavFile::loadToMemory( string sFile )
     if( m_SFINFO.samplerate != g_SNDCardOut->getSampleRate() )
     {
 	char errstr[500];
-	sprintf( errstr, "%s sample rate (%dhz) doesn't match output sample rate (%dhz)\n", sFile.c_str(), m_SFINFO.samplerate, g_SNDCardOut->getSampleRate() );
+	sprintf( errstr, "%s sample rate (%dhz) doesn't match output sample rate (%dhz)\n", szFile.c_str(), m_SFINFO.samplerate, g_SNDCardOut->getSampleRate() );
 	g_Log.log( CLOG_WARNING, errstr );
     }
     if( m_SFINFO.channels != g_SNDCardOut->getChannelNum() )
     {
     	char errstr[500];
-	sprintf( errstr, "%s has %d channel(s), output has %d\n", sFile.c_str(), m_SFINFO.channels, g_SNDCardOut->getChannelNum() );
+	sprintf( errstr, "%s has %d channel(s), output has %d\n", szFile.c_str(), m_SFINFO.channels, g_SNDCardOut->getChannelNum() );
 	g_Log.log( CLOG_WARNING, errstr );
     }
 

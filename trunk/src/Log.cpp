@@ -44,7 +44,7 @@ CLog::~CLog()
     closelog();
 }
 
-void CLog::log( int nFlags, string msg )
+void CLog::log( int nFlags, string szMsg )
 {
     m_bDispScreen = false;
     m_bDispSys = false;
@@ -152,18 +152,18 @@ void CLog::log( int nFlags, string msg )
 	}
 	if( !( nFlags & CLOG_NO_TIME_DISPLAY ) )
 	{
-	    syslog( m_nSysFlags, msg.c_str() );
+	    syslog( m_nSysFlags, szMsg.c_str() );
 	}
     }
 
 
     if( nFlags & CLOG_ERROR )
     {
-	msg = "Error: " + msg;
+	szMsg = "Error: " + szMsg;
     }
     if( nFlags & CLOG_WARNING )
     {
-	msg = "Warning: " + msg;
+	szMsg = "Warning: " + szMsg;
     }
 
 
@@ -171,22 +171,22 @@ void CLog::log( int nFlags, string msg )
     {
 	if( nFlags & CLOG_NO_TIME_DISPLAY )
 	{
-	    cout << msg;
+	    cout << szMsg;
 	}
 	else
 	{
-	    cout << CurrTime() << msg;
+	    cout << CurrTime() << szMsg;
 	}
     }
     if( m_bDispLogFile && m_pLogFile )
     {
-	fprintf( m_pLogFile, string( CurrTime() + msg ).c_str() );
+	fprintf( m_pLogFile, string( CurrTime() + szMsg ).c_str() );
 	fflush( m_pLogFile );
     }
 
     if( nFlags & CLOG_TO_ARCHIVER )
     {
-	g_Archiver.event( msg );
+	g_Archiver.event( szMsg );
     }
 }
 

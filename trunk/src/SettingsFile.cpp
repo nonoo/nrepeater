@@ -23,9 +23,9 @@ using namespace std;
 
 extern CLog g_Log;
 
-void CSettingsFile::Set( string Section, string Key, string Value )
+void CSettingsFile::Set( string szSection, string szKey, string szValue )
 {
-    m_Settings[Section][Key] = Value;
+    m_Settings[ szSection ][ szKey ] = szValue;
 }
 
 string CSettingsFile::Get( string szSection, string szKey, string szDefaultValue )
@@ -108,7 +108,6 @@ string CSettingsFile::TrimRight( string szString )
     }
 
     // searching for the first non-space char from the end of the string
-    //
     string::iterator it = szString.end()-1;
     unsigned int i = szString.size();
     while( ( *it == ' ' ) && ( it != szString.begin() ) )
@@ -227,13 +226,11 @@ void CSettingsFile::LoadConfig()
 void CSettingsFile::SearchForConfigFile()
 {
     // opening config file in current directory
-    //
     string tmp = m_szInitialHomeDir + "/" + m_szConfigFile;
     ifstream FileStream( tmp.c_str() );
     if( FileStream.fail() )
     {
 	// trying in $HOME/.PACKAGE
-	//
 	FileStream.close();
 
 	char* pHomeDir = getenv( "HOME" );
@@ -245,7 +242,6 @@ void CSettingsFile::SearchForConfigFile()
 	if( FileStream.fail() )
 	{
 	    // trying in /etc/PACKAGE
-	    //
 	    FileStream.close();
 
 	    tmp = "/etc/";

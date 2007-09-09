@@ -27,7 +27,7 @@ public:
     virtual ~COggOutStream();
 
     virtual void feedPacket( ogg_packet* m_Op, bool bFlush );
-    virtual void open( std::string sFileName );
+    virtual void open( std::string szFileName );
     virtual void close();
     unsigned int getSerial();
 
