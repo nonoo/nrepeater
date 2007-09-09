@@ -1,5 +1,4 @@
 long-term todos:
-- reloading config file and reinitializing on SIGHUP
 - LITZ Emergency Alert: LITZ is a new system promoted by the ARRL to provide a means for a repeater user to request emergency assistance without being familiar with the operation of the repeater. If a repeater user transmits a DTMF [0] for three seconds, the CAT-1000 will alert the control operators. 
 - current temperature DTMF
 - test wav playback / parrot repeater mode DTMF
@@ -7,4 +6,4 @@ long-term todos:
 - server and win32 client
 
 short-term todos:
-- daemon mode
+- reloading config file and reinitializing on SIGHUP
