@@ -27,7 +27,7 @@ class CGoertzel
 {
 public:
     void	init( int nSampleRate );
-    char*	process( short* pData, int nFramesNum );
+    char	process( short* pData, int nFramesNum );
 
 private:
     void	calcCoeffs();
@@ -53,8 +53,7 @@ private:
     int		m_nMaxIndex;
     int		m_nPeakCount;
 
-    char	m_caDecoded[ MAX_DECODED ];
-    int		m_nDecodedNum;
+    char	m_cDecoded;
 };
 
 #endif

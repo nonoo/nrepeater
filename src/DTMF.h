@@ -26,10 +26,18 @@ public:
     void process( short* pData, int nFramesNum );
 
 private:
+    void decodingFinished();
+
+
     CGoertzel	m_Goertzel;
     int		m_nSampleRate;
 
-    char*	m_caDecoded;
+    char	m_cDecoded;
+    char	m_caDecodedChars[50];
+    int		m_nDecodedCharsNum;
+    char	m_cPrevDecoded;
+    int		m_nSamplesProcessed;
+    int		m_nPause;
 };
 
 #endif

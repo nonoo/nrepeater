@@ -152,6 +152,10 @@ void CArchiver::event2( string sEvent )
 // checks if new log files should be started
 void CArchiver::maintain()
 {
+    if( !m_bArchiverEnabled )
+    {
+	return;
+    }
     m_stTime = time( NULL );
     m_stLocalTime = localtime( &m_stTime );
     if( m_stLocalTime->tm_mday != m_nDay )

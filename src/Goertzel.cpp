@@ -60,10 +60,9 @@ void CGoertzel::init( int nSampleRate )
     calcCoeffs();
 }
 
-char* CGoertzel::process( short* pData, int nFramesNum )
+char CGoertzel::process( short* pData, int nFramesNum )
 {
-    memset( m_caDecoded, 0, MAX_DECODED );
-    m_nDecodedNum = 0;
+    m_cDecoded = 0;
 
     for( j = 0; j < nFramesNum; j++ )
     {
@@ -88,15 +87,7 @@ char* CGoertzel::process( short* pData, int nFramesNum )
 	}
     }
 
-    if( m_nDecodedNum )
-    {
-	// there are decoded digits
-	return m_caDecoded;
-    }
-    else
-    {
-	return NULL;
-    }
+    return m_cDecoded;
 }
 
 // coef = 2.0 * cos( ( 2.0 * PI * k ) / (float)GOERTZEL_N );
@@ -200,7 +191,14 @@ void CGoertzel::postTesting()
 	}
 	if( m_bSeeDigit )
 	{
-	    m_caDecoded[ m_nDecodedNum++ ] = m_caDTMFASCII[ m_nRow ][ m_nCol - 4 ];
+	    if( ( m_cDecoded != 0 ) && ( m_caDTMFASCII[ m_nRow ][ m_nCol - 4 ] != m_cDecoded ) )
+	    {
+		m_cDecoded = 0;
+	    }
+	    else
+	    {
+		m_cDecoded = m_caDTMFASCII[ m_nRow ][ m_nCol - 4 ];
+	    }
 	}
     }
 }
