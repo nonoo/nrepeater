@@ -22,12 +22,13 @@
 class CDTMF
 {
 public:
-    void init( int nSampleRate );
-    void process( short* pData, int nFramesNum );
+    void	init( int nSampleRate );
+    void	process( short* pData, int nFramesNum );
+    char*	finishDecoding();
+    void	clearSequence();
+    bool	isValidSequence( char* pszSequence );
 
 private:
-    void decodingFinished();
-
 
     CGoertzel	m_Goertzel;
     int		m_nSampleRate;

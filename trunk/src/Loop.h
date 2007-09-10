@@ -35,17 +35,30 @@ private:
     int			m_nFDIn;
     fd_set		m_fsReads;
     int			m_nSelectRes;
-    CCompressor		m_Compressor;
+
     CWavFile		m_RogerBeep;
+    CWavFile		m_AckBeep;
+    CWavFile		m_FailBeep;
+    CCompressor		m_Compressor;
+    CResampler		m_Resampler;
+    CDTMF		m_DTMF;
 
     // audio data from the sound card
     short*		m_pBuffer;
     int			m_nFramesRead;
+
+    // roger beep stuff
     int			m_nBeepDelay;
     int			m_nPlayBeepTime;
-    bool		m_fPlayingBeep;
-    CResampler		m_Resampler;
-    CDTMF		m_DTMF;
+    bool		m_bPlayingBeep;
+
+    int			m_nCompressedFramesNum;
+    int			m_nResampledFramesNum;
+
+    char*		m_pszDTMFDecoded;
+    bool		m_bPlayRogerBeep;
+    bool		m_bPlayAckBeep;
+    bool		m_bPlayFailBeep;
 };
 
 #endif

@@ -33,7 +33,6 @@ extern CParPort*	g_ParPort;
 extern CSNDCard*	g_SNDCardIn;
 extern CSNDCard*	g_SNDCardOut;
 extern CLog		g_Log;
-extern CWavFile		m_RogerBeep;
 extern CSettingsFile	g_MainConfig;
 extern bool		g_fTerminate;
 extern CLoop		g_Loop;
@@ -44,7 +43,7 @@ void onSIGALRM( int )
     g_ParPort->setPTT( false );
     g_SNDCardOut->stop();
 
-    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "roger beep finished, transmission stopped.\n" );
+    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "beep finished, transmission stopped.\n" );
 }
 
 void CLoop::setTransmitTimeout( int nMicroSecs )
@@ -78,17 +77,36 @@ void CLoop::start()
     m_nFDIn = g_SNDCardIn->getFDIn();
     m_nSelectRes = -1;
 
-    if( g_MainConfig.getInt( "rogerbeep", "enabled", 1 ) )
+    // initializing beeps
+    if( g_MainConfig.getInt( "beeps", "rogerbeep_enabled", 1 ) )
     {
 	// initializing roger beep
-	if( m_RogerBeep.loadToMemory( g_MainConfig.get( "rogerbeep", "file", "beep.wav" ) ) )
+	if( m_RogerBeep.loadToMemory( g_MainConfig.get( "beeps", "file", "beep.wav" ) ) )
 	{
-	    m_RogerBeep.setVolume( g_MainConfig.getInt( "rogerbeep", "volume", 80 ) );
+	    m_RogerBeep.setVolume( g_MainConfig.getInt( "beeps", "volume", 80 ) );
 	    g_Log.log( CLOG_DEBUG, "roger beep file loaded into memory\n" );
 	}
-	m_nBeepDelay = g_MainConfig.getInt( "rogerbeep", "delay", 2 );
-	m_nPlayBeepTime = 0;
     }
+    if( g_MainConfig.getInt( "beeps", "ackbeep_enabled", 1 ) )
+    {
+	// initializing roger beep
+	if( m_AckBeep.loadToMemory( g_MainConfig.get( "beeps", "ackbeep_file", "ackbeep.wav" ) ) )
+	{
+	    m_AckBeep.setVolume( g_MainConfig.getInt( "beeps", "volume", 80 ) );
+	    g_Log.log( CLOG_DEBUG, "ack beep file loaded into memory\n" );
+	}
+    }
+    if( g_MainConfig.getInt( "beeps", "failbeep_enabled", 1 ) )
+    {
+	// initializing roger beep
+	if( m_AckBeep.loadToMemory( g_MainConfig.get( "beeps", "failbeep_file", "failbeep.wav" ) ) )
+	{
+	    m_AckBeep.setVolume( g_MainConfig.getInt( "beeps", "volume", 80 ) );
+	    g_Log.log( CLOG_DEBUG, "fail beep file loaded into memory\n" );
+	}
+    }
+    m_nBeepDelay = g_MainConfig.getInt( "beeps", "delay", 2 );
+    m_nPlayBeepTime = 0;
 
     signal( SIGALRM, onSIGALRM );
 
@@ -123,7 +141,7 @@ void CLoop::start()
 	    g_ParPort->setPTT( true );
 
 	    m_nPlayBeepTime = 0;
-	    m_fPlayingBeep = false;
+	    m_bPlayingBeep = false;
 
 	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving transmission, transmitting started\n" );
 	}
@@ -140,8 +158,54 @@ void CLoop::start()
 		m_Compressor.flush();
 	    }
 
-	    // do we have to play a roger beep?
-	    if( !m_RogerBeep.isLoaded() )
+	    // initializing status booleans
+	    m_bPlayRogerBeep = m_RogerBeep.isLoaded();
+	    m_bPlayAckBeep = m_bPlayFailBeep = false;
+
+	    // querying decoded DTMF sequence
+	    m_pszDTMFDecoded = m_DTMF.finishDecoding();
+	    if( m_pszDTMFDecoded != NULL )
+	    {
+		g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "received DTMF sequence: " + string( m_pszDTMFDecoded ) + "\n" );
+		if( m_DTMF.isValidSequence( m_pszDTMFDecoded ) )
+		{
+		    // sequence valid, playing ack beep
+		    if( m_AckBeep.isLoaded() )
+		    {
+			m_bPlayRogerBeep = false;
+			m_bPlayAckBeep = true;
+
+			// setting the time we have to play the beep
+			m_nPlayBeepTime = time( NULL ) + m_nBeepDelay;
+			m_AckBeep.rewind();
+		    }
+		}
+		else
+		{
+		    // sequence invalid, playing fail beep
+		    if( m_FailBeep.isLoaded() )
+		    {
+			m_bPlayRogerBeep = false;
+			m_bPlayFailBeep = true;
+
+			// setting the time we have to play the beep
+			m_nPlayBeepTime = time( NULL ) + m_nBeepDelay;
+			m_FailBeep.rewind();
+		    }
+		}
+		m_DTMF.clearSequence();
+	    }
+
+	    // do we have to play the roger beep?
+	    if( m_bPlayRogerBeep )
+	    {
+		// setting the time we have to play the beep
+		m_nPlayBeepTime = time( NULL ) + m_nBeepDelay;
+		m_RogerBeep.rewind();
+	    }
+
+	    // if we don't have to play a beep
+	    if( !m_bPlayRogerBeep && !m_bPlayAckBeep && !m_bPlayFailBeep )
 	    {
 		g_SNDCardOut->stop();
 		g_ParPort->setPTT( false );
@@ -150,46 +214,55 @@ void CLoop::start()
 	    }
 	    else
 	    {
-		m_nPlayBeepTime = time( NULL ) + m_nBeepDelay;
-		m_RogerBeep.rewind();
-
 		g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving finished\n" );
 	    }
 	}
 
-	// playing roger beep if needed
+	// playing time of the beep reached
 	if( ( m_nPlayBeepTime ) && ( time( NULL ) > m_nPlayBeepTime ) )
 	{
 	    m_nPlayBeepTime = 0;
-	    m_fPlayingBeep = true;
+	    m_bPlayingBeep = true;
 
 	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "playing roger beep\n" );
 	}
 
-	// this plays the roger beep wave sequentially
-	if( m_fPlayingBeep )
+	// this plays the beep wave sequentially
+	if( m_bPlayingBeep )
 	{
-	    m_pBuffer = m_RogerBeep.play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
+	    if( m_bPlayRogerBeep )
+	    {
+		m_pBuffer = m_RogerBeep.play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
+	    }
+	    if( m_bPlayAckBeep )
+	    {
+		m_pBuffer = m_AckBeep.play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
+	    }
+	    if( m_bPlayFailBeep )
+	    {
+		m_pBuffer = m_FailBeep.play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
+	    }
+
 	    if( m_pBuffer == NULL )
 	    {
-		// reached the end of the wave
-		m_fPlayingBeep = false;
+	        // reached the end of the wave
+	        m_bPlayingBeep = false;
 
-		// turning off transmitter after given microseconds
-		// setting up timer
-		setTransmitTimeout( g_MainConfig.getInt( "rogerbeep", "delayafter", 250000 ) );
+	        // turning off transmitter after given microseconds
+	        // setting up timer
+	        setTransmitTimeout( g_MainConfig.getInt( "beeps", "delayafter", 250000 ) );
 	    }
 	    else
 	    {
-		// playing roger beep
+	        // playing beep
 		g_SNDCardOut->write( m_pBuffer, m_nFramesRead );
 
 		// resampling
-		int nResampledFramesNum = 0;
-		short* pResampledData = m_Resampler.resample( m_pBuffer, m_nFramesRead, nResampledFramesNum );
+		m_nResampledFramesNum = 0;
+		short* pResampledData = m_Resampler.resample( m_pBuffer, m_nFramesRead, m_nResampledFramesNum );
 
 		// archiving
-	        g_Archiver.write( pResampledData, nResampledFramesNum );
+	    	g_Archiver.write( pResampledData, m_nResampledFramesNum );
 	    }
 	}
 
@@ -227,21 +300,21 @@ void CLoop::start()
 	    m_pBuffer = g_SNDCardIn->read( m_nFramesRead );
 
 	    // compressing
-	    int nCompressedFramesNum = 0;
-	    short* pCompOut = m_Compressor.process( m_pBuffer, m_nFramesRead, nCompressedFramesNum );
+	    m_nCompressedFramesNum = 0;
+	    short* pCompOut = m_Compressor.process( m_pBuffer, m_nFramesRead, m_nCompressedFramesNum );
 
 	    // playing processed samples
-	    g_SNDCardOut->write( pCompOut, nCompressedFramesNum );
+	    g_SNDCardOut->write( pCompOut, m_nCompressedFramesNum );
 
 	    // resampling
-	    int nResampledFramesNum = 0;
-	    short* pResampledData = m_Resampler.resample( pCompOut, nCompressedFramesNum, nResampledFramesNum );
+	    m_nResampledFramesNum = 0;
+	    short* pResampledData = m_Resampler.resample( pCompOut, m_nCompressedFramesNum, m_nResampledFramesNum );
 
 	    // DTMF decoding
-	    m_DTMF.process( pResampledData, nResampledFramesNum );
+	    m_DTMF.process( pResampledData, m_nResampledFramesNum );
 
 	    // archiving
-	    g_Archiver.write( pResampledData, nResampledFramesNum );
+	    g_Archiver.write( pResampledData, m_nResampledFramesNum );
 	}
     }
 }
