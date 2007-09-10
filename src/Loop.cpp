@@ -78,19 +78,33 @@ void CLoop::start()
     m_nFDIn = g_SNDCardIn->getFDIn();
     m_nSelectRes = -1;
 
-    if( m_RogerBeep.loadToMemory( g_MainConfig.get( "rogerbeep", "file", "beep.wav" ) ) )
+    if( g_MainConfig.getInt( "rogerbeep", "enabled", 1 ) )
     {
-	m_RogerBeep.setVolume( g_MainConfig.getInt( "rogerbeep", "volume", 80 ) );
-	g_Log.log( CLOG_DEBUG, "roger beep file loaded into memory\n" );
+	// initializing roger beep
+	if( m_RogerBeep.loadToMemory( g_MainConfig.get( "rogerbeep", "file", "beep.wav" ) ) )
+	{
+	    m_RogerBeep.setVolume( g_MainConfig.getInt( "rogerbeep", "volume", 80 ) );
+	    g_Log.log( CLOG_DEBUG, "roger beep file loaded into memory\n" );
+	}
+	m_nBeepDelay = g_MainConfig.getInt( "rogerbeep", "delay", 2 );
+	m_nPlayBeepTime = 0;
     }
-    m_nBeepDelay = g_MainConfig.getInt( "rogerbeep", "delay", 2 );
-    m_nPlayBeepTime = 0;
 
     signal( SIGALRM, onSIGALRM );
 
-    m_Compressor.init( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getBufferSize() );
-    m_Resampler.init( ( 1.0 * SPEEX_SAMPLERATE ) / g_SNDCardIn->getSampleRate(), g_SNDCardOut->getChannelNum() );
-    m_DTMF.init( SPEEX_SAMPLERATE );
+    if( g_MainConfig.getInt( "compressor", "enabled", 0 ) )
+    {
+	m_Compressor.init( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getBufferSize() );
+    }
+    if( g_MainConfig.getInt( "archiver", "enabled", 0 ) || g_MainConfig.getInt( "dtmf", "enabled", 0 ) )
+    {
+	// only initialize resampler if archiver or dtmf decoder is enabled
+	m_Resampler.init( ( 1.0 * SPEEX_SAMPLERATE ) / g_SNDCardIn->getSampleRate(), g_SNDCardOut->getChannelNum() );
+    }
+    if( g_MainConfig.getInt( "dtmf", "enabled", 0 ) )
+    {
+	m_DTMF.init( SPEEX_SAMPLERATE );
+    }
 
     g_Log.log( CLOG_MSG, "starting main loop\n" );
 
