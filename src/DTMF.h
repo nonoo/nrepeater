@@ -27,9 +27,9 @@ public:
     char*	finishDecoding();
     void	clearSequence();
     bool	isValidSequence( char* pszSequence );
+    void	processSequence( char* pszSequence );
 
 private:
-
     CGoertzel	m_Goertzel;
     int		m_nSampleRate;
 
@@ -39,6 +39,8 @@ private:
     char	m_cPrevDecoded;
     int		m_nSamplesProcessed;
     int		m_nPause;
+
+    char*	m_pszSequence;
 };
 
 #endif

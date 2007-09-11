@@ -122,3 +122,7 @@ bool CDTMF::isValidSequence( char* pszSequence )
 {
     return true;
 }
+
+void CDTMF::processSequence( char* pszSequence )
+{
+}
