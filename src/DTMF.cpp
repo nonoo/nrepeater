@@ -18,6 +18,7 @@
 #include "DTMF.h"
 #include "SettingsFile.h"
 #include "Log.h"
+#include "Loop.h"
 
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -26,6 +27,7 @@
 
 extern CSettingsFile	g_MainConfig;
 extern CLog		g_Log;
+extern CLoop		g_Loop;
 
 void CDTMF::init( int nSampleRate )
 {
@@ -204,19 +206,30 @@ bool CDTMF::processSequence( char* pszSequence )
     // do we have to log something?
     if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "log" ) )
     {
-	g_Log.log( CLOG_MSG, g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "log", "no log message specified.\n" ) + "\n" );
-    }
-
-    // do we have to log something to the archiver?
-    if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "log_to_archiver" ) )
-    {
-	g_Log.log( CLOG_TO_ARCHIVER, g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "log_to_archiver", "no log message specified.\n" ) + "\n" );
+	if( g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "log_to_archiver", 0 ) )
+	{
+	    // log to the archiver also
+	    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "log", "no log message specified.\n" ) + "\n" );
+	}
+	else
+	{
+	    g_Log.log( CLOG_MSG, g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "log", "no log message specified.\n" ) + "\n" );
+	}
     }
 
     // do we have to exec a command?
     if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "exec" ) )
     {
 	if( system( g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "exec", "" ).c_str() ) < 0 )
+	{
+	    return false;
+	}
+    }
+
+    // do we have to switch parrot mode?
+    if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "parrot_mode_switch" ) )
+    {
+	if( !g_Loop.switchParrotMode() )
 	{
 	    return false;
 	}

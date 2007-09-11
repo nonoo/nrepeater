@@ -32,7 +32,11 @@ public:
     void setAlarm( int nMilliSecs );
     void clearAlarm();
 
+    bool switchParrotMode();
+
 private:
+    void checkDTMFSequence();
+
     struct timeval	m_tTime;
     int			m_nFDIn;
     fd_set		m_fsReads;
