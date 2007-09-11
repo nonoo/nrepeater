@@ -74,6 +74,14 @@ void onSIGALRM( int )
 	    g_SNDCardOut->write( g_Loop.m_pParrotBuffer, g_Loop.m_nParrotBufferPos );
 	    usleep( g_MainConfig.getInt( "parrot", "delay_after_playback", 250 ) * 1000 );
 
+	    // querying decoded DTMF sequence
+	    g_Loop.checkDTMFSequence();
+	    if( !g_Loop.m_bParrotMode )
+	    {
+		// parrot mode has been switched off by a DTMF action
+		return;
+	    }
+
 	    // playing roger beep if needed
 	    g_Loop.m_bPlayRogerBeep = g_Loop.m_RogerBeep.isLoaded();
 	    if( g_Loop.m_bPlayRogerBeep )
@@ -310,14 +318,10 @@ void CLoop::start()
 	    m_bPlayRogerBeep = m_RogerBeep.isLoaded();
 	    m_bPlayAckBeep = m_bPlayFailBeep = false;
 
-	    // querying decoded DTMF sequence
-	    checkDTMFSequence();
-
 	    if( m_bParrotMode && !m_bProcessingDTMFAction )
 	    {
 		g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "receiving finished, recording over\n" );
 		m_bParrotStartPlayback = true;
-		m_bPlayRogerBeep = false;
 
 		// switching transmitter on
 		g_ParPort->setPTT( true );
@@ -327,6 +331,7 @@ void CLoop::start()
 		if( m_bPlayAckBeep )
 		{
 		    m_bPlayingBeepStart = true;
+		    m_bPlayRogerBeep = false;
 		    m_AckBeep.rewind();
 		    onSIGALRM( 0 );
 		}
@@ -337,13 +342,37 @@ void CLoop::start()
 		    g_SNDCardOut->write( m_pParrotBuffer, m_nParrotBufferPos );
 		    usleep( g_MainConfig.getInt( "parrot", "delay_after_playback", 250 ) * 1000 );
 		    m_bParrotStartPlayback = false;
-		    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "playback of parrot buffer finished, transmission stopped.\n" );
-		    g_SNDCardOut->stop();
-		    g_ParPort->setPTT( false );
+
+		    // querying decoded DTMF sequence
+		    checkDTMFSequence();
+		    if( !m_bParrotMode )
+		    {
+			// parrot mode has been switched off by a DTMF action
+			continue;
+		    }
+
+		    // do we have to play the roger beep?
+		    if( m_bPlayRogerBeep )
+		    {
+		        g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "playback of parrot buffer finished, playing roger beep\n" );
+			// setting up a timer that will enable playing beeps after the given delay
+			m_bPlayingBeepStart = true;
+			m_RogerBeep.rewind();
+			onSIGALRM( 0 );
+		    }
+		    else
+		    {
+		        g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "playback of parrot buffer finished, transmission stopped.\n" );
+			g_SNDCardOut->stop();
+			g_ParPort->setPTT( false );
+		    }
 		}
 	    }
 	    else
 	    {
+		// querying decoded DTMF sequence
+		checkDTMFSequence();
+
 		// do we have to play the roger beep?
 		if( m_bPlayRogerBeep )
 		{
@@ -476,13 +505,6 @@ void CLoop::start()
 		    // interrupting receiving
 		    m_bSquelchOff = false;
 
-		    checkDTMFSequence();
-		    if( !m_bParrotMode )
-		    {
-			// parrot mode has been switched off by a DTMF action
-			continue;
-		    }
-
 		    // switching transmitter on
 		    g_ParPort->setPTT( true );
 		    // playing ack beep if needed
@@ -499,6 +521,14 @@ void CLoop::start()
 			// playing back parrot buffer
 			g_SNDCardOut->write( m_pParrotBuffer, m_nParrotBufferPos );
 			usleep( g_MainConfig.getInt( "parrot", "delay_after_playback", 250 ) * 1000 );
+
+			checkDTMFSequence();
+			if( !m_bParrotMode )
+			{
+			    // parrot mode has been switched off by a DTMF action
+			    continue;
+			}
+
 			// playing roger beep if needed
 		        m_bPlayRogerBeep = m_RogerBeep.isLoaded();
 			if( m_bPlayRogerBeep )
