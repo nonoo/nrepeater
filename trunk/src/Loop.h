@@ -27,10 +27,11 @@ class CLoop
 public:
     void start();
 
-private:
+    // for onSIGALRM()
     void setTransmitTimeout( int nMicroSecs );
     void clearTransmitTimeout();
 
+private:
     struct timeval	m_tTime;
     int			m_nFDIn;
     fd_set		m_fsReads;
@@ -41,24 +42,26 @@ private:
     CWavFile		m_FailBeep;
     CCompressor		m_Compressor;
     CResampler		m_Resampler;
-    CDTMF		m_DTMF;
 
     // audio data from the sound card
     short*		m_pBuffer;
     int			m_nFramesRead;
 
-    // roger beep stuff
-    int			m_nBeepDelay;
-    int			m_nPlayBeepTime;
-    bool		m_bPlayingBeep;
-
+    short*		m_pResampledData;
+    short*		m_pCompOut;
     int			m_nCompressedFramesNum;
     int			m_nResampledFramesNum;
 
+// these variables are have to be reached by onSIGALRM()
+public:
+    CDTMF		m_DTMF;
     char*		m_pszDTMFDecoded;
+    bool		m_bPlayingBeepStart;
+    bool		m_bPlayingBeep;
     bool		m_bPlayRogerBeep;
     bool		m_bPlayAckBeep;
     bool		m_bPlayFailBeep;
+    bool		m_bProcessingDTMFAction;
 };
 
 #endif
