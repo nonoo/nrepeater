@@ -36,9 +36,7 @@ private:
     fd_set		m_fsReads;
     int			m_nSelectRes;
 
-    CWavFile		m_RogerBeep;
     CWavFile		m_AckBeep;
-    CWavFile		m_FailBeep;
     CCompressor		m_Compressor;
     CResampler		m_Resampler;
 
@@ -53,6 +51,8 @@ private:
 
 // these variables have to be reached by onSIGALRM()
 public:
+    CWavFile		m_RogerBeep;
+    CWavFile		m_FailBeep;
     CDTMF		m_DTMF;
     char*		m_pszDTMFDecoded;
     bool		m_bPlayingBeepStart;
@@ -61,6 +61,7 @@ public:
     bool		m_bPlayAckBeep;
     bool		m_bPlayFailBeep;
     bool		m_bProcessingDTMFAction;
+    bool		m_bDTMFProcessingSuccess;
 };
 
 #endif

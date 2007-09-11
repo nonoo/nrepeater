@@ -33,6 +33,7 @@ public:
     std::string	get( std::string szSection, std::string szKey, std::string szDefaultValue );
     int		getInt( std::string szSection, std::string szKey, const int& nDefaultValue );
     void	set( std::string szSection, std::string szKey, std::string szValue );
+    bool	isValidKey( std::string szSection, std::string szKey );
 
     std::string	getConfigFilePath();
 

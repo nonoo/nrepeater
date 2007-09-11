@@ -34,6 +34,7 @@ public:
     void event( std::string sEvent );
     void event2( std::string sEvent );
     void maintain();
+    void writeSilence( int nMilliSecs );
 
 private:
     std::string	currDate();
@@ -53,6 +54,10 @@ private:
     FILE*		m_pEventFile;
 
     long		m_lArchivedSamples;
+
+    short*		m_pSilenceBuf;
+    int			m_nSilenceBufSize;
+    int			m_nSilenceFramesNeeded;
 };
 
 #endif

@@ -15,6 +15,7 @@
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // algorithm taken from http://en.wikipedia.org/wiki/Goertzel_algorithm
+// more info: http://www.embedded.com/story/OEG20020819S0057
 
 #include "Main.h"
 #include "Goertzel.h"

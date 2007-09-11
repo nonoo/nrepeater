@@ -27,9 +27,12 @@ public:
     char*	finishDecoding();
     void	clearSequence();
     bool	isValidSequence( char* pszSequence );
-    void	processSequence( char* pszSequence );
+    bool	processSequence( char* pszSequence );
 
 private:
+    void	beep( int nFrequency, int nDuration, int nNum, int nDelay );
+
+
     CGoertzel	m_Goertzel;
     int		m_nSampleRate;
 
@@ -39,6 +42,7 @@ private:
     char	m_cPrevDecoded;
     int		m_nSamplesProcessed;
     int		m_nPause;
+    bool	m_bLongToneDetected;
 
     char*	m_pszSequence;
 };
