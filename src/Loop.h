@@ -25,6 +25,8 @@
 class CLoop
 {
 public:
+    ~CLoop();
+
     void start();
 
     void setAlarm( int nMilliSecs );
@@ -49,6 +51,9 @@ private:
     int			m_nCompressedFramesNum;
     int			m_nResampledFramesNum;
 
+    int			m_nParrotBufferFree;
+    int			m_nParrotBufferSize;
+
 // these variables have to be reached by onSIGALRM()
 public:
     CWavFile		m_RogerBeep;
@@ -62,6 +67,13 @@ public:
     bool		m_bPlayFailBeep;
     bool		m_bProcessingDTMFAction;
     bool		m_bDTMFProcessingSuccess;
+
+    short*		m_pParrotBuffer;
+    int			m_nParrotBufferPos;
+    bool		m_bParrotMode;
+    bool		m_bParrotStartPlayback;
+
+    bool		m_bSquelchOff;
 };
 
 #endif

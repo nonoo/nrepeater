@@ -40,8 +40,6 @@ extern CArchiver	g_Archiver;
 
 void onSIGALRM( int )
 {
-    g_ParPort->setPTT( false );
-
     // beep playing hasn't been started yet, but the delay after receiving is over
     if( g_Loop.m_bPlayingBeepStart )
     {
@@ -68,14 +66,42 @@ void onSIGALRM( int )
     {
 	// ack beep has just finished playing, delay after ack beep is over
 	g_Loop.m_bPlayAckBeep = false;
-	g_Log.log( CLOG_DEBUG, "beep finished\n" );
 
-	g_Loop.m_bDTMFProcessingSuccess = g_Loop.m_DTMF.processSequence( g_Loop.m_pszDTMFDecoded );
+	if( g_Loop.m_bParrotMode && g_Loop.m_bParrotStartPlayback )
+	{
+	    // playing back parrot buffer
+	    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "beep finished, playing back parrot buffer\n" );
+	    g_SNDCardOut->write( g_Loop.m_pParrotBuffer, g_Loop.m_nParrotBufferPos );
+	    usleep( g_MainConfig.getInt( "parrot", "delay_after_playback", 250 ) * 1000 );
 
-	g_Loop.m_DTMF.clearSequence();
-	// turning off transmitter after given microseconds
-	// setting up timer
-	g_Loop.setAlarm( g_MainConfig.getInt( "dtmf", "delay_after_action", 250 ) );
+	    // playing roger beep if needed
+	    g_Loop.m_bPlayRogerBeep = g_Loop.m_RogerBeep.isLoaded();
+	    if( g_Loop.m_bPlayRogerBeep )
+	    {
+		g_Loop.m_bPlayingBeepStart = true;
+		g_Loop.m_RogerBeep.rewind();
+		onSIGALRM( 0 );
+	    }
+	    else
+	    {
+		g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "playback of parrot buffer finished, transmission stopped.\n" );
+		g_Loop.m_bParrotStartPlayback = false;
+		g_SNDCardOut->stop();
+		g_ParPort->setPTT( false );
+		g_Loop.m_bSquelchOff = false;
+	    }
+	}
+	else
+	{
+	    g_Log.log( CLOG_DEBUG, "beep finished\n" );
+
+	    g_Loop.m_bDTMFProcessingSuccess = g_Loop.m_DTMF.processSequence( g_Loop.m_pszDTMFDecoded );
+
+	    g_Loop.m_DTMF.clearSequence();
+	    // turning off transmitter after given microseconds
+	    // setting up timer
+	    g_Loop.setAlarm( g_MainConfig.getInt( "dtmf", "delay_after_action", 250 ) );
+	}
 	return;
     }
 
@@ -116,8 +142,12 @@ void onSIGALRM( int )
 	return;
     }
 
+    // this stops blocking incoming transmissions
+    g_Loop.m_bParrotStartPlayback = false;
+
     // the delay after the beep is over
     g_SNDCardOut->stop();
+    g_ParPort->setPTT( false );
     g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "beep finished, transmission stopped.\n" );
 }
 
@@ -155,12 +185,16 @@ void CLoop::clearAlarm()
 // main loop
 void CLoop::start()
 {
-    bool fSquelchOff = false;
+    m_bSquelchOff = false;
     m_nFDIn = g_SNDCardIn->getFDIn();
     m_nSelectRes = -1;
     m_bProcessingDTMFAction = false;
     m_bPlayingBeep = false;
     m_bPlayingBeepStart = false;
+
+    m_bParrotMode = g_MainConfig.getInt( "parrot", "enabled", 0 );
+    m_pParrotBuffer = NULL;
+    m_nParrotBufferSize = 0;
 
     // initializing beeps
     if( g_MainConfig.getInt( "beeps", "rogerbeep_enabled", 1 ) )
@@ -200,7 +234,7 @@ void CLoop::start()
     if( g_MainConfig.getInt( "archiver", "enabled", 0 ) || g_MainConfig.getInt( "dtmf", "enabled", 0 ) )
     {
 	// only initialize resampler if archiver or dtmf decoder is enabled
-	m_Resampler.init( ( 1.0 * SPEEX_SAMPLERATE ) / g_SNDCardIn->getSampleRate(), g_SNDCardOut->getChannelNum() );
+	m_Resampler.init( ( (float)SPEEX_SAMPLERATE ) / g_SNDCardIn->getSampleRate(), g_SNDCardOut->getChannelNum() );
     }
     if( g_MainConfig.getInt( "dtmf", "enabled", 0 ) )
     {
@@ -212,28 +246,52 @@ void CLoop::start()
     while( !g_fTerminate )
     {
 	// receiver started receiving
-	if( g_ParPort->isSquelchOff() && !fSquelchOff && !m_bProcessingDTMFAction )
+	if( g_ParPort->isSquelchOff() && !m_bSquelchOff && !m_bProcessingDTMFAction && !m_bParrotStartPlayback )
 	{
 	    clearAlarm();
 
 	    g_SNDCardIn->start();
-	    fSquelchOff = true;
+	    m_bSquelchOff = true;
 
-	    g_SNDCardOut->stop();
-	    g_SNDCardOut->start();
-	    g_ParPort->setPTT( true );
+	    if( m_bParrotMode )
+	    {
+		if( m_pParrotBuffer == NULL )
+		{
+		    // parrot buffer hasn't been allocated yet
+		    m_nParrotBufferSize = g_MainConfig.getInt( "parrot", "buffer_size", 200 ) * 1024;
+		    m_pParrotBuffer = new short[ m_nParrotBufferSize ];
+		    if( m_pParrotBuffer == NULL )
+		    {
+			// memory allocation failed
+			g_Log.log( CLOG_ERROR, "not enough memory for parrot buffer, parrot mode disabled.\n" );
+			m_bParrotMode = false;
+		    }
+		}
+
+		m_nParrotBufferPos = 0;
+		m_nParrotBufferFree = m_nParrotBufferSize;
+		m_bParrotStartPlayback = false;
+
+		g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving transmission, recording started\n" );
+	    }
+	    else
+	    {
+		g_SNDCardOut->stop();
+		g_SNDCardOut->start();
+		g_ParPort->setPTT( true );
+
+		g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving transmission, transmitting started\n" );
+	    }
 
 	    m_bPlayingBeep = false;
 	    m_bPlayingBeepStart = false;
-
-	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving transmission, transmitting started\n" );
-	}
+	} // endof: receiver started receiving
 
 	// receiver stopped receiving
-	if( !g_ParPort->isSquelchOff() && fSquelchOff && !m_bProcessingDTMFAction )
+	if( !g_ParPort->isSquelchOff() && m_bSquelchOff && !m_bProcessingDTMFAction )
 	{
 	    g_SNDCardIn->stop();
-	    fSquelchOff = false;
+	    m_bSquelchOff = false;
 
 	    if( g_MainConfig.getInt( "compressor", "enabled", 0 ) )
 	    {
@@ -297,29 +355,61 @@ void CLoop::start()
 		}
 	    }
 
-	    // do we have to play the roger beep?
-	    if( m_bPlayRogerBeep )
+	    if( m_bParrotMode )
 	    {
-		// setting up a timer that will enable playing beeps after the given delay
-		m_bPlayingBeepStart = true;
-		setAlarm( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
-		//g_Archiver.writeSilence( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
-		m_RogerBeep.rewind();
-	    }
+		g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "receiving finished, recording over\n" );
+		m_bParrotStartPlayback = true;
+		m_bPlayRogerBeep = false;
 
-	    // if we don't have to play a beep
-	    if( !m_bPlayRogerBeep && !m_bPlayAckBeep && !m_bPlayFailBeep )
-	    {
-		g_SNDCardOut->stop();
-		g_ParPort->setPTT( false );
+		// switching transmitter on
+		g_ParPort->setPTT( true );
 
-		g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving finished, transmission stopped.\n" );
+		// playing ack beep if needed
+		m_bPlayAckBeep = m_AckBeep.isLoaded();
+		if( m_bPlayAckBeep )
+		{
+		    m_bPlayingBeepStart = true;
+		    m_AckBeep.rewind();
+		    onSIGALRM( 0 );
+		}
+		else
+		{
+		    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "playing back parrot buffer\n" );
+		    // playing back parrot buffer
+		    g_SNDCardOut->write( m_pParrotBuffer, m_nParrotBufferPos );
+		    usleep( g_MainConfig.getInt( "parrot", "delay_after_playback", 250 ) * 1000 );
+		    m_bParrotStartPlayback = false;
+		    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "playback of parrot buffer finished, transmission stopped.\n" );
+		    g_SNDCardOut->stop();
+		    g_ParPort->setPTT( false );
+		}
 	    }
 	    else
 	    {
-		g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving finished\n" );
+		// do we have to play the roger beep?
+		if( m_bPlayRogerBeep )
+		{
+		    // setting up a timer that will enable playing beeps after the given delay
+		    m_bPlayingBeepStart = true;
+		    setAlarm( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
+		    //g_Archiver.writeSilence( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
+		    m_RogerBeep.rewind();
+		}
+
+		// if we don't have to play a beep
+		if( !m_bPlayRogerBeep && !m_bPlayAckBeep && !m_bPlayFailBeep )
+		{
+		    g_SNDCardOut->stop();
+		    g_ParPort->setPTT( false );
+
+		    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving finished, transmission stopped.\n" );
+		}
+		else
+		{
+		    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving finished\n" );
+		}
 	    }
-	}
+	} // endof: receiver started receiving
 
 	// this plays the beep wave sequentially
 	if( m_bPlayingBeep )
@@ -371,17 +461,16 @@ void CLoop::start()
 		// archiving
 	    	g_Archiver.write( pResampledData, m_nResampledFramesNum );
 	    }
-	}
+	} // endof: wave playing
 
 	g_Archiver.maintain();
 
-	if( !fSquelchOff )
+	if( !m_bSquelchOff )
 	{
 	    // we're not transmitting so we don't need to capture audio
 	    usleep( 100 );
 	    continue;
 	}
-
 
 	// select stuff may be removed later
         FD_ZERO( &m_fsReads );
@@ -410,8 +499,64 @@ void CLoop::start()
 	    m_nCompressedFramesNum = 0;
 	    m_pCompOut = m_Compressor.process( m_pBuffer, m_nFramesRead, m_nCompressedFramesNum );
 
-	    // playing samples
-	    g_SNDCardOut->write( m_pCompOut, m_nCompressedFramesNum );
+	    if( ( m_bParrotMode ) && ( !m_bParrotStartPlayback ) )
+	    {
+		// recording samples to memory
+		m_nParrotBufferFree = m_nParrotBufferSize - m_nParrotBufferPos;
+		if( m_nParrotBufferFree > m_nCompressedFramesNum )
+		{
+		    memcpy( m_pParrotBuffer + m_nParrotBufferPos, m_pCompOut, m_nCompressedFramesNum * 2 );
+		    m_nParrotBufferPos += m_nCompressedFramesNum;
+		}
+		else
+		{
+		    memcpy( m_pParrotBuffer + m_nParrotBufferPos, m_pCompOut, m_nParrotBufferFree * 2 );
+		    // parrot buffer is full
+		    g_Log.log( CLOG_DEBUG, "parrot buffer has been filled\n" );
+		    m_bParrotStartPlayback = true;
+		    m_bPlayRogerBeep = false;
+		    // interrupting receiving
+		    m_bSquelchOff = false;
+		    // switching transmitter on
+		    g_ParPort->setPTT( true );
+		    // playing ack beep if needed
+		    m_bPlayAckBeep = m_AckBeep.isLoaded();
+		    if( m_bPlayAckBeep )
+		    {
+			m_bPlayingBeepStart = true;
+			m_AckBeep.rewind();
+			onSIGALRM( 0 );
+		    }
+		    else
+		    {
+			g_Log.log( CLOG_MSG, "playing back parrot buffer\n" );
+			// playing back parrot buffer
+			g_SNDCardOut->write( m_pParrotBuffer, m_nParrotBufferPos );
+			usleep( g_MainConfig.getInt( "parrot", "delay_after_playback", 250 ) * 1000 );
+
+			// playing roger beep if needed
+		        m_bPlayRogerBeep = m_RogerBeep.isLoaded();
+			if( m_bPlayRogerBeep )
+			{
+			    m_bPlayingBeepStart = true;
+			    m_RogerBeep.rewind();
+			    onSIGALRM( 0 );
+		        }
+			else
+			{
+			    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "playback of parrot buffer finished, transmission stopped.\n" );
+			    g_SNDCardOut->stop();
+			    g_ParPort->setPTT( false );
+			    m_bParrotStartPlayback = false;
+			}
+		    }
+		}
+	    }
+	    else
+	    {
+		// playing samples
+	        g_SNDCardOut->write( m_pCompOut, m_nCompressedFramesNum );
+	    }
 
 	    // resampling
 	    m_nResampledFramesNum = 0;
@@ -424,4 +569,9 @@ void CLoop::start()
 	    g_Archiver.write( m_pResampledData, m_nResampledFramesNum );
 	}
     }
+}
+
+CLoop::~CLoop()
+{
+    SAFE_DELETE_ARRAY( m_pParrotBuffer );
 }

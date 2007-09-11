@@ -70,6 +70,11 @@ void CParPort::setPTT( bool fState )
     change_pin( LP_PIN[ m_nTransmitterPin1 ] | LP_PIN[ m_nTransmitterPin2 ], fState );
 }
 
+bool CParPort::getPTT()
+{
+    return pin_is_set( LP_PIN[ m_nTransmitterPin1 ] | LP_PIN[ m_nTransmitterPin2 ] );
+}
+
 bool CParPort::isSquelchOff()
 {
     if( m_bReceiverLow )
