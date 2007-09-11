@@ -67,7 +67,7 @@ void onSIGALRM( int )
 	// ack beep has just finished playing, delay after ack beep is over
 	g_Loop.m_bPlayAckBeep = false;
 
-	if( g_Loop.m_bParrotMode && g_Loop.m_bParrotStartPlayback )
+	if( g_Loop.m_bParrotMode && g_Loop.m_bParrotStartPlayback && !g_Loop.m_bProcessingDTMFAction )
 	{
 	    // playing back parrot buffer
 	    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "beep finished, playing back parrot buffer\n" );
@@ -94,8 +94,9 @@ void onSIGALRM( int )
 	else
 	{
 	    g_Log.log( CLOG_DEBUG, "beep finished\n" );
-
+	    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "starting processing DTMF actions\n" );
 	    g_Loop.m_bDTMFProcessingSuccess = g_Loop.m_DTMF.processSequence( g_Loop.m_pszDTMFDecoded );
+	    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "DTMF action processing finished\n" );
 
 	    g_Loop.m_DTMF.clearSequence();
 	    // turning off transmitter after given microseconds
@@ -105,15 +106,15 @@ void onSIGALRM( int )
 	return;
     }
 
+    // this stops blocking incoming transmissions
+    g_Loop.m_bParrotStartPlayback = false;
+
     if( g_Loop.m_bProcessingDTMFAction )
     {
 	// processing DTMF action is over, delay after action is over
 	g_Loop.m_bProcessingDTMFAction = false;
-	g_SNDCardOut->stop();
 	if( g_Loop.m_bDTMFProcessingSuccess )
 	{
-	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "action finished successfully\n" );
-
 	    // playing roger beep if needed
 	    g_Loop.m_bPlayRogerBeep = g_Loop.m_RogerBeep.isLoaded();
 	    if( g_Loop.m_bPlayRogerBeep )
@@ -123,10 +124,15 @@ void onSIGALRM( int )
 		//setAlarm( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
 		onSIGALRM( 0 );
 	    }
+	    else
+	    {
+		g_SNDCardOut->stop();
+		g_ParPort->setPTT( false );
+	    }
 	}
 	else
 	{
-	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "action failed\n" );
+	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "DTMF action processing failed\n" );
 
 	    // playing fail beep if needed
 	    g_Loop.m_bPlayFailBeep = g_Loop.m_FailBeep.isLoaded();
@@ -137,13 +143,14 @@ void onSIGALRM( int )
 		//setAlarm( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
 		onSIGALRM( 0 );
 	    }
+	    else
+	    {
+		g_SNDCardOut->stop();
+		g_ParPort->setPTT( false );
+	    }
 	}
-
 	return;
     }
-
-    // this stops blocking incoming transmissions
-    g_Loop.m_bParrotStartPlayback = false;
 
     // the delay after the beep is over
     g_SNDCardOut->stop();
@@ -304,58 +311,9 @@ void CLoop::start()
 	    m_bPlayAckBeep = m_bPlayFailBeep = false;
 
 	    // querying decoded DTMF sequence
-	    m_pszDTMFDecoded = m_DTMF.finishDecoding();
-	    if( m_pszDTMFDecoded != NULL )
-	    {
-		if( m_DTMF.isValidSequence( m_pszDTMFDecoded ) )
-		{
-		    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "received valid DTMF sequence: " + string( m_pszDTMFDecoded ) + "\n" );
-		    // sequence valid, playing ack beep
-		    if( m_AckBeep.isLoaded() )
-		    {
-			m_bPlayRogerBeep = false;
-			m_bPlayAckBeep = true;
-			m_bProcessingDTMFAction = true;
+	    checkDTMFSequence();
 
-			// setting up a timer that will enable playing beeps after the given delay
-			m_bPlayingBeepStart = true;
-			setAlarm( g_MainConfig.getInt( "beeps", "delay_ackbeep", 0 ) );
-			m_AckBeep.rewind();
-		    }
-		    else
-		    {
-			// we don't have to play the ack beep, starting processing sequence
-			m_DTMF.processSequence( g_Loop.m_pszDTMFDecoded );
-
-			m_DTMF.clearSequence();
-			m_bPlayRogerBeep = false;
-			m_bPlayAckBeep = false;
-			m_bProcessingDTMFAction = true;
-			// turning off transmitter after given microseconds
-			// setting up timer
-			setAlarm( g_MainConfig.getInt( "dtmf", "delay_after_action", 250 ) );
-			continue;
-		    }
-		}
-		else
-		{
-		    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "received invalid DTMF sequence (" + string( m_pszDTMFDecoded ) + ")\n" );
-		    // sequence invalid, playing fail beep
-		    if( m_FailBeep.isLoaded() )
-		    {
-			m_bPlayRogerBeep = false;
-			m_bPlayFailBeep = true;
-
-			// setting up a timer that will enable playing beeps after the given delay
-			m_bPlayingBeepStart = true;
-			setAlarm( g_MainConfig.getInt( "beeps", "delay_failbeep", 0 ) );
-			m_FailBeep.rewind();
-		    }
-		    m_DTMF.clearSequence();
-		}
-	    }
-
-	    if( m_bParrotMode )
+	    if( m_bParrotMode && !m_bProcessingDTMFAction )
 	    {
 		g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "receiving finished, recording over\n" );
 		m_bParrotStartPlayback = true;
@@ -517,6 +475,14 @@ void CLoop::start()
 		    m_bPlayRogerBeep = false;
 		    // interrupting receiving
 		    m_bSquelchOff = false;
+
+		    checkDTMFSequence();
+		    if( !m_bParrotMode )
+		    {
+			// parrot mode has been switched off by a DTMF action
+			continue;
+		    }
+
 		    // switching transmitter on
 		    g_ParPort->setPTT( true );
 		    // playing ack beep if needed
@@ -533,7 +499,6 @@ void CLoop::start()
 			// playing back parrot buffer
 			g_SNDCardOut->write( m_pParrotBuffer, m_nParrotBufferPos );
 			usleep( g_MainConfig.getInt( "parrot", "delay_after_playback", 250 ) * 1000 );
-
 			// playing roger beep if needed
 		        m_bPlayRogerBeep = m_RogerBeep.isLoaded();
 			if( m_bPlayRogerBeep )
@@ -567,6 +532,89 @@ void CLoop::start()
 
 	    // archiving
 	    g_Archiver.write( m_pResampledData, m_nResampledFramesNum );
+	}
+    }
+}
+
+// called from a DTMF action
+bool CLoop::switchParrotMode()
+{
+    if( m_bParrotMode )
+    {
+	m_bParrotMode = false;
+	g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "parrot mode switched off.\n" );
+    }
+    else
+    {
+	if( m_pParrotBuffer == NULL )
+	{
+	    // parrot buffer hasn't been allocated yet
+	    m_nParrotBufferSize = g_MainConfig.getInt( "parrot", "buffer_size", 200 ) * 1024;
+	    m_pParrotBuffer = new short[ m_nParrotBufferSize ];
+	    if( m_pParrotBuffer == NULL )
+	    {
+		// memory allocation failed
+		g_Log.log( CLOG_ERROR, "not enough memory for parrot buffer, can't enable parrot mode.\n" );
+		return false;
+	    }
+	}
+	m_bParrotMode = true;
+	g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "parrot mode switched on.\n" );
+    }
+    // switch was successful
+    return true;
+}
+
+// checks if a DTMF sequence has been received and starts it's processing
+void CLoop::checkDTMFSequence()
+{
+    m_pszDTMFDecoded = m_DTMF.finishDecoding();
+    if( m_pszDTMFDecoded != NULL )
+    {
+	if( m_DTMF.isValidSequence( m_pszDTMFDecoded ) )
+	{
+	    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "received valid DTMF sequence: " + string( m_pszDTMFDecoded ) + "\n" );
+	    // sequence valid, playing ack beep
+	    if( m_AckBeep.isLoaded() )
+	    {
+		m_bPlayRogerBeep = false;
+		m_bPlayAckBeep = true;
+		m_bProcessingDTMFAction = true;
+
+		// setting up a timer that will enable playing beeps after the given delay
+		m_bPlayingBeepStart = true;
+		setAlarm( g_MainConfig.getInt( "beeps", "delay_ackbeep", 0 ) );
+		m_AckBeep.rewind();
+	    }
+	    else
+	    {
+		// we don't have to play the ack beep, starting processing sequence
+		m_bDTMFProcessingSuccess = m_DTMF.processSequence( g_Loop.m_pszDTMFDecoded );
+
+		m_DTMF.clearSequence();
+		m_bPlayRogerBeep = false;
+		m_bPlayAckBeep = false;
+		m_bProcessingDTMFAction = true;
+		// turning off transmitter after given microseconds
+		// setting up timer
+		setAlarm( g_MainConfig.getInt( "dtmf", "delay_after_action", 250 ) );
+	    }
+	}
+	else
+	{
+	    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, "received invalid DTMF sequence (" + string( m_pszDTMFDecoded ) + ")\n" );
+	    // sequence invalid, playing fail beep
+	    if( m_FailBeep.isLoaded() )
+	    {
+		m_bPlayRogerBeep = false;
+		m_bPlayFailBeep = true;
+
+		// setting up a timer that will enable playing beeps after the given delay
+		m_bPlayingBeepStart = true;
+		setAlarm( g_MainConfig.getInt( "beeps", "delay_failbeep", 0 ) );
+		m_FailBeep.rewind();
+	    }
+	    m_DTMF.clearSequence();
 	}
     }
 }
