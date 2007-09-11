@@ -30,6 +30,7 @@ public:
     void setTransmitterPin1( int nPin );
     void setTransmitterPin2( int nPin );
     void setPTT( bool fState );
+    bool getPTT();
     bool isSquelchOff();
 
 private:
