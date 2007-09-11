@@ -42,8 +42,10 @@ void onSIGALRM( int )
 {
     g_ParPort->setPTT( false );
 
+    // beep playing hasn't been started yet, but the delay after receiving is over
     if( g_Loop.m_bPlayingBeepStart )
     {
+	// starting beep playing
 	g_Loop.m_bPlayingBeep = true;
 	g_Loop.m_bPlayingBeepStart = false;
 
@@ -73,34 +75,44 @@ void onSIGALRM( int )
 	g_Loop.m_DTMF.clearSequence();
 	// turning off transmitter after given microseconds
 	// setting up timer
-	g_Loop.setTransmitTimeout( g_MainConfig.getInt( "dtmf", "delay_after_action", 250000 ) );
+	g_Loop.setAlarm( g_MainConfig.getInt( "dtmf", "delay_after_action", 250 ) );
 	return;
     }
+
     if( g_Loop.m_bProcessingDTMFAction )
     {
-	// processing DTMF action is over, delay is over
+	// processing DTMF action is over, delay after action is over
 	g_Loop.m_bProcessingDTMFAction = false;
 	g_SNDCardOut->stop();
 	g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "action finished, transmission stopped.\n" );
 	return;
     }
+
+    // the delay after the beep is over
     g_SNDCardOut->stop();
     g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "beep finished, transmission stopped.\n" );
 }
 
-void CLoop::setTransmitTimeout( int nMicroSecs )
+void CLoop::setAlarm( int nMilliSecs )
 {
+    if( nMilliSecs == 0 )
+    {
+	// setitimer() does nothing when nMilliSecs == 0
+	onSIGALRM( 0 );
+	return;
+    }
+
     struct itimerval rttimer;
     struct itimerval old_rttimer;
 
     rttimer.it_value.tv_sec = 0;
-    rttimer.it_value.tv_usec = nMicroSecs * 1000;
+    rttimer.it_value.tv_usec = nMilliSecs * 1000;
     rttimer.it_interval.tv_sec = 0;
     rttimer.it_interval.tv_usec = 0;
     setitimer( ITIMER_REAL, &rttimer, &old_rttimer );
 }
 
-void CLoop::clearTransmitTimeout()
+void CLoop::clearAlarm()
 {
     struct itimerval rttimer;
     struct itimerval old_rttimer;
@@ -174,7 +186,7 @@ void CLoop::start()
 	// receiver started receiving
 	if( g_ParPort->isSquelchOff() && !fSquelchOff && !m_bProcessingDTMFAction )
 	{
-	    clearTransmitTimeout();
+	    clearAlarm();
 
 	    g_SNDCardIn->start();
 	    fSquelchOff = true;
@@ -221,7 +233,7 @@ void CLoop::start()
 
 			// setting up a timer that will enable playing beeps after the given delay
 			m_bPlayingBeepStart = true;
-			setTransmitTimeout( g_MainConfig.getInt( "beeps", "delay_ackbeep", 0 ) );
+			setAlarm( g_MainConfig.getInt( "beeps", "delay_ackbeep", 0 ) );
 			m_AckBeep.rewind();
 		    }
 		    else
@@ -235,7 +247,7 @@ void CLoop::start()
 			m_bProcessingDTMFAction = true;
 			// turning off transmitter after given microseconds
 			// setting up timer
-			setTransmitTimeout( g_MainConfig.getInt( "dtmf", "delay_after_action", 250000 ) );
+			setAlarm( g_MainConfig.getInt( "dtmf", "delay_after_action", 250 ) );
 			continue;
 		    }
 		}
@@ -250,7 +262,7 @@ void CLoop::start()
 
 			// setting up a timer that will enable playing beeps after the given delay
 			m_bPlayingBeepStart = true;
-			setTransmitTimeout( g_MainConfig.getInt( "beeps", "delay_failbeep", 0 ) );
+			setAlarm( g_MainConfig.getInt( "beeps", "delay_failbeep", 0 ) );
 			m_FailBeep.rewind();
 		    }
 		    m_DTMF.clearSequence();
@@ -262,7 +274,7 @@ void CLoop::start()
 	    {
 		// setting up a timer that will enable playing beeps after the given delay
 		m_bPlayingBeepStart = true;
-		setTransmitTimeout( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
+		setAlarm( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
 		m_RogerBeep.rewind();
 	    }
 
@@ -306,17 +318,17 @@ void CLoop::start()
 		int nMSecs = 0;
 		if( m_bPlayRogerBeep )
 		{
-		    nMSecs = g_MainConfig.getInt( "beeps", "delay_after_rogerbeep", 250000 );
+		    nMSecs = g_MainConfig.getInt( "beeps", "delay_after_rogerbeep", 250 );
 		}
 		if( m_bPlayAckBeep )
 		{
-		    nMSecs = g_MainConfig.getInt( "beeps", "delay_after_ackbeep", 250000 );
+		    nMSecs = g_MainConfig.getInt( "beeps", "delay_after_ackbeep", 250 );
 		}
 		if( m_bPlayFailBeep )
 		{
-		    nMSecs = g_MainConfig.getInt( "beeps", "delay_after_failbeep", 250000 );
+		    nMSecs = g_MainConfig.getInt( "beeps", "delay_after_failbeep", 250 );
 		}
-	    	setTransmitTimeout( nMSecs );
+	    	setAlarm( nMSecs );
 	    }
 	    else
 	    {

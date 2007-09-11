@@ -27,9 +27,8 @@ class CLoop
 public:
     void start();
 
-    // for onSIGALRM()
-    void setTransmitTimeout( int nMicroSecs );
-    void clearTransmitTimeout();
+    void setAlarm( int nMilliSecs );
+    void clearAlarm();
 
 private:
     struct timeval	m_tTime;
@@ -52,7 +51,7 @@ private:
     int			m_nCompressedFramesNum;
     int			m_nResampledFramesNum;
 
-// these variables are have to be reached by onSIGALRM()
+// these variables have to be reached by onSIGALRM()
 public:
     CDTMF		m_DTMF;
     char*		m_pszDTMFDecoded;
