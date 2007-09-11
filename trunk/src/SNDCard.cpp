@@ -292,11 +292,6 @@ void CSNDCard::write( short* pBuffer, int nLength )
 	m_bFirstTime = false;
     }
 
-    if( nLength == 0 )
-    {
-	return;
-    }
-
     // n * 2 because we read shorts
     if( ::write( m_nFDOut, pBuffer, nLength * 2 ) != (int)nLength * 2 )
     {

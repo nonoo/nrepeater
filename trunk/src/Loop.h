@@ -33,10 +33,9 @@ public:
     void clearAlarm();
 
     bool switchParrotMode();
-
-private:
     void checkDTMFSequence();
 
+private:
     struct timeval	m_tTime;
     int			m_nFDIn;
     fd_set		m_fsReads;
