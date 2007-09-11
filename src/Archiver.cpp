@@ -42,6 +42,8 @@ CArchiver::~CArchiver()
     {
 	fclose( m_pEventFile );
     }
+
+    SAFE_DELETE_ARRAY( m_pSilenceBuf );
 }
 
 void CArchiver::init( int nSampleRate, int nChannels )
@@ -53,6 +55,9 @@ void CArchiver::init( int nSampleRate, int nChannels )
     m_nDay = -1;
     m_lArchivedSamples = 0;
     m_pEventFile = NULL;
+
+    m_pSilenceBuf = NULL;
+    m_nSilenceBufSize = 0;
 
     m_pOgg = new COggFileOutStream( 0 );
 
@@ -188,4 +193,24 @@ void CArchiver::maintain()
 	fprintf( m_pEventFile, "\n[REALTIME] [FILETIME]\n" );
     }
     m_nDay = m_stLocalTime->tm_mday;
+}
+
+void CArchiver::writeSilence( int nMilliSecs )
+{
+    if( !m_bArchiverEnabled )
+    {
+	return;
+    }
+
+    m_nSilenceFramesNeeded = (int)( ( (float)m_nSampleRate * nMilliSecs ) / 1000 );
+    if( m_nSilenceBufSize < m_nSilenceFramesNeeded )
+    {
+	SAFE_DELETE_ARRAY( m_pSilenceBuf );
+	m_nSilenceBufSize = m_nSilenceFramesNeeded;
+	m_pSilenceBuf = new short[ m_nSilenceBufSize ];
+	memset( m_pSilenceBuf, 0, m_nSilenceBufSize * 2 );
+    }
+
+    m_SpeexCodec.encode( m_pSilenceBuf, m_nSilenceFramesNeeded );
+    m_lArchivedSamples += m_nSilenceFramesNeeded;
 }

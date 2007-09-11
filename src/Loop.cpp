@@ -66,11 +66,11 @@ void onSIGALRM( int )
 
     if( g_Loop.m_bPlayAckBeep )
     {
-	// ack beep has just finished playing
+	// ack beep has just finished playing, delay after ack beep is over
 	g_Loop.m_bPlayAckBeep = false;
 	g_Log.log( CLOG_DEBUG, "beep finished\n" );
 
-	g_Loop.m_DTMF.processSequence( g_Loop.m_pszDTMFDecoded );
+	g_Loop.m_bDTMFProcessingSuccess = g_Loop.m_DTMF.processSequence( g_Loop.m_pszDTMFDecoded );
 
 	g_Loop.m_DTMF.clearSequence();
 	// turning off transmitter after given microseconds
@@ -84,7 +84,35 @@ void onSIGALRM( int )
 	// processing DTMF action is over, delay after action is over
 	g_Loop.m_bProcessingDTMFAction = false;
 	g_SNDCardOut->stop();
-	g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "action finished, transmission stopped.\n" );
+	if( g_Loop.m_bDTMFProcessingSuccess )
+	{
+	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "action finished successfully\n" );
+
+	    // playing roger beep if needed
+	    g_Loop.m_bPlayRogerBeep = g_Loop.m_RogerBeep.isLoaded();
+	    if( g_Loop.m_bPlayRogerBeep )
+	    {
+		g_Loop.m_bPlayingBeepStart = true;
+		g_Loop.m_RogerBeep.rewind();
+		//setAlarm( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
+		onSIGALRM( 0 );
+	    }
+	}
+	else
+	{
+	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "action failed\n" );
+
+	    // playing fail beep if needed
+	    g_Loop.m_bPlayFailBeep = g_Loop.m_FailBeep.isLoaded();
+	    if( g_Loop.m_bPlayFailBeep )
+	    {
+		g_Loop.m_bPlayingBeepStart = true;
+		g_Loop.m_FailBeep.rewind();
+		//setAlarm( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
+		onSIGALRM( 0 );
+	    }
+	}
+
 	return;
     }
 
@@ -275,6 +303,7 @@ void CLoop::start()
 		// setting up a timer that will enable playing beeps after the given delay
 		m_bPlayingBeepStart = true;
 		setAlarm( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
+		//g_Archiver.writeSilence( g_MainConfig.getInt( "beeps", "delay_rogerbeep", 1000 ) );
 		m_RogerBeep.rewind();
 	    }
 

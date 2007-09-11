@@ -80,6 +80,18 @@ int CSettingsFile::getInt( string szSection, string szKey, const int& nDefaultVa
     return nDefaultValue;
 }
 
+bool CSettingsFile::isValidKey( string szSection, string szKey )
+{
+    if( m_Settings.count( szSection ) > 0 )
+    {
+	if( m_Settings[ szSection ].count( szKey ) > 0 )
+	{
+	    return true;
+	}
+    }
+    return false;
+}
+
 string CSettingsFile::trimLeft( string szString )
 {
     string out="";

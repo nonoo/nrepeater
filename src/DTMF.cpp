@@ -19,6 +19,11 @@
 #include "SettingsFile.h"
 #include "Log.h"
 
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <linux/kd.h>
+
 extern CSettingsFile	g_MainConfig;
 extern CLog		g_Log;
 
@@ -91,6 +96,76 @@ void CDTMF::process( short* pData, int nFramesNum )
 
     m_nSamplesProcessed += nFramesNum;
 
+    // litz alert checking
+    if( g_MainConfig.getInt( "dtmf", "litz_enabled", 1 ) )
+    {
+	if( !strncmp( m_caDecodedChars, "P", 1 ) && ( ( (float)m_nSamplesProcessed / m_nSampleRate ) * 1000 > 3000 ) )
+	{
+	    g_Log.log( CLOG_DEBUG, "DTMF [0] pressed for 3 secs: P -> !, LITZ alert\n" );
+	    m_caDecodedChars[0] = '!';
+	}
+    }
+
+    if( ( (float)m_nSamplesProcessed / m_nSampleRate ) * 1000 > g_MainConfig.getInt( "dtmf", "long_tone_min_length", 2000 ) && !m_bLongToneDetected )
+    {
+	// tone pressed for more than long_tone_min_length millisecs
+	// changing stored tone code to it's long equivalent
+	switch( m_caDecodedChars[ m_nDecodedCharsNum - 1 ] )
+	{
+	    case '1':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'Q';
+		break;
+	    case '2':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'W';
+		break;
+	    case '3':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'E';
+		break;
+	    case '4':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'R';
+		break;
+	    case '5':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'T';
+		break;
+	    case '6':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'Z';
+		break;
+	    case '7':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'U';
+		break;
+	    case '8':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'I';
+		break;
+	    case '9':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'O';
+		break;
+	    case '0':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'P';
+		break;
+	    case '#':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'S';
+		break;
+	    case '*':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'D';
+		break;
+	    case 'A':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'F';
+		break;
+	    case 'B':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'G';
+		break;
+	    case 'C':
+		m_caDecodedChars[ m_nDecodedCharsNum - 1 ] = 'H';
+		break;
+	    default:
+		break;
+	}
+	m_bLongToneDetected = true;
+	char caDbgTmp[500];
+	sprintf( caDbgTmp, "tone %c held long -> %c\n", m_cDecoded, m_caDecodedChars[ m_nDecodedCharsNum -1 ] );
+	g_Log.log( CLOG_DEBUG, caDbgTmp );
+    }
+
     if( ( m_nDecodedCharsNum > 0 ) && ( ( (float)m_nPause / m_nSampleRate ) * 1000 < g_MainConfig.getInt( "dtmf", "min_pause", 500 ) ) )
     {
 	// the pause between two tones has not been reached
@@ -106,6 +181,7 @@ void CDTMF::process( short* pData, int nFramesNum )
 	    memset( m_caDecodedChars, 0, sizeof( m_caDecodedChars ) );
 	}
 
+	m_bLongToneDetected = false;
 	m_caDecodedChars[ m_nDecodedCharsNum++ ] = m_cDecoded;
 	char caDbgTmp[500];
 	sprintf( caDbgTmp, "DTMF tone decoded: %c\n", m_cDecoded );
@@ -120,9 +196,91 @@ void CDTMF::process( short* pData, int nFramesNum )
 
 bool CDTMF::isValidSequence( char* pszSequence )
 {
+    return g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "enabled", 0 );
+}
+
+bool CDTMF::processSequence( char* pszSequence )
+{
+    // do we have to log something?
+    if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "log" ) )
+    {
+	g_Log.log( CLOG_MSG, g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "log", "no log message specified.\n" ) + "\n" );
+    }
+
+    // do we have to log something to the archiver?
+    if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "log_to_archiver" ) )
+    {
+	g_Log.log( CLOG_TO_ARCHIVER, g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "log_to_archiver", "no log message specified.\n" ) + "\n" );
+    }
+
+    // do we have to exec a command?
+    if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "exec" ) )
+    {
+	if( system( g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "exec", "" ).c_str() ) < 0 )
+	{
+	    return false;
+	}
+    }
+
+    // do we have to play PC speaker beeps?
+    if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "pcspeaker_beep" ) )
+    {
+	int nFrequency = 0;
+	int nDuration = 0;
+	int nNum = 0;
+	int nDelay = 0;
+	if( sscanf( g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "pcspeaker_beep", "0" ).c_str(), "%d %d %d %d", &nFrequency, &nDuration, &nNum, &nDelay ) != 4 )
+	{
+	    g_Log.log( CLOG_ERROR, "invalid format in config file for pcspeaker_beep in dtmf-action-" + string( pszSequence ) + "\n" );
+	    return false;
+	}
+	else
+	{
+	    char szTmp[500];
+	    sprintf( szTmp, "PC speaker beep: %d Hz, count: %d ms, duration: %d ms, delay: %d ms\n", nFrequency, nNum, nDuration, nDelay );
+	    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, szTmp );
+	    beep( nFrequency, nDuration, nNum, nDelay );
+	}
+    }
     return true;
 }
 
-void CDTMF::processSequence( char* pszSequence )
+// PC speaker beep
+void CDTMF::beep( int nFrequency, int nDuration, int nNum, int nDelay )
 {
+    int nSpeakerFD = open( "/dev/tty0", O_RDWR | O_NDELAY );
+
+    if( nSpeakerFD < 0 )
+    {
+    	g_Log.log( CLOG_ERROR, "can't open PC speaker device, make sure you have CONFIG_INPUT_PCSPKR enabled in your kernel.\n" );
+	return;
+    }
+
+    while( nNum > 0 )
+    {
+	// note down
+	if( ioctl( nSpeakerFD, KIOCSOUND, 1190000 / nFrequency ) == -1 )
+	{
+    	    g_Log.log( CLOG_ERROR, "can't beep on the PC speaker - ioctl() error.\n" );
+    	    return;
+	}
+
+	// holding the note
+	usleep( nDuration * 1000 );
+
+	// turning off the speaker
+	if( ioctl( nSpeakerFD, KIOCSOUND, 0 ) == -1 )
+	{
+    	    g_Log.log( CLOG_ERROR, "can't turn off beep on the PC speaker - ioctl() error.\n" );
+    	    return;
+	}
+
+	if( --nNum > 0 )
+	{
+	    // delaying between beeps
+	    usleep( nDelay * 1000 );
+	}
+    }
+
+    close( nSpeakerFD );
 }

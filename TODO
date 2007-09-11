@@ -6,7 +6,3 @@ long-term todos:
 - server and win32 client, or connecting to other networks
 
 short-term todos:
-- LITZ Emergency Alert: LITZ is a new system promoted by the ARRL to provide
-  a means for a repeater user to request emergency assistance without being
-  familiar with the operation of the repeater. If a repeater user transmits
-  a DTMF [0] for three seconds, nrepeater will alert the control operators. 
