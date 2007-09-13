@@ -255,7 +255,7 @@ bool CDTMF::processSequence( char* pszSequence )
 	{
 	    char szTmp[500];
 	    sprintf( szTmp, "PC speaker beep: %d Hz, count: %d ms, duration: %d ms, delay: %d ms\n", nFrequency, nNum, nDuration, nDelay );
-	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, szTmp );
+	    g_Log.log( CLOG_DEBUG, szTmp );
 	    beep( nFrequency, nDuration, nNum, nDelay );
 	}
     }
@@ -297,6 +297,14 @@ bool CDTMF::processSequence( char* pszSequence )
 	}
 
 	string szRandomFileName = getRandomFileName( szDir, ".wav" );
+
+	if( szRandomFileName == "" )
+	{
+	    // no files found
+	    g_Log.log( CLOG_DEBUG, "no .wav files found in " + szDir + "\n" );
+	    return false;
+	}
+
 	if( !WavFile.loadToMemory( szRandomFileName ) )
 	{
 	    // (loadToMemory() already logged the error)
@@ -391,6 +399,12 @@ string CDTMF::getRandomFileName( string szDir, string szExtension )
     }
 
     closedir( pDir );
+
+    if( vszRes.size() == 0 )
+    {
+	// no files found
+	return "";
+    }
 
     return vszRes[ rand() % vszRes.size() ];
 }

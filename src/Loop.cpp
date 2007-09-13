@@ -445,7 +445,7 @@ void CLoop::checkDTMFSequence()
 		{
 		    usleep( g_MainConfig.getInt( "beeps", "delay_failbeep", 0 ) * 1000 );
 		    g_Log.log( CLOG_DEBUG, "playing fail beep\n" );
-		    playWavFileBlocking( m_AckBeep );
+		    playWavFileBlocking( m_FailBeep );
 		    usleep( g_MainConfig.getInt( "beeps", "delay_after_failbeep", 250 ) * 1000 );
 		    g_Log.log( CLOG_DEBUG, "playing fail beep finished\n" );
 		}
