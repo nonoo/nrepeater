@@ -270,16 +270,16 @@ bool CDTMF::processSequence( char* pszSequence )
 	    return false;
 	}
 
-	if( g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "play_blocking", 1 ) )
+	if( g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "play_non_blocking", 0 ) )
 	{
-	    g_Log.log( CLOG_DEBUG, "playing " + g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "play", "" ) + "\n" );
-	    g_pLoop->playWavFileBlocking( WavFile );
+	    g_Log.log( CLOG_DEBUG, "playing " + g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "play", "" ) + " non-blocking\n" );
+	    g_pLoop->playWavFileNonBlocking( WavFile );
 	    g_Log.log( CLOG_DEBUG, "playback finished\n" );
 	}
 	else
 	{
-	    g_Log.log( CLOG_DEBUG, "playing " + g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "play", "" ) + " non-blocking\n" );
-	    g_pLoop->playWavFileNonBlocking( WavFile );
+	    g_Log.log( CLOG_DEBUG, "playing " + g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "play", "" ) + "\n" );
+	    g_pLoop->playWavFileBlocking( WavFile );
 	    g_Log.log( CLOG_DEBUG, "playback finished\n" );
 	}
     }
@@ -311,16 +311,16 @@ bool CDTMF::processSequence( char* pszSequence )
 	    return false;
 	}
 
-	if( g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "play_blocking", 1 ) )
+	if( g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "play_non_blocking", 0 ) )
 	{
-	    g_Log.log( CLOG_DEBUG, "playing random file: " + szDir + szRandomFileName + "\n" );
-	    g_pLoop->playWavFileBlocking( WavFile );
+	    g_Log.log( CLOG_DEBUG, "playing random file: " + szDir + szRandomFileName + " non-blocking\n" );
+	    g_pLoop->playWavFileNonBlocking( WavFile );
 	    g_Log.log( CLOG_DEBUG, "playback finished\n" );
 	}
 	else
 	{
-	    g_Log.log( CLOG_DEBUG, "playing random file: " + szDir + szRandomFileName + " non-blocking\n" );
-	    g_pLoop->playWavFileNonBlocking( WavFile );
+	    g_Log.log( CLOG_DEBUG, "playing random file: " + szDir + szRandomFileName + "\n" );
+	    g_pLoop->playWavFileBlocking( WavFile );
 	    g_Log.log( CLOG_DEBUG, "playback finished\n" );
 	}
     }
