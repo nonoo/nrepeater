@@ -35,7 +35,7 @@ const struct option long_options[] =
 const char* const short_options = "hc:";
 
 CLog		g_Log;
-CLoop		g_Loop;
+CLoop*		g_pLoop;
 CSettingsFile	g_MainConfig;
 CParPort*	g_ParPort = NULL;
 CSNDCard*	g_SNDCardIn = NULL;
@@ -191,6 +191,8 @@ void mainInit()
     initSndCards();
 
     g_Archiver.init( SPEEX_SAMPLERATE, g_SNDCardOut->getChannelNum() );
+
+    g_pLoop = new CLoop();
 }
 
 int main( int argc, char* argv[] )
@@ -202,8 +204,9 @@ int main( int argc, char* argv[] )
     mainInit();
 
     // starting main loop
-    g_Loop.start();
+    g_pLoop->start();
 
+    SAFE_DELETE( g_pLoop );
     SAFE_DELETE( g_ParPort );
     SAFE_DELETE( g_SNDCardIn );
     SAFE_DELETE( g_SNDCardOut );

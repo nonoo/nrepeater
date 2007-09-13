@@ -25,6 +25,7 @@
 class CLoop
 {
 public:
+    CLoop();
     ~CLoop();
 
     void start();
@@ -36,14 +37,25 @@ public:
     void checkDTMFSequence();
 
 private:
+    void playWaveBlocking( CWavFile& WavFile );
+    void parrotReceivingOver();
+
+
     struct timeval	m_tTime;
     int			m_nFDIn;
     fd_set		m_fsReads;
     int			m_nSelectRes;
+    bool		m_bSquelchOff;
 
+    CWavFile		m_RogerBeep;
     CWavFile		m_AckBeep;
+    CWavFile		m_FailBeep;
     CCompressor		m_Compressor;
     CResampler		m_Resampler;
+
+    CDTMF		m_DTMF;
+    char*		m_pszDTMFDecoded;
+    bool		m_bDTMFProcessingSuccess;
 
     // audio data from the sound card
     short*		m_pBuffer;
@@ -56,27 +68,21 @@ private:
 
     int			m_nParrotBufferFree;
     int			m_nParrotBufferSize;
+    short*		m_pParrotBuffer;
+    int			m_nParrotBufferPos;
+    bool		m_bParrotMode;
+
+    // for playWaveBlocking()
+    short*		m_pWaveData;
+    int			m_nWaveDataLength;
 
 // these variables have to be reached by onSIGALRM()
 public:
-    CWavFile		m_RogerBeep;
-    CWavFile		m_FailBeep;
-    CDTMF		m_DTMF;
-    char*		m_pszDTMFDecoded;
     bool		m_bPlayingBeepStart;
     bool		m_bPlayingBeep;
     bool		m_bPlayRogerBeep;
     bool		m_bPlayAckBeep;
     bool		m_bPlayFailBeep;
-    bool		m_bProcessingDTMFAction;
-    bool		m_bDTMFProcessingSuccess;
-
-    short*		m_pParrotBuffer;
-    int			m_nParrotBufferPos;
-    bool		m_bParrotMode;
-    bool		m_bParrotStartPlayback;
-
-    bool		m_bSquelchOff;
 };
 
 #endif

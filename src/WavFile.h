@@ -35,6 +35,7 @@ public:
     void	close();
     void	rewind();
     short*	play( int nBufferSize, int& nFramesRead );
+    short*	play( int& nFramesRead );
     short*	getWaveData( int& nLength );
     int		getSampleRate();
     int		getChannelNum();

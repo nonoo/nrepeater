@@ -177,6 +177,13 @@ short* CWavFile::play( int nBufferSize, int& nFramesRead )
     return m_pWave + nOldSeek;
 }
 
+// for playing the whole wave file in one call
+short* CWavFile::play( int& nFramesRead )
+{
+    nFramesRead = m_SFINFO.frames;
+    return m_pWave;
+}
+
 short* CWavFile::getWaveData( int& nLength )
 {
     nLength = m_SFINFO.frames;
