@@ -27,7 +27,7 @@
 
 extern CSettingsFile	g_MainConfig;
 extern CLog		g_Log;
-extern CLoop		g_Loop;
+extern CLoop*		g_pLoop;
 
 void CDTMF::init( int nSampleRate )
 {
@@ -229,8 +229,9 @@ bool CDTMF::processSequence( char* pszSequence )
     // do we have to switch parrot mode?
     if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "parrot_mode_switch" ) )
     {
-	if( !g_Loop.switchParrotMode() )
+	if( !g_pLoop->switchParrotMode() )
 	{
+	    // parrot mode switch failed
 	    return false;
 	}
     }
