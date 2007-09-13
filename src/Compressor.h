@@ -27,6 +27,7 @@
 class CCompressor
 {
 public:
+    CCompressor();
     ~CCompressor();
 
     void	init( int nSNDCardRate, int nSNDCardBufferSize );

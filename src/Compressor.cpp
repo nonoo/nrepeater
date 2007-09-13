@@ -24,6 +24,12 @@
 extern CSettingsFile	g_MainConfig;
 extern CLog		g_Log;
 
+CCompressor::CCompressor()
+{
+    m_bCompressorEnabled = false;
+    m_pOut = NULL;
+}
+
 void CCompressor::init( int nSNDCardRate, int nSNDCardBufferSize )
 {
     m_nSampleRate = nSNDCardRate;

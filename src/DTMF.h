@@ -19,6 +19,8 @@
 
 #include "Goertzel.h"
 
+#include <string>
+
 class CDTMF
 {
 public:
@@ -31,6 +33,7 @@ public:
 
 private:
     void	beep( int nFrequency, int nDuration, int nNum, int nDelay );
+    std::string getRandomFileName( std::string szDir, std::string szExtension );
 
 
     CGoertzel	m_Goertzel;

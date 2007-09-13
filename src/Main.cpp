@@ -37,9 +37,9 @@ const char* const short_options = "hc:";
 CLog		g_Log;
 CLoop*		g_pLoop;
 CSettingsFile	g_MainConfig;
-CParPort*	g_ParPort = NULL;
-CSNDCard*	g_SNDCardIn = NULL;
-CSNDCard*	g_SNDCardOut = NULL;
+CParPort*	g_pParPort = NULL;
+CSNDCard*	g_pSNDCardIn = NULL;
+CSNDCard*	g_pSNDCardOut = NULL;
 bool		g_fTerminate = false;
 CArchiver	g_Archiver;
 bool		g_bDaemonMode = false;
@@ -76,26 +76,26 @@ void initParPort()
     string sParPort = g_MainConfig.get( "lpt", "port", "LPT1" );
     if( sParPort == "LPT1" )
     {
-	g_ParPort = new CParPort( LPT1 );
+	g_pParPort = new CParPort( LPT1 );
     }
     else
     {
 	if( sParPort == "LPT2" )
 	{
-	    g_ParPort = new CParPort( LPT2 );
+	    g_pParPort = new CParPort( LPT2 );
 	}
 	else
 	{
-	    g_ParPort = new CParPort( atoi( sParPort.c_str() ) );
+	    g_pParPort = new CParPort( atoi( sParPort.c_str() ) );
 	}
     }
 
-    g_ParPort->setReceiverPin( g_MainConfig.getInt( "lpt", "receiver_pin", 11 ) );
-    g_ParPort->setReceiverLow( g_MainConfig.getInt( "lpt", "receiver_low", 1 ) );
-    g_ParPort->setTransmitterPin1( g_MainConfig.getInt( "lpt", "transmitter_pin1", 2 ) );
-    g_ParPort->setTransmitterPin2( g_MainConfig.getInt( "lpt", "transmitter_pin2", 3 ) );
+    g_pParPort->setReceiverPin( g_MainConfig.getInt( "lpt", "receiver_pin", 11 ) );
+    g_pParPort->setReceiverLow( g_MainConfig.getInt( "lpt", "receiver_low", 1 ) );
+    g_pParPort->setTransmitterPin1( g_MainConfig.getInt( "lpt", "transmitter_pin1", 2 ) );
+    g_pParPort->setTransmitterPin2( g_MainConfig.getInt( "lpt", "transmitter_pin2", 3 ) );
 
-    g_ParPort->init();
+    g_pParPort->init();
 }
 
 void initSndCards()
@@ -105,13 +105,13 @@ void initSndCards()
 
     if( sSNDDevIn == sSNDDevOut )
     {
-	g_SNDCardIn = new CSNDCard( sSNDDevIn, SNDCARDMODE_DUPLEX, g_MainConfig.getInt( "sound", "rate", 44100 ), g_MainConfig.getInt( "sound", "channels", 1 ) );
-	g_SNDCardOut = g_SNDCardIn;
+	g_pSNDCardIn = new CSNDCard( sSNDDevIn, SNDCARDMODE_DUPLEX, g_MainConfig.getInt( "sound", "rate", 44100 ), g_MainConfig.getInt( "sound", "channels", 1 ) );
+	g_pSNDCardOut = g_pSNDCardIn;
     }
     else
     {
-	g_SNDCardIn = new CSNDCard( sSNDDevIn, SNDCARDMODE_IN, g_MainConfig.getInt( "sound", "rate", 44100 ), g_MainConfig.getInt( "sound", "channels", 1 ) );
-	g_SNDCardOut = new CSNDCard( sSNDDevOut, SNDCARDMODE_OUT, g_MainConfig.getInt( "sound", "rate", 44100 ), g_MainConfig.getInt( "sound", "channels", 1 ) );
+	g_pSNDCardIn = new CSNDCard( sSNDDevIn, SNDCARDMODE_IN, g_MainConfig.getInt( "sound", "rate", 44100 ), g_MainConfig.getInt( "sound", "channels", 1 ) );
+	g_pSNDCardOut = new CSNDCard( sSNDDevOut, SNDCARDMODE_OUT, g_MainConfig.getInt( "sound", "rate", 44100 ), g_MainConfig.getInt( "sound", "channels", 1 ) );
     }
 }
 
@@ -158,9 +158,9 @@ static void parseCommandLine( int argc, char* argv[] )
 
 void mainInit()
 {
-    SAFE_DELETE( g_ParPort );
-    SAFE_DELETE( g_SNDCardIn );
-    SAFE_DELETE( g_SNDCardOut );
+    SAFE_DELETE( g_pParPort );
+    SAFE_DELETE( g_pSNDCardIn );
+    SAFE_DELETE( g_pSNDCardOut );
 
     g_MainConfig.loadConfig();
 
@@ -190,7 +190,7 @@ void mainInit()
 
     initSndCards();
 
-    g_Archiver.init( SPEEX_SAMPLERATE, g_SNDCardOut->getChannelNum() );
+    g_Archiver.init( SPEEX_SAMPLERATE, g_pSNDCardOut->getChannelNum() );
 
     g_pLoop = new CLoop();
 }
@@ -207,9 +207,9 @@ int main( int argc, char* argv[] )
     g_pLoop->start();
 
     SAFE_DELETE( g_pLoop );
-    SAFE_DELETE( g_ParPort );
-    SAFE_DELETE( g_SNDCardIn );
-    SAFE_DELETE( g_SNDCardOut );
+    SAFE_DELETE( g_pParPort );
+    SAFE_DELETE( g_pSNDCardIn );
+    SAFE_DELETE( g_pSNDCardOut );
 
     g_Log.log( CLOG_MSG, "exiting with errcode = 0\n" );
     return EXIT_SUCCESS;
