@@ -36,8 +36,10 @@ public:
     bool switchParrotMode();
     void checkDTMFSequence();
 
+    void playWavFileBlocking( CWavFile& WavFile );
+    void playWavFileNonBlocking( CWavFile& WavFile );
+
 private:
-    void playWaveBlocking( CWavFile& WavFile );
     void parrotReceivingOver();
 
 

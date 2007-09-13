@@ -27,6 +27,7 @@ using namespace std;
 void CGoertzel::init( int nSampleRate )
 {
     m_nSampleRate = nSampleRate;
+    m_nSampleCount = 0;
 
     m_daFreqs[0] = 697;
     m_daFreqs[1] = 770;
@@ -57,6 +58,11 @@ void CGoertzel::init( int nSampleRate )
     m_caDTMFASCII[1][3] = 'B';
     m_caDTMFASCII[2][3] = 'C';
     m_caDTMFASCII[3][3] = 'D';
+
+    for( i = 0; i < MAX_BINS; i++ )
+    {
+	m_dQ0 = m_daCoeffs[i] = m_daQ1[i] = m_daQ2[i] = m_daR[i] = 0;
+    }
 
     calcCoeffs();
 }
@@ -106,7 +112,7 @@ void CGoertzel::postTesting()
 {
     // find the largest in the row group
     m_nRow = 0;
-    m_dMaxVal = 0.0;
+    m_dMaxVal = 0;
     for( i = 0; i < 4; i++ )
     {
 	if( m_daR[i] > m_dMaxVal )

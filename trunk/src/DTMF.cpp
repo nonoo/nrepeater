@@ -24,6 +24,9 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <linux/kd.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <vector>
 
 extern CSettingsFile	g_MainConfig;
 extern CLog		g_Log;
@@ -252,10 +255,68 @@ bool CDTMF::processSequence( char* pszSequence )
 	{
 	    char szTmp[500];
 	    sprintf( szTmp, "PC speaker beep: %d Hz, count: %d ms, duration: %d ms, delay: %d ms\n", nFrequency, nNum, nDuration, nDelay );
-	    g_Log.log( CLOG_MSG | CLOG_TO_ARCHIVER, szTmp );
+	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, szTmp );
 	    beep( nFrequency, nDuration, nNum, nDelay );
 	}
     }
+
+    // do we have to play a wav file?
+    if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "play" ) )
+    {
+	CWavFile WavFile;
+	if( !WavFile.loadToMemory( g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "play", "" ) ) )
+	{
+	    // (loadToMemory() already logged the error)
+	    return false;
+	}
+
+	if( g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "play_blocking", 1 ) )
+	{
+	    g_Log.log( CLOG_DEBUG, "playing " + g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "play", "" ) + "\n" );
+	    g_pLoop->playWavFileBlocking( WavFile );
+	    g_Log.log( CLOG_DEBUG, "playback finished\n" );
+	}
+	else
+	{
+	    g_Log.log( CLOG_DEBUG, "playing " + g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "play", "" ) + " non-blocking\n" );
+	    g_pLoop->playWavFileNonBlocking( WavFile );
+	    g_Log.log( CLOG_DEBUG, "playback finished\n" );
+	}
+    }
+
+    // do we have to play a random wav file?
+    if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "play_random" ) )
+    {
+	CWavFile WavFile;
+	string szDir = g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "play_random", "./" );
+
+	// making sure that szDir ends with /
+	if( szDir[ szDir.size() - 1 ] != '/' )
+	{
+	    szDir += '/';
+	}
+
+	string szRandomFileName = getRandomFileName( szDir, ".wav" );
+	if( !WavFile.loadToMemory( szRandomFileName ) )
+	{
+	    // (loadToMemory() already logged the error)
+	    return false;
+	}
+
+	if( g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "play_blocking", 1 ) )
+	{
+	    g_Log.log( CLOG_DEBUG, "playing random file: " + szDir + szRandomFileName + "\n" );
+	    g_pLoop->playWavFileBlocking( WavFile );
+	    g_Log.log( CLOG_DEBUG, "playback finished\n" );
+	}
+	else
+	{
+	    g_Log.log( CLOG_DEBUG, "playing random file: " + szDir + szRandomFileName + " non-blocking\n" );
+	    g_pLoop->playWavFileNonBlocking( WavFile );
+	    g_Log.log( CLOG_DEBUG, "playback finished\n" );
+	}
+    }
+
     return true;
 }
 
@@ -297,4 +358,39 @@ void CDTMF::beep( int nFrequency, int nDuration, int nNum, int nDelay )
     }
 
     close( nSpeakerFD );
+}
+
+// returns a random file from the given directory with the given extension
+string CDTMF::getRandomFileName( string szDir, string szExtension )
+{
+    vector<string> vszRes;
+    DIR* pDir = opendir( szDir.c_str() );
+    string szRes;
+    unsigned int nDotPos;
+
+    if( pDir != NULL )
+    {
+	struct dirent* pEnt;
+
+	while( ( pEnt = readdir( pDir ) ) != NULL )
+	{
+	    szRes = pEnt->d_name;
+	    nDotPos = szRes.rfind( '.' );
+	    if( nDotPos != string::npos )
+	    {
+		if( szRes.substr( nDotPos ) == szExtension )
+		{
+		    vszRes.push_back( szRes );
+		}
+	    }
+	}
+    }
+    else
+    {
+	return "";
+    }
+
+    closedir( pDir );
+
+    return vszRes[ rand() % vszRes.size() ];
 }

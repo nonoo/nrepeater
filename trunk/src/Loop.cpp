@@ -29,9 +29,9 @@
 #include <signal.h>
 #include <sys/time.h>
 
-extern CParPort*	g_ParPort;
-extern CSNDCard*	g_SNDCardIn;
-extern CSNDCard*	g_SNDCardOut;
+extern CParPort*	g_pParPort;
+extern CSNDCard*	g_pSNDCardIn;
+extern CSNDCard*	g_pSNDCardOut;
 extern CLog		g_Log;
 extern CSettingsFile	g_MainConfig;
 extern bool		g_fTerminate;
@@ -63,14 +63,14 @@ void onSIGALRM( int )
     }
 
     // the delay after the beep is over
-    g_SNDCardOut->stop();
-    g_ParPort->setPTT( false );
+    g_pSNDCardOut->stop();
+    g_pParPort->setPTT( false );
     g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "beep finished, transmission stopped.\n" );
 }
 
 CLoop::CLoop()
 {
-    m_nFDIn = g_SNDCardIn->getFDIn();
+    m_nFDIn = g_pSNDCardIn->getFDIn();
     m_nSelectRes = -1;
 
     m_bSquelchOff = false;
@@ -115,12 +115,12 @@ CLoop::CLoop()
 
     if( g_MainConfig.getInt( "compressor", "enabled", 0 ) )
     {
-	m_Compressor.init( g_SNDCardOut->getSampleRate(), g_SNDCardOut->getBufferSize() );
+	m_Compressor.init( g_pSNDCardOut->getSampleRate(), g_pSNDCardOut->getBufferSize() );
     }
     if( g_MainConfig.getInt( "archiver", "enabled", 0 ) || g_MainConfig.getInt( "dtmf", "enabled", 0 ) )
     {
 	// only initialize resampler if archiver or dtmf decoder is enabled
-	m_Resampler.init( ( (float)SPEEX_SAMPLERATE ) / g_SNDCardIn->getSampleRate(), g_SNDCardOut->getChannelNum() );
+	m_Resampler.init( ( (float)SPEEX_SAMPLERATE ) / g_pSNDCardIn->getSampleRate(), g_pSNDCardOut->getChannelNum() );
     }
     if( g_MainConfig.getInt( "dtmf", "enabled", 0 ) )
     {
@@ -167,11 +167,11 @@ void CLoop::start()
     while( !g_fTerminate )
     {
 	// receiver started receiving
-	if( g_ParPort->isSquelchOff() && !m_bSquelchOff )
+	if( g_pParPort->isSquelchOff() && !m_bSquelchOff )
 	{
 	    clearAlarm();
 
-	    g_SNDCardIn->start();
+	    g_pSNDCardIn->start();
 	    m_bSquelchOff = true;
 
 	    if( m_bParrotMode )
@@ -200,9 +200,9 @@ void CLoop::start()
 	    }
 	    else
 	    {
-		g_SNDCardOut->stop();
-		g_SNDCardOut->start();
-		g_ParPort->setPTT( true );
+		g_pSNDCardOut->stop();
+		g_pSNDCardOut->start();
+		g_pParPort->setPTT( true );
 
 		g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving transmission, transmitting started\n" );
 	    }
@@ -215,9 +215,9 @@ void CLoop::start()
 	} // endof: receiver started receiving
 
 	// receiver stopped receiving
-	if( !g_ParPort->isSquelchOff() && m_bSquelchOff )
+	if( !g_pParPort->isSquelchOff() && m_bSquelchOff )
 	{
-	    g_SNDCardIn->stop();
+	    g_pSNDCardIn->stop();
 	    m_bSquelchOff = false;
 
 	    if( g_MainConfig.getInt( "compressor", "enabled", 0 ) )
@@ -249,8 +249,8 @@ void CLoop::start()
 		}
 		else
 		{
-		    g_SNDCardOut->stop();
-		    g_ParPort->setPTT( false );
+		    g_pSNDCardOut->stop();
+		    g_pParPort->setPTT( false );
 
 		    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving finished, transmission stopped.\n" );
 		}
@@ -262,15 +262,15 @@ void CLoop::start()
 	{
 	    if( m_bPlayRogerBeep )
 	    {
-		m_pBuffer = m_RogerBeep.play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
+		m_pBuffer = m_RogerBeep.play( g_pSNDCardOut->getBufferSize(), m_nFramesRead );
 	    }
 	    if( m_bPlayAckBeep )
 	    {
-		m_pBuffer = m_AckBeep.play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
+		m_pBuffer = m_AckBeep.play( g_pSNDCardOut->getBufferSize(), m_nFramesRead );
 	    }
 	    if( m_bPlayFailBeep )
 	    {
-		m_pBuffer = m_FailBeep.play( g_SNDCardOut->getBufferSize(), m_nFramesRead );
+		m_pBuffer = m_FailBeep.play( g_pSNDCardOut->getBufferSize(), m_nFramesRead );
 	    }
 
 	    if( m_pBuffer == NULL )
@@ -298,7 +298,7 @@ void CLoop::start()
 	    else
 	    {
 	        // playing beep
-		g_SNDCardOut->write( m_pBuffer, m_nFramesRead );
+		g_pSNDCardOut->write( m_pBuffer, m_nFramesRead );
 
 		// resampling
 		m_nResampledFramesNum = 0;
@@ -339,7 +339,7 @@ void CLoop::start()
 
 	if( FD_ISSET( m_nFDIn, &m_fsReads) )
 	{
-	    m_pBuffer = g_SNDCardIn->read( m_nFramesRead );
+	    m_pBuffer = g_pSNDCardIn->read( m_nFramesRead );
 
 	    // compressing
 	    m_nCompressedFramesNum = 0;
@@ -368,7 +368,7 @@ void CLoop::start()
 	    else
 	    {
 		// playing samples
-	        g_SNDCardOut->write( m_pCompOut, m_nCompressedFramesNum );
+	        g_pSNDCardOut->write( m_pCompOut, m_nCompressedFramesNum );
 	    }
 
 	    // resampling
@@ -427,7 +427,7 @@ void CLoop::checkDTMFSequence()
 	    {
 		usleep( g_MainConfig.getInt( "beeps", "delay_ackbeep", 0 ) * 1000 );
 		g_Log.log( CLOG_DEBUG, "playing ack beep\n" );
-		playWaveBlocking( m_AckBeep );
+		playWavFileBlocking( m_AckBeep );
 		usleep( g_MainConfig.getInt( "beeps", "delay_after_ackbeep", 250 ) * 1000 );
 		g_Log.log( CLOG_DEBUG, "playing ack beep finished\n" );
 	    }
@@ -445,7 +445,7 @@ void CLoop::checkDTMFSequence()
 		{
 		    usleep( g_MainConfig.getInt( "beeps", "delay_failbeep", 0 ) * 1000 );
 		    g_Log.log( CLOG_DEBUG, "playing fail beep\n" );
-		    playWaveBlocking( m_AckBeep );
+		    playWavFileBlocking( m_AckBeep );
 		    usleep( g_MainConfig.getInt( "beeps", "delay_after_failbeep", 250 ) * 1000 );
 		    g_Log.log( CLOG_DEBUG, "playing fail beep finished\n" );
 		}
@@ -460,7 +460,7 @@ void CLoop::checkDTMFSequence()
 	    {
 		usleep( g_MainConfig.getInt( "beeps", "delay_failbeep", 0 ) * 1000 );
 		g_Log.log( CLOG_DEBUG, "playing fail beep\n" );
-		playWaveBlocking( m_FailBeep );
+		playWavFileBlocking( m_FailBeep );
 		usleep( g_MainConfig.getInt( "beeps", "delay_after_failbeep", 250 ) * 1000 );
 		g_Log.log( CLOG_DEBUG, "playing fail beep finished\n" );
 	    }
@@ -468,11 +468,11 @@ void CLoop::checkDTMFSequence()
     }
 }
 
-void CLoop::playWaveBlocking( CWavFile& WavFile )
+void CLoop::playWavFileBlocking( CWavFile& WavFile )
 {
     WavFile.rewind();
     m_pWaveData = WavFile.play( m_nWaveDataLength );
-    g_SNDCardOut->write( m_pWaveData, m_nWaveDataLength );
+    g_pSNDCardOut->write( m_pWaveData, m_nWaveDataLength );
 
     // resampling
     m_nResampledFramesNum = 0;
@@ -482,25 +482,43 @@ void CLoop::playWaveBlocking( CWavFile& WavFile )
     g_Archiver.write( m_pResampledData, m_nResampledFramesNum );
 }
 
+void CLoop::playWavFileNonBlocking( CWavFile& WavFile )
+{
+    WavFile.rewind();
+
+    while( ( m_nFramesRead > 0 ) && ( !g_pParPort->isSquelchOff() ) )
+    {
+	m_pBuffer = WavFile.play( g_pSNDCardOut->getBufferSize(), m_nFramesRead );
+	g_pSNDCardOut->write( m_pBuffer, m_nFramesRead );
+
+	// resampling
+	m_nResampledFramesNum = 0;
+	m_pResampledData = m_Resampler.resample( m_pWaveData, m_nWaveDataLength, m_nResampledFramesNum );
+
+	// archiving
+	g_Archiver.write( m_pResampledData, m_nResampledFramesNum );
+    }
+}
+
 void CLoop::parrotReceivingOver()
 {
     g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving finished, recording over\n" );
 
     // switching transmitter on
-    g_ParPort->setPTT( true );
+    g_pParPort->setPTT( true );
 
     // playing ack beep if needed
     if( m_AckBeep.isLoaded() )
     {
         g_Log.log( CLOG_DEBUG, "playing ack beep\n" );
-        playWaveBlocking( m_AckBeep );
+        playWavFileBlocking( m_AckBeep );
         usleep( g_MainConfig.getInt( "beeps", "delay_after_ackbeep", 250 ) * 1000 );
         g_Log.log( CLOG_DEBUG, "playing ack beep finished\n" );
     }
 
     g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "playing back parrot buffer\n" );
     // playing back parrot buffer
-    g_SNDCardOut->write( m_pParrotBuffer, m_nParrotBufferPos );
+    g_pSNDCardOut->write( m_pParrotBuffer, m_nParrotBufferPos );
     usleep( g_MainConfig.getInt( "parrot", "delay_after_playback", 250 ) * 1000 );
 
     // querying decoded DTMF sequence
@@ -510,7 +528,7 @@ void CLoop::parrotReceivingOver()
     if( m_RogerBeep.isLoaded() )
     {
         g_Log.log( CLOG_DEBUG, "playback of parrot buffer finished, playing roger beep\n" );
-        playWaveBlocking( m_RogerBeep );
+        playWavFileBlocking( m_RogerBeep );
         usleep( g_MainConfig.getInt( "beeps", "delay_after_rogerbeep", 250 ) * 1000 );
         g_Log.log( CLOG_DEBUG, "roger beep finished, transmission stopped.\n" );
     }
@@ -518,8 +536,8 @@ void CLoop::parrotReceivingOver()
     {
         g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "playback of parrot buffer finished, transmission stopped.\n" );
     }
-    g_SNDCardOut->stop();
-    g_ParPort->setPTT( false );
+    g_pSNDCardOut->stop();
+    g_pParPort->setPTT( false );
 }
 
 CLoop::~CLoop()

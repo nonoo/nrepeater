@@ -1,8 +1,7 @@
 long-term todos:
+- DTMF action: speech synthetizer
 - DTMF action: current temperature
-- DTMF action: parrot repeater mode
 - DTMF action: current time
-- DTMF action: (random) speex file playing from a directory
 - server and win32 client, or connecting to other networks
 
 short-term todos:

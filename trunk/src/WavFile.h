@@ -30,7 +30,7 @@ public:
     int		write( short* pData, int nFramesNum );
     int		write( char* pData, int nBytesNum );
     bool	isOpened();
-    int		loadToMemory( std::string szFile );
+    bool	loadToMemory( std::string szFile );
     bool	isLoaded();
     void	close();
     void	rewind();

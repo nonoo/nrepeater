@@ -27,7 +27,7 @@ extern CSettingsFile g_MainConfig;
 using namespace std;
 
 extern CLog		g_Log;
-extern CSNDCard*	g_SNDCardOut;
+extern CSNDCard*	g_pSNDCardOut;
 
 CWavFile::CWavFile()
 {
@@ -79,7 +79,7 @@ int CWavFile::write( char* pData, int nBytesNum )
     return sf_write_raw( m_pSNDFILE, pData, nBytesNum );
 }
 
-int CWavFile::loadToMemory( string szFile )
+bool CWavFile::loadToMemory( string szFile )
 {
     close();
 
@@ -92,36 +92,42 @@ int CWavFile::loadToMemory( string szFile )
 	    char errstr[500];
 	    sf_error_str( m_pSNDFILE, errstr, 100 );
 	    g_Log.log( CLOG_WARNING, "can't open wav file " + szFile + ": " + errstr + "\n" );
-	    return 0;
+	    return false;
 	}
     }
 
     // loading wave data to memory
     m_pWave = new short[ m_SFINFO.frames + 200 ]; // without + 200 there's a SIGSEGV when freeing
+    if( !m_pWave )
+    {
+	g_Log.log( CLOG_WARNING, "not enough memory to load wav file: " + szFile + "\n" );
+	return false;
+    }
+
     if( sf_read_short( m_pSNDFILE, m_pWave, m_SFINFO.frames ) < m_SFINFO.frames )
     {
 	char errstr[500];
 	sf_error_str( m_pSNDFILE, errstr, 100 );
 	g_Log.log( CLOG_WARNING, "can't load wav file " + szFile + ": " + errstr + "\n" );
 	SAFE_DELETE_ARRAY( m_pWave );
-	return 0;
+	return false;
     }
 
-    if( m_SFINFO.samplerate != g_SNDCardOut->getSampleRate() )
+    if( m_SFINFO.samplerate != g_pSNDCardOut->getSampleRate() )
     {
 	char errstr[500];
-	sprintf( errstr, "%s sample rate (%dhz) doesn't match output sample rate (%dhz)\n", szFile.c_str(), m_SFINFO.samplerate, g_SNDCardOut->getSampleRate() );
+	sprintf( errstr, "%s sample rate (%dhz) doesn't match output sample rate (%dhz)\n", szFile.c_str(), m_SFINFO.samplerate, g_pSNDCardOut->getSampleRate() );
 	g_Log.log( CLOG_WARNING, errstr );
     }
-    if( m_SFINFO.channels != g_SNDCardOut->getChannelNum() )
+    if( m_SFINFO.channels != g_pSNDCardOut->getChannelNum() )
     {
     	char errstr[500];
-	sprintf( errstr, "%s has %d channel(s), output has %d\n", szFile.c_str(), m_SFINFO.channels, g_SNDCardOut->getChannelNum() );
+	sprintf( errstr, "%s has %d channel(s), output has %d\n", szFile.c_str(), m_SFINFO.channels, g_pSNDCardOut->getChannelNum() );
 	g_Log.log( CLOG_WARNING, errstr );
     }
 
     rewind();
-    return 1;
+    return true;
 }
 
 bool CWavFile::isLoaded()
