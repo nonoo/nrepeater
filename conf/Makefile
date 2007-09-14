@@ -138,7 +138,7 @@ sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 sysconfdir = ${prefix}/etc
 target_alias = 
-pkgdata_DATA = nrepeater.conf beep.wav ackbeep.wav failbeep.wav
+pkgdata_DATA = nrepeater.conf beep.wav ackbeep.wav failbeep.wav dtmf-help.txt
 EXTRA_DIST = $(pkgdata_DATA)
 all: all-am
 

@@ -1,0 +1,7 @@
+available D T M F codes are:
+0; this help,
+*, and 0; version of n repeater,
+*, and 1; current time,
+*, and 2; current date,
+*, and 7; switching parrot mode on and off,
+0, pressed longer than 3 seconds; L I T Z emergency alert.
