@@ -456,7 +456,7 @@ void CLoop::checkDTMFSequence()
 	    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "received invalid DTMF sequence (" + string( m_pszDTMFDecoded ) + ")\n" );
 	    m_DTMF.clearSequence();
 	    // sequence invalid, playing fail beep if needed
-	    if( m_FailBeep.isLoaded() )
+	    if( m_FailBeep.isLoaded() && g_MainConfig.getInt( "dtmf", "failbeep_on_invalid", 1 ) )
 	    {
 		usleep( g_MainConfig.getInt( "beeps", "delay_failbeep", 0 ) * 1000 );
 		g_Log.log( CLOG_DEBUG, "playing fail beep\n" );

@@ -3,6 +3,8 @@ long-term todos:
 - DTMF action: current temperature
 - DTMF action: current time
 - able to install without speex, ogg, samplerate, sndfile libs
+- reloading config file and reinitializing on sighup
+- compiling under windows
 - server and win32 client, or connecting to other networks
 
 short-term todos:
