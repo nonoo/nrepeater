@@ -34,6 +34,7 @@ public:
     void clearAlarm();
 
     bool switchParrotMode();
+    bool isParrotModeEnabled();
     void checkDTMFSequence();
 
     void playWavFileBlocking( CWavFile& WavFile );

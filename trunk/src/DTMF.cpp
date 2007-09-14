@@ -278,7 +278,41 @@ bool CDTMF::processSequence( char* pszSequence )
     // do we have to switch parrot mode?
     if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "parrot_mode_switch" ) )
     {
-	if( !g_pLoop->switchParrotMode() )
+	string szSpeakText;
+	bool bSuccess = g_pLoop->switchParrotMode();
+
+	// do we have to speak?
+	if( g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "speak_parrot_mode_switch", 0 ) )
+	{
+	    if( bSuccess )
+	    {
+		if( g_pLoop->isParrotModeEnabled() )
+		{
+		    szSpeakText = "parrot mode switched on.";
+		}
+		else
+		{
+		    szSpeakText = "parrot mode switched off.";
+		}
+	    }
+	    else
+	    {
+		szSpeakText = "switch failed!";
+	    }
+
+	    int nBufferSize = 0;
+	    short* pBuffer = SpeechSynth.synthetize( szSpeakText, nBufferSize );
+	    if( g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "speak_non_blocking", 0 ) )
+	    {
+		g_pLoop->playBufferNonBlocking( pBuffer, nBufferSize );
+	    }
+	    else
+	    {
+		g_pLoop->playBufferBlocking( pBuffer, nBufferSize );
+	    }
+	}
+
+	if( !bSuccess )
 	{
 	    // parrot mode switch failed
 	    return false;

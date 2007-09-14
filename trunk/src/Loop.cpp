@@ -574,6 +574,11 @@ void CLoop::parrotReceivingOver()
     g_pParPort->setPTT( false );
 }
 
+bool CLoop::isParrotModeEnabled()
+{
+    return m_bParrotMode;
+}
+
 CLoop::~CLoop()
 {
     SAFE_DELETE_ARRAY( m_pParrotBuffer );

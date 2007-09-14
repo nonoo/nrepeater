@@ -28,11 +28,13 @@
 // argument list
 const struct option long_options[] =
 {
-    { "help",	0,	NULL,	'h' },
-    { "config",	1,	NULL,	'c' },
-    { NULL,	0,	NULL,	0 }
+    { "help",		0,	NULL,	'h' },
+    { "config",		1,	NULL,	'c' },
+    { "version",	0,	NULL,	'v' },
+    { "version-num",	0,	NULL,	'V' },
+    { NULL,		0,	NULL,	0 }
 };
-const char* const short_options = "hc:";
+const char* const short_options = "hc:vV";
 
 CLog		g_Log;
 CLoop*		g_pLoop;
@@ -125,10 +127,15 @@ void onSIGTERM( int )
     g_fTerminate = true;
 }
 
-void printUsage( string szProgName )
+void printHeader()
 {
     cout << string( PACKAGE ) + " v" + string( PACKAGE_VERSION ) + " by Nonoo <nonoo@nonoo.hu>" << endl;
     cout << "http://www.nonoo.hu/projects/nrepeater/" << endl << endl;
+}
+
+void printUsage( string szProgName )
+{
+    printHeader();
     cout << "Usage:  " << szProgName << " options" << endl << endl;
     cout << "    -h  --help" << endl;
     cout << "    -c  --config filename   Use given config file path" << endl << endl;
@@ -145,6 +152,12 @@ static void parseCommandLine( int argc, char* argv[] )
 
 	switch( next_option )
 	{
+	    case 'v':
+		printHeader();
+		exit( EXIT_SUCCESS );
+	    case 'V':
+		cout << PACKAGE_VERSION << endl;
+		exit( EXIT_SUCCESS );
 	    case 'h':
 		printUsage( argv[0] );
 	    case 'c':
