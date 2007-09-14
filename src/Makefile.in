@@ -51,7 +51,7 @@ am_nrepeater_OBJECTS = Main.$(OBJEXT) Log.$(OBJEXT) ParPort.$(OBJEXT) \
 	WavFile.$(OBJEXT) Compressor.$(OBJEXT) Archiver.$(OBJEXT) \
 	SpeexCodec.$(OBJEXT) OggOutStream.$(OBJEXT) \
 	OggFileOutStream.$(OBJEXT) Resampler.$(OBJEXT) DTMF.$(OBJEXT) \
-	Goertzel.$(OBJEXT)
+	Goertzel.$(OBJEXT) SpeechSynth.$(OBJEXT)
 nrepeater_OBJECTS = $(am_nrepeater_OBJECTS)
 nrepeater_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -170,7 +170,8 @@ nrepeater_SOURCES = \
 	OggFileOutStream.cpp OggFileOutStream.h \
 	Resampler.cpp Resampler.h \
 	DTMF.cpp DTMF.h \
-	Goertzel.cpp Goertzel.h
+	Goertzel.cpp Goertzel.h \
+	SpeechSynth.cpp SpeechSynth.h
 
 all: all-am
 
@@ -251,6 +252,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Resampler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SNDCard.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SettingsFile.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SpeechSynth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SpeexCodec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WavFile.Po@am__quote@
 

@@ -15,4 +15,5 @@ nrepeater_SOURCES = \
 	OggFileOutStream.cpp OggFileOutStream.h \
 	Resampler.cpp Resampler.h \
 	DTMF.cpp DTMF.h \
-	Goertzel.cpp Goertzel.h
+	Goertzel.cpp Goertzel.h \
+	SpeechSynth.cpp SpeechSynth.h

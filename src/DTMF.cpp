@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <vector>
+#include <fstream>
 
 extern CSettingsFile	g_MainConfig;
 extern CLog		g_Log;
@@ -229,6 +230,51 @@ bool CDTMF::processSequence( char* pszSequence )
 	}
     }
 
+    // do we have to speak?
+    if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "speak" ) )
+    {
+	int nBufferSize = 0;
+	short* pBuffer = SpeechSynth.synthetize( g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "speak", "" ), nBufferSize );
+	if( g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "speak_non_blocking", 0 ) )
+	{
+	    g_pLoop->playBufferNonBlocking( pBuffer, nBufferSize );
+	}
+	else
+	{
+	    g_pLoop->playBufferBlocking( pBuffer, nBufferSize );
+	}
+    }
+
+    // do we have to read a whole file?
+    if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "speak_file" ) )
+    {
+	int nBufferSize = 0;
+	short* pBuffer;
+	char buf[500];
+	memset( buf, 0, 500 );
+
+	ifstream FileStream( g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "speak_file", "" ).c_str() );
+	if( FileStream.fail() )
+	{
+	    return false;
+	}
+
+	while( !FileStream.eof() )
+	{
+	    FileStream.getline( buf, 499 );
+	    pBuffer = SpeechSynth.synthetize( buf, nBufferSize );
+	    if( g_MainConfig.getInt( "dtmf-action-" + string( pszSequence ), "speak_non_blocking", 0 ) )
+	    {
+		g_pLoop->playBufferNonBlocking( pBuffer, nBufferSize );
+	    }
+	    else
+	    {
+		g_pLoop->playBufferBlocking( pBuffer, nBufferSize );
+	    }
+	}
+	FileStream.close();
+    }
+
     // do we have to switch parrot mode?
     if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "parrot_mode_switch" ) )
     {
@@ -322,6 +368,15 @@ bool CDTMF::processSequence( char* pszSequence )
 	    g_Log.log( CLOG_DEBUG, "playing random file: " + szDir + szRandomFileName + "\n" );
 	    g_pLoop->playWavFileBlocking( WavFile );
 	    g_Log.log( CLOG_DEBUG, "playback finished\n" );
+	}
+    }
+
+    // do we have to exec a command after the action?
+    if( g_MainConfig.isValidKey( "dtmf-action-" + string( pszSequence ), "exec_after" ) )
+    {
+	if( system( g_MainConfig.get( "dtmf-action-" + string( pszSequence ), "exec_after", "" ).c_str() ) < 0 )
+	{
+	    return false;
 	}
     }
 

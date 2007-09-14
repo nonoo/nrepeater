@@ -61,11 +61,11 @@ short* CResampler::resample( short* pData, int nFramesNum, int& nOutFramesNum )
     }
 
     // checking that if buffer sizes are bigger than the incoming frames count
-    if( m_nResampleBufSize < nFramesNum )
+    if( m_nResampleBufSize < nFramesNum * m_dRatio )
     {
-	m_nResampleBufSize = nFramesNum;
+	m_nResampleBufSize = nFramesNum * m_dRatio;
 	SAFE_DELETE_ARRAY( m_pSRCIn );
-	m_pSRCIn = new float[ m_nResampleBufSize ];
+	m_pSRCIn = new float[ nFramesNum ];
 	SAFE_DELETE_ARRAY( m_pSRCOut );
 	m_pSRCOut = new float[ m_nResampleBufSize ];
 	SAFE_DELETE_ARRAY( m_pDataOut );

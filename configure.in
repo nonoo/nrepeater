@@ -76,6 +76,15 @@ AC_ARG_WITH(samplerate-dir,
 	LDFLAGS="$LDFLAGS -R${withval}/lib"
     fi
 ])
+AC_ARG_WITH(flite-dir,
+    AC_HELP_STRING([--with-flite-dir=PATH],[path to libflite installation]),
+[
+    CXXFLAGS="$CXXFLAGS -I${withval}/include"
+    LDFLAGS="$LDFLAGS -L${withval}/lib"
+    if test -n "${need_dash_r}"; then
+	LDFLAGS="$LDFLAGS -R${withval}/lib"
+    fi
+])
 
 dnl AC_MSG_CHECKING([for librudeconfig])
 dnl LIBS="$LIBS -lrudeconfig"
@@ -141,12 +150,22 @@ AC_CHECK_LIB([samplerate], [src_simple], [], [
     echo "You need to have libsamplerate installed on your system!"
     echo "You can download it from http://www.mega-nerd.com/SRC/"
     echo
-    echo "Or you can specify libogg installation directory this way:"
+    echo "Or you can specify libsamplerate installation directory this way:"
     echo "./configure --with-samplerate-dir=PATH"
     echo
     exit
 ])
-
+AC_CHECK_LIB([flite], [flite_init], [], [
+    echo
+    echo "You need to have libflite installed on your system!"
+    echo "You can download it from http://www.speech.cs.cmu.edu/flite/"
+    echo
+    echo "Or you can specify libflite installation directory this way:"
+    echo "./configure --with-flite-dir=PATH"
+    echo
+    exit
+])
+LIBS="-lflite_cmu_us_kal -lflite_usenglish -lflite_cmulex $LIBS"
 
 
 dnl #######
