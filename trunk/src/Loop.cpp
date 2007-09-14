@@ -232,13 +232,13 @@ void CLoop::start()
 	    }
 	    else
 	    {
-		// querying decoded DTMF sequence
-		checkDTMFSequence();
-
 		// do we have to play the roger beep?
 		if( m_RogerBeep.isLoaded() )
 		{
 		    g_Log.log( CLOG_DEBUG | CLOG_TO_ARCHIVER, "receiving finished\n" );
+
+		    // querying decoded DTMF sequence
+		    checkDTMFSequence();
 
 		    // setting up a timer that will enable playing beeps after the given delay
 		    m_bPlayingBeepStart = true;
@@ -249,6 +249,9 @@ void CLoop::start()
 		}
 		else
 		{
+		    // querying decoded DTMF sequence
+		    checkDTMFSequence();
+
 		    g_pSNDCardOut->stop();
 		    g_pParPort->setPTT( false );
 
@@ -497,6 +500,37 @@ void CLoop::playWavFileNonBlocking( CWavFile& WavFile )
 
 	// archiving
 	g_Archiver.write( m_pResampledData, m_nResampledFramesNum );
+    }
+}
+
+void CLoop::playBufferBlocking( short* pBuffer, int nBufferSize )
+{
+    g_pSNDCardOut->write( pBuffer, nBufferSize );
+
+    // resampling
+    m_nResampledFramesNum = 0;
+    m_pResampledData = m_Resampler.resample( pBuffer, nBufferSize, m_nResampledFramesNum );
+
+    // archiving
+    g_Archiver.write( m_pResampledData, m_nResampledFramesNum );
+}
+
+void CLoop::playBufferNonBlocking( short* pBuffer, int nBufferSize )
+{
+    m_nBufferPos = 0;
+    while( ( m_nBufferPos <= nBufferSize ) && ( !g_pParPort->isSquelchOff() ) )
+    {
+        m_nResampledFramesNum = 0;
+	if( m_nBufferPos + g_pSNDCardOut->getBufferSize() > nBufferSize )
+	{
+	    playBufferBlocking( pBuffer + m_nBufferPos, nBufferSize - m_nBufferPos );
+	}
+	else
+	{
+	    playBufferBlocking( pBuffer + m_nBufferPos, g_pSNDCardOut->getBufferSize() );
+	}
+
+	m_nBufferPos += g_pSNDCardOut->getBufferSize();
     }
 }
 

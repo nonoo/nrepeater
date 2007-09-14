@@ -39,6 +39,9 @@ public:
     void playWavFileBlocking( CWavFile& WavFile );
     void playWavFileNonBlocking( CWavFile& WavFile );
 
+    void playBufferBlocking( short* pBuffer, int nBufferSize );
+    void playBufferNonBlocking( short* pBuffer, int nBufferSize );
+
 private:
     void parrotReceivingOver();
 
@@ -74,9 +77,9 @@ private:
     int			m_nParrotBufferPos;
     bool		m_bParrotMode;
 
-    // for playWaveBlocking()
     short*		m_pWaveData;
     int			m_nWaveDataLength;
+    int			m_nBufferPos;
 
 // these variables have to be reached by onSIGALRM()
 public:

@@ -51,7 +51,7 @@ am_nrepeater_OBJECTS = Main.$(OBJEXT) Log.$(OBJEXT) ParPort.$(OBJEXT) \
 	WavFile.$(OBJEXT) Compressor.$(OBJEXT) Archiver.$(OBJEXT) \
 	SpeexCodec.$(OBJEXT) OggOutStream.$(OBJEXT) \
 	OggFileOutStream.$(OBJEXT) Resampler.$(OBJEXT) DTMF.$(OBJEXT) \
-	Goertzel.$(OBJEXT)
+	Goertzel.$(OBJEXT) SpeechSynth.$(OBJEXT)
 nrepeater_OBJECTS = $(am_nrepeater_OBJECTS)
 nrepeater_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
@@ -88,7 +88,7 @@ CXX = g++
 CXXDEPMODE = depmode=gcc3
 CXXFLAGS = -g -Wall -O0
 CYGPATH_W = echo
-DEFS = -DPACKAGE_NAME=\"nrepeater\" -DPACKAGE_TARNAME=\"nrepeater\" -DPACKAGE_VERSION=\"0.1.1\" -DPACKAGE_STRING=\"nrepeater\ 0.1.1\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"nrepeater\" -DVERSION=\"0.1.1\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBSNDFILE=1 -DHAVE_LIBPARAPIN=1 -DHAVE_LIBSPEEX=1 -DHAVE_LIBOGG=1 -DHAVE_LIBSAMPLERATE=1
+DEFS = -DPACKAGE_NAME=\"nrepeater\" -DPACKAGE_TARNAME=\"nrepeater\" -DPACKAGE_VERSION=\"0.1.1\" -DPACKAGE_STRING=\"nrepeater\ 0.1.1\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"nrepeater\" -DVERSION=\"0.1.1\" -DSTDC_HEADERS=1 -DDEBUG=1 -DHAVE_LIBSNDFILE=1 -DHAVE_LIBPARAPIN=1 -DHAVE_LIBSPEEX=1 -DHAVE_LIBOGG=1 -DHAVE_LIBSAMPLERATE=1 -DHAVE_LIBFLITE=1
 DEPDIR = .deps
 ECHO_C = 
 ECHO_N = -n
@@ -102,7 +102,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lsamplerate -logg -lspeex -lparapin -lsndfile 
+LIBS = -lflite_cmu_us_kal -lflite_usenglish -lflite_cmulex -lflite -lsamplerate -logg -lspeex -lparapin -lsndfile 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/nonoo/nrepeater/missing --run makeinfo
 OBJEXT = o
@@ -170,7 +170,8 @@ nrepeater_SOURCES = \
 	OggFileOutStream.cpp OggFileOutStream.h \
 	Resampler.cpp Resampler.h \
 	DTMF.cpp DTMF.h \
-	Goertzel.cpp Goertzel.h
+	Goertzel.cpp Goertzel.h \
+	SpeechSynth.cpp SpeechSynth.h
 
 all: all-am
 
@@ -251,6 +252,7 @@ include ./$(DEPDIR)/ParPort.Po
 include ./$(DEPDIR)/Resampler.Po
 include ./$(DEPDIR)/SNDCard.Po
 include ./$(DEPDIR)/SettingsFile.Po
+include ./$(DEPDIR)/SpeechSynth.Po
 include ./$(DEPDIR)/SpeexCodec.Po
 include ./$(DEPDIR)/WavFile.Po
 
