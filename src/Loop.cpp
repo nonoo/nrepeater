@@ -119,13 +119,15 @@ CLoop::CLoop()
     }
     if( g_MainConfig.getInt( "archiver", "enabled", 0 ) || g_MainConfig.getInt( "dtmf", "enabled", 0 ) )
     {
-	// only initialize resampler if archiver or dtmf decoder is enabled
+	// only initialize resampler if archiver or dtmf is enabled
 	m_Resampler.init( ( (float)SPEEX_SAMPLERATE ) / g_pSNDCardIn->getSampleRate(), g_pSNDCardOut->getChannelNum() );
     }
     if( g_MainConfig.getInt( "dtmf", "enabled", 0 ) )
     {
 	m_DTMF.init( SPEEX_SAMPLERATE );
     }
+
+    g_pParPort->setPTT( false );
 }
 
 void CLoop::setAlarm( int nMilliSecs )

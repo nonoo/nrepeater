@@ -35,6 +35,11 @@ CParPort::CParPort( int port )
     m_nTransmitterPin2 = 3;
 }
 
+CParPort::~CParPort()
+{
+    setPTT( false );
+}
+
 void CParPort::init()
 {
     clear_pin( LP_PIN[ m_nReceiverPin ] );
